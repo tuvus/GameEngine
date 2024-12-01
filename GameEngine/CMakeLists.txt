@@ -4,12 +4,11 @@ project(GameEngine VERSION 0.1.0 DESCRIPTION "GameEngine for C++ games" LANGUAGE
 set(CMAKE_CXX_STANDARD 23)
 
 set(Sources
-        src/library.cpp
-        src/Main.cpp
+        src/Game.cpp
 )
 
 set(Headers
-        include/GameEngine/library.h
+        include/GameEngine/Game.h
 )
 
 
