@@ -40,11 +40,11 @@ set(CMAKE_MAKEFILE_OUTPUTS
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
-  "/home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "/home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/Game.dir/DependInfo.cmake"
-  "/home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CMakeFiles/GameEngine.dir/DependInfo.cmake"
+  "/home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/CMakeFiles/GameEngine.dir/DependInfo.cmake"
   )

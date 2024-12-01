@@ -139,7 +139,7 @@ GameEngine: cmake_check_build_system
 
 # fast build rule for target.
 GameEngine/fast:
-	$(MAKE) $(MAKESILENT) -f /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CMakeFiles/GameEngine.dir/build.make /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CMakeFiles/GameEngine.dir/build
+	$(MAKE) $(MAKESILENT) -f /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/CMakeFiles/GameEngine.dir/build.make /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/CMakeFiles/GameEngine.dir/build
 .PHONY : GameEngine/fast
 
 main.o: main.cpp.o

@@ -87,14 +87,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/oskar/iowastateuniversity/GameEngineProject/Game/build/CMakeFiles /home/oskar/iowastateuniversity/GameEngineProject/Game/lib//CMakeFiles/progress.marks
-	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/all
+	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/oskar/iowastateuniversity/GameEngineProject/Game/build/CMakeFiles /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine//CMakeFiles/progress.marks
+	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/oskar/iowastateuniversity/GameEngineProject/Game/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/clean
+	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,12 +103,12 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/preinstall
+	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/preinstall
+	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
@@ -117,17 +117,17 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-/home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CMakeFiles/GameEngine.dir/rule:
-	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CMakeFiles/GameEngine.dir/rule
-.PHONY : /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CMakeFiles/GameEngine.dir/rule
+/home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/CMakeFiles/GameEngine.dir/rule:
+	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/CMakeFiles/GameEngine.dir/rule
+.PHONY : /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/CMakeFiles/GameEngine.dir/rule
 
 # Convenience name for target.
-GameEngine: /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CMakeFiles/GameEngine.dir/rule
+GameEngine: /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/CMakeFiles/GameEngine.dir/rule
 .PHONY : GameEngine
 
 # fast build rule for target.
 GameEngine/fast:
-	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CMakeFiles/GameEngine.dir/build.make /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CMakeFiles/GameEngine.dir/build
+	cd /home/oskar/iowastateuniversity/GameEngineProject/Game/build && $(MAKE) $(MAKESILENT) -f /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/CMakeFiles/GameEngine.dir/build.make /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/CMakeFiles/GameEngine.dir/build
 .PHONY : GameEngine/fast
 
 # Help Target

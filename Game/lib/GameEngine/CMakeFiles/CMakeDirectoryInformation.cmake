@@ -3,7 +3,7 @@
 
 # Relative path conversion top directories.
 set(CMAKE_RELATIVE_PATH_TOP_SOURCE "/home/oskar/iowastateuniversity/GameEngineProject/GameEngine")
-set(CMAKE_RELATIVE_PATH_TOP_BINARY "/home/oskar/iowastateuniversity/GameEngineProject/Game/lib")
+set(CMAKE_RELATIVE_PATH_TOP_BINARY "/home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine")
 
 # Force unix paths in dependencies.
 set(CMAKE_FORCE_UNIX_PATHS 1)

@@ -92,7 +92,7 @@ Game_EXTERNAL_OBJECTS =
 
 Game: CMakeFiles/Game.dir/main.cpp.o
 Game: CMakeFiles/Game.dir/build.make
-Game: /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CmakeFiles/GameEngine
+Game: /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/libGameEngine.a
 Game: CMakeFiles/Game.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/oskar/iowastateuniversity/GameEngineProject/Game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable Game"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Game.dir/link.txt --verbose=$(VERBOSE)

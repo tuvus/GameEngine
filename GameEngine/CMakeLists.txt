@@ -11,7 +11,8 @@ set(Headers
     include/GameEngine/library.h
 )
 
-include_directories(include/GameEngine)
 
 add_library(${PROJECT_NAME} STATIC ${Sources} ${Headers})
 set_target_properties(GameEngine PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(GameEngine PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/include/GameEngine ${PROJECT_SOURCE_DIR}/include)
+include_directories(include/GameEngine)

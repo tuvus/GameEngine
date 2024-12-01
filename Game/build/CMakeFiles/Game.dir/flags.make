@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = 
+CXX_INCLUDES = -I/home/oskar/iowastateuniversity/GameEngineProject/Game/build -I/home/oskar/iowastateuniversity/GameEngineProject/GameEngine/include/GameEngine
 
 CXX_FLAGS = -std=gnu++23
 

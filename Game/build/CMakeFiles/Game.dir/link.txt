@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/Game.dir/main.cpp.o -o Game  /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/CmakeFiles/GameEngine 
+/usr/bin/c++ CMakeFiles/Game.dir/main.cpp.o -o Game  /home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine/libGameEngine.a 

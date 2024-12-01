@@ -228,7 +228,7 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Value Computed by CMake
-GameEngine_BINARY_DIR:STATIC=/home/oskar/iowastateuniversity/GameEngineProject/Game/lib
+GameEngine_BINARY_DIR:STATIC=/home/oskar/iowastateuniversity/GameEngineProject/Game/lib/GameEngine
 
 //Value Computed by CMake
 GameEngine_IS_TOP_LEVEL:STATIC=OFF
