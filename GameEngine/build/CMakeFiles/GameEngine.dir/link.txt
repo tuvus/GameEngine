@@ -1,2 +1,0 @@
-/usr/bin/ar qc libGameEngine.a 
-/usr/bin/ranlib libGameEngine.a

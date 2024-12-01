@@ -1,3 +1,0 @@
-/home/oskar/iowastateuniversity/GameEngineProject/GameEngine/build/CMakeFiles/GameEngine.dir
-/home/oskar/iowastateuniversity/GameEngineProject/GameEngine/build/CMakeFiles/edit_cache.dir
-/home/oskar/iowastateuniversity/GameEngineProject/GameEngine/build/CMakeFiles/rebuild_cache.dir
