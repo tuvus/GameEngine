@@ -1,4 +1,4 @@
-#include "../include/GameEngine/Game.h"
+#include "Game.h"
 #include "gtest/gtest.h"
 
 class TestGame : public Game {

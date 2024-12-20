@@ -8,7 +8,7 @@ set(Sources
 )
 
 set(Headers
-        include/GameEngine/Game.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/Game.h
 )
 
 
