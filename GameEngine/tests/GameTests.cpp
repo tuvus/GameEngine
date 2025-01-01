@@ -8,7 +8,7 @@ public:
     void EndGame() override {}
 };
 
-TEST(GTest, Setsup) {
+TEST(GTest, GameSetsUp) {
     auto* testGame = new TestGame();
     CreateGame(*testGame);
     delete testGame;

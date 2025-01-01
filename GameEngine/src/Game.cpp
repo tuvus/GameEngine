@@ -3,7 +3,8 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
-
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 using namespace std;
 
 void CreateGame(Game& game) {

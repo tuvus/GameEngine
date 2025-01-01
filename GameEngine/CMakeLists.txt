@@ -16,6 +16,10 @@ add_library(${PROJECT_NAME} STATIC ${Sources} ${Headers})
 set_target_properties(GameEngine PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(GameEngine PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/include/GameEngine ${PROJECT_SOURCE_DIR})
 
+find_package(glfw3 CONFIG REQUIRED)
+find_package(glad CONFIG REQUIRED)
+target_link_libraries(GameEngine PUBLIC glfw glad)
+
 if (NOT DONT_RUN_GAME_ENGINE_TESTS)
     add_subdirectory(tests)
 endif ()
