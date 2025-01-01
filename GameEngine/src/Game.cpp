@@ -3,7 +3,6 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 using namespace std;
 
@@ -16,6 +15,20 @@ Game::Game() = default;
 
 void Game::StartGame() {
     cout << "Starting game: " + GetName() << endl;
+    if (!glfwInit()) {
+        cerr << "An error occurred with initializing glfw!" << endl;
+        exit(-1);
+    }
+
+    auto errorCallBack = [](const int error, const char* description) {
+        cerr << "glfw error " << error << " " << description;
+    };
+    glfwSetErrorCallback(errorCallBack);
+    GLFWwindow* window = glfwCreateWindow(1280,800, GetName().c_str(), nullptr, nullptr);
+    if (!window) {
+        cerr << "Opening window failed" << endl;
+        exit(-1);
+    }
     GameLoop();
 }
 
@@ -31,5 +44,8 @@ void Game::GameLoop() {
     EndGame();
 }
 
-Game::~Game() = default;
+void Game::EndGame() {
+    glfwTerminate();
+}
 
+Game::~Game() = default;

@@ -16,7 +16,7 @@ public:
      * @param deltaTime The game time of this frame in milliseconds
      */
     virtual void UpdateGame(std::chrono::milliseconds deltaTime) = 0;
-    virtual void EndGame() = 0;
+    virtual void EndGame();
     virtual ~Game();
 };
 

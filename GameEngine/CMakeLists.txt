@@ -18,7 +18,7 @@ target_include_directories(GameEngine PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOU
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
-target_link_libraries(GameEngine PUBLIC glfw glad)
+target_link_libraries(GameEngine PUBLIC glfw glad::glad)
 
 if (NOT DONT_RUN_GAME_ENGINE_TESTS)
     add_subdirectory(tests)
