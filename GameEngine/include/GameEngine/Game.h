@@ -1,11 +1,13 @@
 #pragma once
 #include <chrono>
+#include <GLFW/glfw3.h>
 
 using namespace std;
 
 class Game {
 private:
     void GameLoop();
+    GLFWwindow* window;
 
 public:
     Game();
@@ -18,6 +20,7 @@ public:
     virtual void UpdateGame(std::chrono::milliseconds deltaTime) = 0;
     virtual void EndGame();
     virtual ~Game();
+    GLFWwindow& GetWindow() const;
 };
 
 void CreateGame(Game& game);

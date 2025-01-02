@@ -4,7 +4,9 @@
 class TestGame : public Game {
 public:
     string GetName() override { return "TestGame"; }
-    void UpdateGame(std::chrono::milliseconds deltaTime) override {}
+    void UpdateGame(std::chrono::milliseconds deltaTime) override {
+        glfwSetWindowShouldClose(&GetWindow(), true);
+    }
     void EndGame() override {}
 };
 
