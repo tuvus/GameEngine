@@ -9,6 +9,7 @@ string CardGame::GetName() {
 }
 
 void CardGame::StartGame() {
+    Game::StartGame();
     cout << "Here is the card game!" << endl;
 }
 
@@ -17,6 +18,7 @@ void CardGame::UpdateGame(chrono::milliseconds deltaTime) {
 }
 
 void CardGame::EndGame() {
+    Game::EndGame();
     cout << "Ending Game";
 }
 

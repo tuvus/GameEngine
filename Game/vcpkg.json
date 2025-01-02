@@ -1,9 +1,27 @@
 {
   "name" : "game",
-  "version-string" : "0.1.0",
-  "builtin-baseline" : "6de717b75b8326f6d004984f14ae5bbbd86c928d",
+  "version-string" : "1.0.0",
+  "builtin-baseline" : "4b6c50d962cc20aaa3ef457f8ba683b586263cfb",
   "dependencies" : [ {
     "name" : "gtest",
     "version>=" : "1.15.2"
+  }, {
+    "name" : "vcpkg-cmake-config",
+    "version>=" : "2024-05-23"
+  }, {
+    "name" : "vcpkg-cmake",
+    "version>=" : "2024-04-23"
+  }, {
+    "name" : "opengl-registry",
+    "version>=" : "2024-02-10#1"
+  }, {
+    "name" : "opengl",
+    "version>=" : "2022-12-04#3"
+  }, {
+    "name" : "glfw3",
+    "version>=" : "3.4#1"
+  }, {
+    "name" : "glad",
+    "version>=" : "0.1.36"
   } ]
 }
