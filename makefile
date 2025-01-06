@@ -1,9 +1,12 @@
+run: buildgame
+	cd Game && make run && cd ..
+
 buildgame:
-	cd Game && make -f makefile
+	cd Game && make && cd ..
 
 test:
 	cd GameEngine && make test && cd ..
 
 
 clean:
-	cd GameEngine && make clean && cd ..
+	cd GameEngine && make clean && cd ../Game && make clean && cd ..
