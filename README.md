@@ -15,3 +15,5 @@ After vcpkg is set up run the following commands to download the repository.
 3. `make run`
 
 The game should now run and the window should pop up.
+
+To list all commands simply run `make` at the root directory
