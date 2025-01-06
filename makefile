@@ -14,5 +14,5 @@ run: buildgame ## build and run the game
 test: ## Runs the GameEngine tests
 	cd GameEngine && make test && cd ..
 
-clean:
+clean: ## Cleans the build files from both the game engine and game
 	cd GameEngine && make clean && cd ../Game && make clean && cd ..

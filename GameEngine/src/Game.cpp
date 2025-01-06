@@ -1,9 +1,13 @@
 #include "Game.h"
 
 #include <chrono>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include <iostream>
 #include <thread>
 #include <GLFW/glfw3.h>
+
 using namespace std;
 
 void CreateGame(Game& game) {
@@ -30,6 +34,11 @@ void Game::StartGame() {
         exit(-1);
     }
     glfwMakeContextCurrent(window);
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    // ImGuiIO &io = ImGui::GetIO();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init();
     GameLoop();
 }
 
@@ -37,16 +46,34 @@ void Game::StartGame() {
 void Game::GameLoop() {
     chrono::time_point<chrono::system_clock> frameEndTime = chrono::system_clock::now();
     while(!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Start Menu");
         chrono::time_point<chrono::system_clock> frameStartTime = chrono::system_clock::now();
         UpdateGame(chrono::duration_cast<std::chrono::milliseconds>(frameStartTime - frameEndTime));
         this_thread::sleep_until(frameStartTime + 16ms);
         frameEndTime = chrono::system_clock::now();
-        glfwPollEvents();
+
+        if (ImGui::Button("Close Game")) {
+            glfwSetWindowShouldClose(window, true);
+        }
+
+        ImGui::End();
+        ImGui::Render();
+        // glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glfwSwapBuffers(window);
     }
     EndGame();
 }
 
 void Game::EndGame() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     glfwDestroyWindow(window);
     glfwTerminate();
 }
