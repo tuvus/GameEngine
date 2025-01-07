@@ -14,7 +14,7 @@ void CardGame::StartGame() {
 }
 
 void CardGame::UpdateGame(chrono::milliseconds deltaTime) {
-    cout << "DeltaTime: " << deltaTime << endl;
+    // cout << "DeltaTime: " << deltaTime << endl;
 }
 
 void CardGame::EndGame() {

@@ -6,6 +6,7 @@
 #include <imgui_impl_opengl3.h>
 #include <iostream>
 #include <thread>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 using namespace std;
@@ -28,15 +29,20 @@ void Game::StartGame() {
         cerr << "glfw error " << error << " " << description;
     };
     glfwSetErrorCallback(errorCallBack);
-    window = glfwCreateWindow(1280,800, GetName().c_str(), nullptr, nullptr);
+    window = glfwCreateWindow(1280, 800, GetName().c_str(), nullptr, nullptr);
     if (!window) {
         cerr << "Opening window failed" << endl;
         exit(-1);
     }
     glfwMakeContextCurrent(window);
+
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        cerr << "Loading glad failed" << endl;
+        exit(-1);
+    }
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    // ImGuiIO &io = ImGui::GetIO();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
     GameLoop();
@@ -45,7 +51,7 @@ void Game::StartGame() {
 
 void Game::GameLoop() {
     chrono::time_point<chrono::system_clock> frameEndTime = chrono::system_clock::now();
-    while(!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -60,12 +66,15 @@ void Game::GameLoop() {
         if (ImGui::Button("Close Game")) {
             glfwSetWindowShouldClose(window, true);
         }
-
         ImGui::End();
+
         ImGui::Render();
-        // glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        glClear(GL_COLOR_BUFFER_BIT);
     }
     EndGame();
 }
