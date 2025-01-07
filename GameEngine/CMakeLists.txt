@@ -18,7 +18,8 @@ target_include_directories(GameEngine PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOU
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
-target_link_libraries(GameEngine PUBLIC glfw glad::glad imgui::imgui)
+find_package(GameNetworkingSockets CONFIG REQUIRED)
+target_link_libraries(GameEngine PUBLIC glfw glad::glad imgui::imgui GameNetworkingSockets::static)
 
 if (NOT DONT_RUN_GAME_ENGINE_TESTS)
     add_subdirectory(tests)
