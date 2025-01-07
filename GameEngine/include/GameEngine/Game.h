@@ -1,5 +1,7 @@
 #pragma once
 #include <chrono>
+// Neded to include glad
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 using namespace std;

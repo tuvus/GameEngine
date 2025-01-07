@@ -1,5 +1,6 @@
 #include "CardGame.h"
 
+#include <imgui.h>
 #include <iostream>
 
 using namespace std;
@@ -14,7 +15,9 @@ void CardGame::StartGame() {
 }
 
 void CardGame::UpdateGame(chrono::milliseconds deltaTime) {
-    cout << "DeltaTime: " << deltaTime << endl;
+    if (ImGui::Button("Close Game")) {
+        glfwSetWindowShouldClose(&GetWindow(), true);
+    }
 }
 
 void CardGame::EndGame() {
