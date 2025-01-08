@@ -11,15 +11,15 @@
 
 using namespace std;
 
-void CreateGame(Game& game) {
-    cout << "Creating game: " + game.GetName() << endl << endl;
-    game.StartGame();
+void Create_Game(Game& game) {
+    cout << "Creating game: " + game.Get_Name() << endl << endl;
+    game.Start_Game();
 }
 
 Game::Game() = default;
 
-void Game::StartGame() {
-    cout << "Starting game: " + GetName() << endl;
+void Game::Start_Game() {
+    cout << "Starting game: " + Get_Name() << endl;
     if (!glfwInit()) {
         cerr << "An error occurred with initializing glfw!" << endl;
         exit(-1);
@@ -37,7 +37,7 @@ void Game::StartGame() {
         cerr << "glfw error " << error << " " << description;
     };
     glfwSetErrorCallback(errorCallBack);
-    window = glfwCreateWindow(1280, 800, GetName().c_str(), nullptr, nullptr);
+    window = glfwCreateWindow(1280, 800, Get_Name().c_str(), nullptr, nullptr);
     if (!window) {
         cerr << "Opening window failed" << endl;
         exit(-1);
@@ -53,11 +53,11 @@ void Game::StartGame() {
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 150");
-    GameLoop();
+    Game_Loop();
 }
 
 
-void Game::GameLoop() {
+void Game::Game_Loop() {
     chrono::time_point<chrono::system_clock> frameEndTime = chrono::system_clock::now();
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -68,7 +68,7 @@ void Game::GameLoop() {
         ImGui::Begin("Start Menu");
 
         chrono::time_point<chrono::system_clock> frameStartTime = chrono::system_clock::now();
-        UpdateGame(chrono::duration_cast<std::chrono::milliseconds>(frameStartTime - frameEndTime));
+        Update_Game(chrono::duration_cast<std::chrono::milliseconds>(frameStartTime - frameEndTime));
         this_thread::sleep_until(frameStartTime + 16ms);
         frameEndTime = chrono::system_clock::now();
 
@@ -82,10 +82,10 @@ void Game::GameLoop() {
         glViewport(0, 0, display_w, display_h);
         glClear(GL_COLOR_BUFFER_BIT);
     }
-    EndGame();
+    End_Game();
 }
 
-void Game::EndGame() {
+void Game::End_Game() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
