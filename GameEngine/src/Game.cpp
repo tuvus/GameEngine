@@ -33,10 +33,10 @@ void Game::Start_Game() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
 
-    auto errorCallBack = [](const int error, const char* description) {
+    auto error_call_back = [](const int error, const char* description) {
         cerr << "glfw error " << error << " " << description;
     };
-    glfwSetErrorCallback(errorCallBack);
+    glfwSetErrorCallback(error_call_back);
     window = glfwCreateWindow(1280, 800, Get_Name().c_str(), nullptr, nullptr);
     if (!window) {
         cerr << "Opening window failed" << endl;
@@ -58,7 +58,7 @@ void Game::Start_Game() {
 
 
 void Game::Game_Loop() {
-    chrono::time_point<chrono::system_clock> frameEndTime = chrono::system_clock::now();
+    chrono::time_point<chrono::system_clock> frame_end_time = chrono::system_clock::now();
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         ImGui_ImplOpenGL3_NewFrame();
@@ -67,10 +67,10 @@ void Game::Game_Loop() {
 
         ImGui::Begin("Start Menu");
 
-        chrono::time_point<chrono::system_clock> frameStartTime = chrono::system_clock::now();
-        Update_Game(chrono::duration_cast<std::chrono::milliseconds>(frameStartTime - frameEndTime));
-        this_thread::sleep_until(frameStartTime + 16ms);
-        frameEndTime = chrono::system_clock::now();
+        chrono::time_point<chrono::system_clock> frame_start_time = chrono::system_clock::now();
+        Update_Game(chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time));
+        this_thread::sleep_until(frame_start_time + 16ms);
+        frame_end_time = chrono::system_clock::now();
 
         ImGui::End();
 
