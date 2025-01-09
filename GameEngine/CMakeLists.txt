@@ -19,7 +19,7 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(GameNetworkingSockets CONFIG REQUIRED)
-target_link_libraries(GameEngine PUBLIC glfw glad::glad imgui::imgui GameNetworkingSockets::static)
+target_link_libraries(GameEngine PUBLIC glfw glad::glad imgui::imgui GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
 
 if (NOT DONT_RUN_GAME_ENGINE_TESTS)
     add_subdirectory(tests)

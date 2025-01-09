@@ -8,7 +8,7 @@
 #include <thread>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <steam/isteamnetworkingsockets.h>
+#include <steam/steamnetworkingsockets.h>
 
 using namespace std;
 
@@ -26,7 +26,7 @@ void Game::StartGame() {
         exit(-1);
     }
 
-    // ensure OpenGL version matches GLSL
+    // Ensure OpenGL version matches GLSL
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
