@@ -26,6 +26,14 @@ void Game::StartGame() {
         exit(-1);
     }
 
+    // ensure OpenGL version matches GLSL
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    #ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    #endif
+
     auto errorCallBack = [](const int error, const char* description) {
         cerr << "glfw error " << error << " " << description;
     };
@@ -45,7 +53,7 @@ void Game::StartGame() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init();
+    ImGui_ImplOpenGL3_Init("#version 150");
     GameLoop();
 }
 
