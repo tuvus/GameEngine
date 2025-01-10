@@ -12,6 +12,6 @@ public:
 
 TEST(GTest, GameSetsUp) {
     auto* testGame = new TestGame();
-    CreateGame(*testGame);
+    CreateGame(*testGame, false);
     delete testGame;
 }
