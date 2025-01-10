@@ -5,26 +5,26 @@
 
 using namespace std;
 
-string CardGame::GetName() {
+string Card_Game::Get_Name() {
     return "NewCardGame";
 }
 
-void CardGame::StartGame() {
-    Game::StartGame();
+void Card_Game::Start_Game() {
+    Game::Start_Game();
     cout << "Here is the card game!" << endl;
 }
 
-void CardGame::UpdateGame(chrono::milliseconds deltaTime) {
+void Card_Game::Update_Game(chrono::milliseconds deltaTime) {
     if (ImGui::Button("Close Game")) {
         glfwSetWindowShouldClose(&GetWindow(), true);
     }
 }
 
-void CardGame::EndGame() {
-    Game::EndGame();
+void Card_Game::End_Game() {
+    Game::End_Game();
     cout << "Ending Game";
 }
 
-CardGame::~CardGame() = default;
+Card_Game::~Card_Game() = default;
 
 

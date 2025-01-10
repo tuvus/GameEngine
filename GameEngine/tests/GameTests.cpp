@@ -3,15 +3,15 @@
 
 class TestGame : public Game {
 public:
-    string GetName() override { return "TestGame"; }
-    void UpdateGame(std::chrono::milliseconds deltaTime) override {
+    string Get_Name() override { return "TestGame"; }
+    void Update_Game(std::chrono::milliseconds deltaTime) override {
         glfwSetWindowShouldClose(&GetWindow(), true);
     }
-    void EndGame() override {}
+    void End_Game() override {}
 };
 
 TEST(GTest, GameSetsUp) {
     auto* testGame = new TestGame();
-    CreateGame(*testGame, false);
+    Create_Game(*testGame, false);
     delete testGame;
 }

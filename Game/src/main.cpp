@@ -2,7 +2,7 @@
 #include "Game.h"
 
 int main() {
-    auto* cardGame = new CardGame();
-    CreateGame(*cardGame);
-    delete cardGame;
+    auto* card_game = new Card_Game();
+    Create_Game(*card_game);
+    delete card_game;
 }

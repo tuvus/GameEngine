@@ -9,7 +9,7 @@ using namespace std;
 
 class Game {
 private:
-    void GameLoop();
+    void Game_Loop();
     GLFWwindow* window;
     HSteamListenSocket listen_socket;
     HSteamNetPollGroup poll_group;
@@ -18,16 +18,16 @@ private:
 
 public:
     Game();
-    virtual string GetName() = 0;
-    virtual void StartGame(bool server);
+    virtual string Get_Name() = 0;
+    virtual void Start_Game(bool server);
     /**
      * Handles the main game logic and is called every frame.
      * @param deltaTime The game time of this frame in milliseconds
      */
-    virtual void UpdateGame(std::chrono::milliseconds deltaTime) = 0;
-    virtual void EndGame();
+    virtual void Update_Game(std::chrono::milliseconds deltaTime) = 0;
+    virtual void End_Game();
     virtual ~Game();
     GLFWwindow& GetWindow() const;
 };
 
-void CreateGame(Game& game, bool server);
+void Create_Game(Game& game, bool server);
