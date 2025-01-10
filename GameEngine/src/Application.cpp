@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "Application.h"
 
 #include <chrono>
 #include <imgui.h>
@@ -13,19 +13,19 @@
 
 using namespace std;
 
-void Create_Game(Game& game, bool server) {
-    cout << "Creating game: " + game.Get_Name() << endl << endl;
-    game.Start_Game(server);
+void Create_Application(Application& application, bool server) {
+    cout << "Creating application: " + application.Get_Name() << endl << endl;
+    application.Start_Application(server);
 }
 
-Game::Game() = default;
+Application::Application() = default;
 
 void OnConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t* pInfo) {
     // Temporary here
 }
 
-void Game::Start_Game(bool server) {
-    cout << "Starting game: " + Get_Name() << endl;
+void Application::Start_Application(bool server) {
+    cout << "Starting application: " + Get_Name() << endl;
 
     SteamNetworkingIPAddr addrServer;
     addrServer.Clear();
@@ -82,11 +82,11 @@ void Game::Start_Game(bool server) {
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 150");
-    Game_Loop();
+    Application_Loop();
 }
 
 
-void Game::Game_Loop() {
+void Application::Application_Loop() {
     chrono::time_point<chrono::system_clock> frame_end_time = chrono::system_clock::now();
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -97,7 +97,7 @@ void Game::Game_Loop() {
         ImGui::Begin("Start Menu");
 
         chrono::time_point<chrono::system_clock> frame_start_time = chrono::system_clock::now();
-        Update_Game(chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time));
+        Update_Application(chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time));
         this_thread::sleep_until(frame_start_time + 16ms);
         frame_end_time = chrono::system_clock::now();
 
@@ -111,10 +111,10 @@ void Game::Game_Loop() {
         glViewport(0, 0, display_w, display_h);
         glClear(GL_COLOR_BUFFER_BIT);
     }
-    End_Game();
+    End_Application();
 }
 
-void Game::End_Game() {
+void Application::End_Application() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -124,8 +124,8 @@ void Game::End_Game() {
     GameNetworkingSockets_Kill();
 }
 
-Game::~Game() = default;
+Application::~Application() = default;
 
-GLFWwindow& Game::GetWindow() const {
+GLFWwindow& Application::Get_Window() const {
     return *window;
 }

@@ -1,17 +1,17 @@
-#include "Game.h"
+#include "Application.h"
 #include "gtest/gtest.h"
 
-class TestGame : public Game {
+class TestGame : public Application {
 public:
     string Get_Name() override { return "TestGame"; }
-    void Update_Game(std::chrono::milliseconds deltaTime) override {
+    void Update_Application(std::chrono::milliseconds deltaTime) override {
         glfwSetWindowShouldClose(&GetWindow(), true);
     }
-    void End_Game() override {}
+    void End_Application() override {}
 };
 
 TEST(GTest, GameSetsUp) {
     auto* testGame = new TestGame();
-    Create_Game(*testGame, false);
+    Create_Application(*testGame, false);
     delete testGame;
 }

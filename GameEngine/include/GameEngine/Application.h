@@ -7,9 +7,9 @@
 
 using namespace std;
 
-class Game {
+class Application {
 private:
-    void Game_Loop();
+    void Application_Loop();
     GLFWwindow* window;
     HSteamListenSocket listen_socket;
     HSteamNetPollGroup poll_group;
@@ -17,17 +17,17 @@ private:
     ISteamNetworkingSockets *connection_api;
 
 public:
-    Game();
+    Application();
     virtual string Get_Name() = 0;
-    virtual void Start_Game(bool server);
+    virtual void Start_Application(bool server);
     /**
      * Handles the main game logic and is called every frame.
      * @param deltaTime The game time of this frame in milliseconds
      */
-    virtual void Update_Game(std::chrono::milliseconds deltaTime) = 0;
-    virtual void End_Game();
-    virtual ~Game();
-    GLFWwindow& GetWindow() const;
+    virtual void Update_Application(std::chrono::milliseconds deltaTime) = 0;
+    virtual void End_Application();
+    virtual ~Application();
+    GLFWwindow& Get_Window() const;
 };
 
-void Create_Game(Game& game, bool server);
+void Create_Application(Application& application, bool server);

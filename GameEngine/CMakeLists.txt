@@ -5,11 +5,11 @@ project(${PROJECT_NAME} VERSION 0.1.0 DESCRIPTION "GameEngine for C++ games" LAN
 set(CMAKE_CXX_STANDARD 23)
 
 set(Sources
-        src/Game.cpp
+        src/Application.cpp
 )
 
 set(Headers
-        ${PROJECT_SOURCE_DIR}/include/GameEngine/Game.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/Application.h
 )
 
 
@@ -20,8 +20,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_BINARY_DIR} ${PROJEC
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
-find_package(GameNetworkingSockets CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw glad::glad imgui::imgui GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
+find_package(GameNetworkingSockets CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
 
 if (NOT DONT_RUN_GAME_ENGINE_TESTS)
     add_subdirectory(tests)
