@@ -15,6 +15,10 @@ void Card_Game::Start_Game() {
 }
 
 void Card_Game::Update_Game(chrono::milliseconds deltaTime) {
+    if (ImGui::Button("Start Game")) {
+    }
+    if (ImGui::Button("Options")) {
+    }
     if (ImGui::Button("Close Game")) {
         glfwSetWindowShouldClose(&GetWindow(), true);
     }
