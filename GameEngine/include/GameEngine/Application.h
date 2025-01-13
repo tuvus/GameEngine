@@ -1,33 +1,36 @@
 #pragma once
 #include <chrono>
-// Neded to include glad
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 #include <steam/isteamnetworkingsockets.h>
 
 using namespace std;
 
+class ApplicationWindow;
+class ApplicationFactory;
+
+enum class ApplicationState {
+    SettingUp,
+    Running,
+    Closing,
+};
+
 class Application {
 private:
-    void Application_Loop();
-    GLFWwindow* window;
+    bool client;
+    string application_name;
+    ApplicationState application_state;
+    ApplicationWindow* application_window;
     HSteamListenSocket listen_socket;
     HSteamNetPollGroup poll_group;
     HSteamNetConnection remote_host_connection;
     ISteamNetworkingSockets *connection_api;
+    void Application_Loop();
 
 public:
-    Application();
-    virtual string Get_Name() = 0;
-    virtual void Start_Application(bool server);
-    /**
-     * Handles the main game logic and is called every frame.
-     * @param deltaTime The game time of this frame in milliseconds
-     */
-    virtual void Update_Application(std::chrono::milliseconds deltaTime) = 0;
-    virtual void End_Application();
-    virtual ~Application();
-    GLFWwindow& Get_Window() const;
+    Application(ApplicationFactory& application_factory, bool client);
+    void Start_Application();
+    string Get_Name();
+    void Close_Application();
+    ~Application();
 };
 
-void Create_Application(Application& application, bool server);
+void Create_Application(ApplicationFactory& application_factory, bool client);

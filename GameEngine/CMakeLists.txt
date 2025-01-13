@@ -6,10 +6,13 @@ set(CMAKE_CXX_STANDARD 23)
 
 set(Sources
         src/Application.cpp
+        src/ApplicationWindow.cpp
 )
 
 set(Headers
         ${PROJECT_SOURCE_DIR}/include/GameEngine/Application.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/ApplicationWindow.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/ApplicationFactory.h
 )
 
 

@@ -1,8 +1,20 @@
 #include "CardGame.h"
 #include "Application.h"
+#include "ApplicationFactory.h"
+
+class CardGameFactory : public ApplicationFactory {
+public:
+    string Get_Name() override {
+        return "NewCardGame";
+    }
+
+    ApplicationWindow* Create_Window(Application& application) override {
+        return new Card_Game(application);
+    }
+};
 
 int main() {
-    auto* card_game = new Card_Game();
-    Create_Application(*card_game, false);
-    delete card_game;
+    auto* factory = new CardGameFactory();
+    Create_Application(*factory, true);
+    delete factory;
 }

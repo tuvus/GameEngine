@@ -1,17 +1,29 @@
 #include "Application.h"
+#include "ApplicationFactory.h"
 #include "gtest/gtest.h"
 
-class TestGame : public Application {
+class TestWindow : public ApplicationWindow {
 public:
-    string Get_Name() override { return "TestGame"; }
-    void Update_Application(std::chrono::milliseconds deltaTime) override {
-        glfwSetWindowShouldClose(&GetWindow(), true);
+    TestWindow(Application& application): ApplicationWindow(application) {}
+    void Render(std::chrono::milliseconds deltaTime) override {
+        Get_Application().Close_Application();
     }
-    void End_Application() override {}
+};
+
+class TestFactory : public ApplicationFactory {
+public:
+    TestFactory() = default;
+    string Get_Name() override { return "TestGame"; }
+
+    ApplicationWindow* Create_Window(Application& application) override {
+        return new TestWindow(application);
+    }
+
+    ~TestFactory() override = default;
 };
 
 TEST(GTest, GameSetsUp) {
-    auto* testGame = new TestGame();
-    Create_Application(*testGame, false);
-    delete testGame;
+    auto* test_factory = new TestFactory();
+    Create_Application(*test_factory, false);
+    delete test_factory;
 }
