@@ -70,5 +70,7 @@ void Application::Close_Application() {
 
 Application::~Application() {
     delete application_window;
-    GameNetworkingSockets_Kill();
+    if (network) {
+        delete network;
+    }
 };

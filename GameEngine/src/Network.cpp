@@ -5,9 +5,12 @@
 
 using namespace std;
 
+const uint16 DEFAULT_SERVER_PORT = 27020;
+
 Network::Network(bool server) : server(server) {
     SteamNetworkingIPAddr addrServer;
     addrServer.Clear();
+    addrServer.m_port = DEFAULT_SERVER_PORT;
     SteamDatagramErrMsg err_msg;
     if (!GameNetworkingSockets_Init(nullptr, err_msg)) {
         std::cerr << "GameNetworkingSockets initialization failed " << err_msg << std::endl;
@@ -28,15 +31,19 @@ Network::Network(bool server) : server(server) {
 
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addrServer, 1, &config_options);
-        if (listen_socket == k_HSteamListenSocket_Invalid) cerr << "Failed to setup listener on port " << 0 << endl;
+        if (listen_socket == k_HSteamListenSocket_Invalid) cerr << "Failed to setup socket listener on port " << 0 << endl;
         poll_group = connection_api->CreatePollGroup();
-        if (poll_group == k_HSteamNetPollGroup_Invalid) cerr << "Failed to setup listener on port " << 0 << endl;
+        if (poll_group == k_HSteamNetPollGroup_Invalid) cerr << "Failed to setup poll group listener on port " << 0 << endl;
+        cout << "Starting server" << endl;
     } else {
         remote_host_connection = connection_api->ConnectByIPAddress(addrServer, 1, &config_options);
         if (remote_host_connection == k_HSteamNetConnection_Invalid) cerr << "Failed to connect to the host" << endl;
+        cout << "Starting client" << endl;
     }
 }
 
 void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* pInfo) {}
 
-Network::~Network() {}
+Network::~Network() {
+    GameNetworkingSockets_Kill();
+}
