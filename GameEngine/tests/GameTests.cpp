@@ -24,6 +24,6 @@ public:
 
 TEST(GTest, GameSetsUp) {
     auto* test_factory = new TestFactory();
-    Create_Application(*test_factory, false);
+    Create_Application(*test_factory, true);
     delete test_factory;
 }

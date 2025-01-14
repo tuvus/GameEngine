@@ -1,6 +1,7 @@
 #pragma once
 #include <chrono>
-#include <steam/isteamnetworkingsockets.h>
+
+#include "Network.h"
 
 using namespace std;
 
@@ -19,15 +20,15 @@ private:
     string application_name;
     ApplicationState application_state;
     ApplicationWindow* application_window;
-    HSteamListenSocket listen_socket;
-    HSteamNetPollGroup poll_group;
-    HSteamNetConnection remote_host_connection;
-    ISteamNetworkingSockets *connection_api;
+    Network* network;
+
     void Application_Loop();
 
 public:
     Application(ApplicationFactory& application_factory, bool client);
     void Start_Application();
+    void Start_Server();
+    void Start_Client();
     string Get_Name();
     void Close_Application();
     ~Application();
