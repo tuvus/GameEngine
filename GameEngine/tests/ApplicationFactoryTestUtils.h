@@ -21,10 +21,12 @@ public:
 class TestFactory : public ApplicationFactory {
 private:
     function<void(std::chrono::milliseconds, ApplicationWindow&)> render_function;
+    function<void(std::chrono::milliseconds, Application&)> update_function;
 
 public:
-    TestFactory(function<void(std::chrono::milliseconds, ApplicationWindow&)> render_function): render_function(
-        render_function) {}
+    TestFactory(function<void(std::chrono::milliseconds, ApplicationWindow&)> render_function,
+        function<void(std::chrono::milliseconds, Application&)> update_function): render_function(render_function),
+        update_function(update_function) {}
 
     string Get_Name() override { return "TestGame"; }
 
@@ -32,9 +34,15 @@ public:
         return new TestWindow(application, render_function);
     }
 
+    function<void(std::chrono::milliseconds, Application&)> Create_Update_Function() override {
+        return update_function;
+    }
+
     ~TestFactory() override = default;
 };
 
-inline ApplicationFactory* CreateApplicationTestFactory(function<void(std::chrono::milliseconds, ApplicationWindow&)> render_function) {
-    return new TestFactory(render_function);
+inline ApplicationFactory* CreateApplicationTestFactory(
+    function<void(std::chrono::milliseconds, ApplicationWindow&)> render_function,
+    function<void(std::chrono::milliseconds, Application&)> update_function) {
+    return new TestFactory(render_function, update_function);
 }

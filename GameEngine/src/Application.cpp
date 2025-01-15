@@ -19,7 +19,9 @@ void Create_Application(ApplicationFactory& application_factory, bool client) {
 
 Application::Application(ApplicationFactory& application_factory, bool client): client(client),
     application_name(application_factory.Get_Name()), application_state(ApplicationState::SettingUp),
-    application_window(application_factory.Create_Window(*this)), network(nullptr) {}
+    update_function(application_factory.Create_Update_Function()), network(nullptr) {
+    if (client) application_window = application_factory.Create_Window(*this);
+}
 
 void Application::Start_Application() {
     cout << "Starting application: " + Get_Name() << endl;
@@ -40,26 +42,25 @@ void Application::Start_Client() {
     network = new Network(false);
 }
 
-
-
 string Application::Get_Name() {
     return application_name;
 }
 
+Network& Application::Get_Network() {
+    return *network;
+}
 
 void Application::Application_Loop() {
     application_state = ApplicationState::Running;
     chrono::time_point<chrono::system_clock> frame_end_time = chrono::system_clock::now();
     while (application_state == ApplicationState::Running) {
         chrono::time_point<chrono::system_clock> frame_start_time = chrono::system_clock::now();
+        auto deltaTime = chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time);
 
-        if (network) {
-            network->Network_Update();
-        }
-        if (client) {
-            application_window->Render_Update(
-                chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time));
-        }
+        if (network) network->Network_Update();
+        if (client) application_window->Render_Update(deltaTime);
+
+        update_function(deltaTime, *this);
 
         this_thread::sleep_until(frame_start_time + 16ms);
         frame_end_time = chrono::system_clock::now();

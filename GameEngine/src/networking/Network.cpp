@@ -9,6 +9,7 @@ using namespace std;
 const uint16 DEFAULT_SERVER_PORT = 27020;
 
 Network::Network(bool server) : server(server) {
+    state = Setting_Up;
     SteamNetworkingIPAddr addrServer;
     addrServer.Clear();
     addrServer.m_port = DEFAULT_SERVER_PORT;
@@ -32,17 +33,30 @@ Network::Network(bool server) : server(server) {
 
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addrServer, 1, &config_options);
-        if (listen_socket == k_HSteamListenSocket_Invalid) cerr << "Failed to setup socket listener on port " << 0 <<
-            endl;
+        if (listen_socket == k_HSteamListenSocket_Invalid)
+            cerr << "Failed to setup socket listener on port " << 0 << endl;
         poll_group = connection_api->CreatePollGroup();
-        if (poll_group == k_HSteamNetPollGroup_Invalid) cerr << "Failed to setup poll group listener on port " << 0 <<
-            endl;
+        if (poll_group == k_HSteamNetPollGroup_Invalid)
+            cerr << "Failed to setup poll group listener on port " << 0 << endl;
         cout << "Starting server, listening on port: " << addrServer.m_port << endl;
+        state = Running;
     } else {
         remote_host_connection = connection_api->ConnectByIPAddress(addrServer, 1, &config_options);
         if (remote_host_connection == k_HSteamNetConnection_Invalid) cerr << "Failed to connect to the host" << endl;
         cout << "Starting client" << endl;
+        state = Connecting;
     }
+}
+
+Network::~Network() {
+    cout << "Closing Server" << endl;
+    connection_to_clients.clear();
+    connection_api->CloseListenSocket(listen_socket);
+    listen_socket = k_HSteamListenSocket_Invalid;
+    connection_api->DestroyPollGroup(poll_group);
+    poll_group = k_HSteamNetPollGroup_Invalid;
+    GameNetworkingSockets_Kill();
+    state = Closed;
 }
 
 void Network::Network_Update() {
@@ -83,25 +97,31 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
             break;
         case k_ESteamNetworkingConnectionState_ClosedByPeer:
         case k_ESteamNetworkingConnectionState_ProblemDetectedLocally: {
-            // Something happened to our client
-            // Close the connection to them specifically
-            if (new_status->m_eOldState != k_ESteamNetworkingConnectionState_Connected) {
-                assert(new_status->m_eOldState == k_ESteamNetworkingConnectionState_Connecting);
-                connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, nullptr, false);
-                break;
-            }
-            auto client = connection_to_clients.find(new_status->m_hConn);
-            assert(client != connection_to_clients.end());
-            const char* debug_message;
-            if (new_status->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer) {
-                debug_message = "Connection closed by client request with id: " + client->second.id;
+            if (server) {
+                // Something happened to our client
+                // Close the connection to them specifically
+                if (new_status->m_eOldState != k_ESteamNetworkingConnectionState_Connected) {
+                    assert(new_status->m_eOldState == k_ESteamNetworkingConnectionState_Connecting);
+                    connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, nullptr, false);
+                    break;
+                }
+                auto client = connection_to_clients.find(new_status->m_hConn);
+                assert(client != connection_to_clients.end());
+                const char* debug_message;
+                if (new_status->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer) {
+                    debug_message = "Connection closed by client request with id: " + client->second.id;
+                } else {
+                    debug_message = "Internal problem on the server with id: " + client->second.id;
+                }
+                cout << debug_message << endl;
+                connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, debug_message, false);
             } else {
-                debug_message = "Internal problem on the server with id: " + client->second.id;
+                connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, nullptr, false);
+                state = Closing;
             }
-            cout << debug_message << endl;
-            connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, debug_message, false);
         }
         case k_ESteamNetworkingConnectionState_Connecting: {
+            if (!server) break;
             auto client = connection_to_clients.find(new_status->m_hConn);
             assert(client != connection_to_clients.end());
             cout << "Connecting client " << new_status->m_info.m_szConnectionDescription << endl;
@@ -120,15 +140,13 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
             cout << "Connecting client with it: " << new_client_id << endl;
             connection_to_clients[new_status->m_hConn] = Network_Client{new_client_id};
         }
+        case k_ESteamNetworkingConnectionState_Connected: {
+            if (server) break;
+            state = Connected;
+        }
     }
 }
 
-Network::~Network() {
-    cout << "Closing Server" << endl;
-    connection_to_clients.clear();
-    connection_api->CloseListenSocket(listen_socket);
-    listen_socket = k_HSteamListenSocket_Invalid;
-    connection_api->DestroyPollGroup(poll_group);
-    poll_group = k_HSteamNetPollGroup_Invalid;
-    GameNetworkingSockets_Kill();
+Network::Network_State Network::Get_Network_State() {
+    return state;
 }

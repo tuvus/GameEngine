@@ -1,5 +1,6 @@
 #pragma once
 #include <chrono>
+#include <functional>
 
 #include "networking//Network.h"
 
@@ -21,6 +22,7 @@ private:
     ApplicationState application_state;
     ApplicationWindow* application_window;
     Network* network;
+    function<void(std::chrono::milliseconds, Application&)> update_function;
 
     void Application_Loop();
 
@@ -31,6 +33,7 @@ public:
     void Start_Client();
     string Get_Name();
     void Close_Application();
+    Network& Get_Network();
     ~Application();
 };
 
