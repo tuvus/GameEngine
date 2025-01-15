@@ -53,6 +53,9 @@ void Application::Application_Loop() {
     while (application_state == ApplicationState::Running) {
         chrono::time_point<chrono::system_clock> frame_start_time = chrono::system_clock::now();
 
+        if (network) {
+            network->Network_Update();
+        }
         if (client) {
             application_window->Render_Update(
                 chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time));
