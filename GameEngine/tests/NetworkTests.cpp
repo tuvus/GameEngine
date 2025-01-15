@@ -1,33 +1,17 @@
 #include "Application.h"
 #include "ApplicationFactory.h"
+#include "ApplicationFactoryTestUtils.h"
 #include "gtest/gtest.h"
 
-class NetworkTestWindow : public ApplicationWindow {
-public:
-    NetworkTestWindow(Application& application): ApplicationWindow(application) {}
-    int frames = 0;
-
-    void Render(std::chrono::milliseconds deltaTime) override {
-        if (frames == 0) Get_Application().Start_Server();
-        if (frames == 5) Get_Application().Close_Application();
-        ++frames;
-    }
-};
-
-class NetworkTestFactory : public ApplicationFactory {
-public:
-    NetworkTestFactory() = default;
-    string Get_Name() override { return "TestGame"; }
-
-    ApplicationWindow* Create_Window(Application& application) override {
-        return new NetworkTestWindow(application);
-    }
-
-    ~NetworkTestFactory() override = default;
-};
-
 TEST(GTest, ServerSetsUp) {
-    auto* test_factory = new NetworkTestFactory();
+    int* frames = new int();
+    ApplicationFactory* test_factory = CreateApplicationTestFactory(
+        [frames](chrono::milliseconds delta_time, ApplicationWindow& window) {
+            if (*frames == 0) window.Get_Application().Start_Server();
+            if (*frames == 5) window.Get_Application().Close_Application();
+            ++*frames;
+        });
     Create_Application(*test_factory, true);
+    delete frames;
     delete test_factory;
 }

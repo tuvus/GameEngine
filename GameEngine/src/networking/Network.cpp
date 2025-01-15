@@ -60,18 +60,20 @@ void Network::Poll_Incoming_Messages() {
         if (numMsgs == 0) break;
         if (numMsgs < 0) cerr << "Error checking messages. Number of messages is: " << numMsgs << endl;
         assert(numMsgs == 1 && incoming_message);
-        auto itClient = connection_to_clients.find(incoming_message->m_conn);
-        assert(itClient != connection_to_clients.end());
-
         // It's easier to parse the string as a c-string instead of a c++ string at first
         std::string cstring_message;
         cstring_message.assign((const char*)incoming_message->m_pData, incoming_message->m_cbSize);
         const char* message = cstring_message.c_str();
 
-        incoming_message->Release();
+        if (server) {
+            auto itClient = connection_to_clients.find(incoming_message->m_conn);
+            assert(itClient != connection_to_clients.end());
 
-        // Do message logic here
-        cout << "Message from " << itClient->second.id << ": " << message;
+            cout << "Message from " << itClient->second.id << ": " << message << endl;
+        } else {
+            cout << cstring_message << endl;
+        }
+        incoming_message->Release();
     }
 }
 

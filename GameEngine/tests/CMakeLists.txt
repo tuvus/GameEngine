@@ -3,7 +3,8 @@ enable_testing()
 
 add_executable(Test
         ${Headers}
-        GameTests.cpp
+        ApplicationFactoryTestUtils.h
+        ApplicationTests.cpp
         NetworkTests.cpp)
 target_link_libraries(Test PRIVATE GTest::gtest_main GameEngine)
 gtest_discover_tests(Test)
