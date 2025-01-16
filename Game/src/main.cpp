@@ -11,6 +11,10 @@ public:
     ApplicationWindow* Create_Window(Application& application) override {
         return new Card_Game(application);
     }
+
+    function<void(std::chrono::milliseconds, Application&)> Create_Update_Function() override {
+        return [](std::chrono::milliseconds delta_time, Application& application) {};
+    }
 };
 
 int main() {

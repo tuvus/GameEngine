@@ -1,7 +1,9 @@
 #include "networking/Network.h"
 
 #include <cassert>
+#include <functional>
 #include <iostream>
+#include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 
 using namespace std;
@@ -14,10 +16,13 @@ Network::Network(bool server) : server(server) {
     addrServer.Clear();
     addrServer.m_port = DEFAULT_SERVER_PORT;
     SteamDatagramErrMsg err_msg;
-    if (!GameNetworkingSockets_Init(nullptr, err_msg)) {
+    if (!has_initialized_GameNetworkingSockets && !GameNetworkingSockets_Init(nullptr, err_msg)) {
         std::cerr << "GameNetworkingSockets initialization failed " << err_msg << std::endl;
         exit(-1);
     }
+    has_initialized_GameNetworkingSockets = true;
+
+    // SteamNetworkingUtils()->SetDebugOutputFunction(k_ESteamNetworkingSocketsDebugOutputType_Msg, Debug_Output);
 
     connection_api = SteamNetworkingSockets();
     char szAddr[SteamNetworkingIPAddr::k_cchMaxString];
@@ -34,28 +39,34 @@ Network::Network(bool server) : server(server) {
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addrServer, 1, &config_options);
         if (listen_socket == k_HSteamListenSocket_Invalid)
-            cerr << "Failed to setup socket listener on port " << 0 << endl;
+            cerr << "Failed to setup socket listener on port " << addrServer.m_port << endl;
         poll_group = connection_api->CreatePollGroup();
         if (poll_group == k_HSteamNetPollGroup_Invalid)
-            cerr << "Failed to setup poll group listener on port " << 0 << endl;
+            cerr << "Failed to setup poll group listener on port " << addrServer.m_port << endl;
         cout << "Starting server, listening on port: " << addrServer.m_port << endl;
         state = Running;
     } else {
-        remote_host_connection = connection_api->ConnectByIPAddress(addrServer, 1, &config_options);
-        if (remote_host_connection == k_HSteamNetConnection_Invalid) cerr << "Failed to connect to the host" << endl;
         cout << "Starting client" << endl;
+        remote_host_connection = connection_api->ConnectByIPAddress(addrServer, 1, &config_options);
+        if (remote_host_connection == k_HSteamNetConnection_Invalid) cerr << "Failed to create connection to the host"
+            << endl;
         state = Connecting;
     }
 }
 
 Network::~Network() {
-    cout << "Closing Server" << endl;
-    connection_to_clients.clear();
-    connection_api->CloseListenSocket(listen_socket);
-    listen_socket = k_HSteamListenSocket_Invalid;
-    connection_api->DestroyPollGroup(poll_group);
-    poll_group = k_HSteamNetPollGroup_Invalid;
+    if (server) {
+        for (auto client : connection_to_clients) {
+            connection_api->CloseConnection(client.first, 0, "Shutting down server", false);
+        }
+        connection_to_clients.clear();
+        connection_api->CloseListenSocket(listen_socket);
+        listen_socket = k_HSteamListenSocket_Invalid;
+        connection_api->DestroyPollGroup(poll_group);
+        poll_group = k_HSteamNetPollGroup_Invalid;
+    }
     GameNetworkingSockets_Kill();
+
     state = Closed;
 }
 
@@ -70,10 +81,16 @@ void Network::Network_Update() {
 void Network::Poll_Incoming_Messages() {
     while (true) {
         ISteamNetworkingMessage* incoming_message = nullptr;
-        int numMsgs = connection_api->ReceiveMessagesOnPollGroup(poll_group, &incoming_message, 1);
-        if (numMsgs == 0) break;
-        if (numMsgs < 0) cerr << "Error checking messages. Number of messages is: " << numMsgs << endl;
-        assert(numMsgs == 1 && incoming_message);
+        int numMessages = -2;
+
+        if (server) numMessages = connection_api->ReceiveMessagesOnPollGroup(poll_group, &incoming_message, 1);
+        else numMessages = connection_api->ReceiveMessagesOnConnection(remote_host_connection, &incoming_message, 1);
+
+        if (numMessages == 0) break;
+        if (numMessages < 0)
+            cerr << "Error checking messages on server: " << server << ". Number of messages is: " << numMessages <<
+                endl;
+        assert(numMessages == 1 && incoming_message);
         // It's easier to parse the string as a c-string instead of a c++ string at first
         std::string cstring_message;
         cstring_message.assign((const char*)incoming_message->m_pData, incoming_message->m_cbSize);
@@ -92,6 +109,7 @@ void Network::Poll_Incoming_Messages() {
 }
 
 void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status) {
+    assert(new_status->m_hConn == remote_host_connection || remote_host_connection == k_HSteamNetConnection_Invalid);
     switch (new_status->m_info.m_eState) {
         case k_ESteamNetworkingConnectionState_None:
             break;
@@ -142,11 +160,22 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
         }
         case k_ESteamNetworkingConnectionState_Connected: {
             if (server) break;
+            cout << "Client connected" << endl;
             state = Connected;
         }
+        default:
+            break;
     }
 }
 
 Network::Network_State Network::Get_Network_State() {
     return state;
+}
+
+void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg) {
+    if (error_type == k_ESteamNetworkingSocketsDebugOutputType_Bug) {
+        cerr << pszMsg << endl;
+    } else {
+        cout << pszMsg << endl;
+    }
 }

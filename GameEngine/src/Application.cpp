@@ -73,8 +73,6 @@ void Application::Close_Application() {
 }
 
 Application::~Application() {
-    delete application_window;
-    if (network) {
-        delete network;
-    }
+    if (application_window) delete application_window;
+    if (network) delete network;
 };

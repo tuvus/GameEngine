@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 #include <steam/isteamnetworkingsockets.h>
-
+inline bool has_initialized_GameNetworkingSockets = false;
 class Network {
 public:
     enum Network_State {
@@ -27,7 +27,7 @@ private:
     std::map<HSteamNetConnection, Network_Client> connection_to_clients;
 
     void Poll_Incoming_Messages();
-    void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* pInfo);
+    void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
 
 public:
     Network(bool server);
@@ -35,3 +35,5 @@ public:
     void Network_Update();
     Network_State Get_Network_State();
 };
+
+void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg);
