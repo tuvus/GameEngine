@@ -7,10 +7,10 @@
 #include <steam/steamnetworkingsockets.h>
 
 using namespace std;
-
 const uint16 DEFAULT_SERVER_PORT = 27020;
 
 Network::Network(bool server) : server(server) {
+    network_instance = this;
     state = Setting_Up;
     SteamNetworkingIPAddr addrServer;
     addrServer.Clear();
@@ -22,11 +22,9 @@ Network::Network(bool server) : server(server) {
     }
     has_initialized_GameNetworkingSockets = true;
 
-    // SteamNetworkingUtils()->SetDebugOutputFunction(k_ESteamNetworkingSocketsDebugOutputType_Msg, Debug_Output);
+    SteamNetworkingUtils()->SetDebugOutputFunction(k_ESteamNetworkingSocketsDebugOutputType_Debug, Debug_Output);
 
     connection_api = SteamNetworkingSockets();
-    char szAddr[SteamNetworkingIPAddr::k_cchMaxString];
-    addrServer.ToString(szAddr, sizeof(szAddr), true);
     SteamNetworkingConfigValue_t config_options;
 
     // Interestingly we cannot change a method associated with a class cannot be cast to void*
@@ -34,7 +32,7 @@ Network::Network(bool server) : server(server) {
     auto connections_changed = [this](SteamNetConnectionStatusChangedCallback_t* info) -> void {
         On_Connection_Status_Changed(info);
     };
-    config_options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, &connections_changed);
+    config_options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)On_Connect_Changed_Adapter);
 
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addrServer, 1, &config_options);
@@ -108,6 +106,14 @@ void Network::Poll_Incoming_Messages() {
     }
 }
 
+/**
+ * This static method is needed to convert On_Connection_Status_Changed to a (void*) anonymous function instead of a method.
+ * We go around this by using a static instance to point to the correct method that we wanted to call.
+ */
+void Network::On_Connect_Changed_Adapter(SteamNetConnectionStatusChangedCallback_t* new_status) {
+    network_instance->On_Connection_Status_Changed(new_status);
+}
+
 void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status) {
     assert(new_status->m_hConn == remote_host_connection || remote_host_connection == k_HSteamNetConnection_Invalid);
     switch (new_status->m_info.m_eState) {
@@ -179,3 +185,5 @@ void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char*
         cout << pszMsg << endl;
     }
 }
+
+Network* Network::network_instance = nullptr;
