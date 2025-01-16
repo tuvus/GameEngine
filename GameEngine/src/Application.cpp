@@ -3,8 +3,6 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
-#include <steam/isteamnetworkingutils.h>
-#include <steam/steamnetworkingsockets.h>
 #include "ApplicationFactory.h"
 #include "ApplicationWindow.h"
 
