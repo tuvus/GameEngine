@@ -12,42 +12,36 @@ const uint16 DEFAULT_SERVER_PORT = 27020;
 Network::Network(bool server) : server(server) {
     network_instance = this;
     state = Setting_Up;
-    SteamNetworkingIPAddr addrServer;
-    addrServer.Clear();
-    addrServer.m_port = DEFAULT_SERVER_PORT;
+
     SteamDatagramErrMsg err_msg;
-    if (!has_initialized_GameNetworkingSockets && !GameNetworkingSockets_Init(nullptr, err_msg)) {
+    if (!GameNetworkingSockets_Init(nullptr, err_msg)) {
         std::cerr << "GameNetworkingSockets initialization failed " << err_msg << std::endl;
         exit(-1);
     }
-    has_initialized_GameNetworkingSockets = true;
-
     SteamNetworkingUtils()->SetDebugOutputFunction(k_ESteamNetworkingSocketsDebugOutputType_Debug, Debug_Output);
 
     connection_api = SteamNetworkingSockets();
+    SteamNetworkingIPAddr addrServer;
+    addrServer.Clear();
+    addrServer.SetIPv6LocalHost(DEFAULT_SERVER_PORT);
     SteamNetworkingConfigValue_t config_options;
 
-    // Interestingly we cannot change a method associated with a class cannot be cast to void*
-    // therefore I used an anonymous function to serve as an adapter.
-    auto connections_changed = [this](SteamNetConnectionStatusChangedCallback_t* info) -> void {
-        On_Connection_Status_Changed(info);
-    };
     config_options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)On_Connect_Changed_Adapter);
 
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addrServer, 1, &config_options);
-        if (listen_socket == k_HSteamListenSocket_Invalid)
-            cerr << "Failed to setup socket listener on port " << addrServer.m_port << endl;
+        if (listen_socket == k_HSteamListenSocket_Invalid) cerr << "Failed to setup socket listener on port " <<
+            addrServer.m_port << endl;
         poll_group = connection_api->CreatePollGroup();
-        if (poll_group == k_HSteamNetPollGroup_Invalid)
-            cerr << "Failed to setup poll group listener on port " << addrServer.m_port << endl;
+        if (poll_group == k_HSteamNetPollGroup_Invalid) cerr << "Failed to setup poll group listener on port " <<
+            addrServer.m_port << endl;
         cout << "Starting server, listening on port: " << addrServer.m_port << endl;
         state = Running;
     } else {
         cout << "Starting client" << endl;
         remote_host_connection = connection_api->ConnectByIPAddress(addrServer, 1, &config_options);
-        if (remote_host_connection == k_HSteamNetConnection_Invalid) cerr << "Failed to create connection to the host"
-            << endl;
+        if (remote_host_connection == k_HSteamNetConnection_Invalid)
+            cerr << "Failed to create connection to the host" << endl;
         state = Connecting;
     }
 }
@@ -147,7 +141,9 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
         case k_ESteamNetworkingConnectionState_Connecting: {
             if (!server) break;
             auto client = connection_to_clients.find(new_status->m_hConn);
-            assert(client != connection_to_clients.end());
+            if (client != connection_to_clients.end()) {
+                cerr << "Trying to conect a client that has already been connected!" << endl;
+            }
             cout << "Connecting client " << new_status->m_info.m_szConnectionDescription << endl;
             if (connection_api->AcceptConnection(new_status->m_hConn) != k_EResultOK) {
                 connection_api->CloseConnection(new_status->m_hConn, k_ESteamNetworkingConnectionState_ClosedByPeer,
@@ -163,6 +159,7 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
             int new_client_id = rand();
             cout << "Connecting client with it: " << new_client_id << endl;
             connection_to_clients[new_status->m_hConn] = Network_Client{new_client_id};
+            connection_api->SetConnectionName(new_status->m_hConn, to_string(new_client_id).c_str());
         }
         case k_ESteamNetworkingConnectionState_Connected: {
             if (server) break;
@@ -176,6 +173,10 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
 
 Network::Network_State Network::Get_Network_State() {
     return state;
+}
+
+int Network::Get_Num_Connected_Clients() const {
+    return connection_to_clients.size();
 }
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg) {

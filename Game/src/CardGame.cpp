@@ -14,6 +14,12 @@ void Card_Game::Render(std::chrono::milliseconds deltaTime) {
         if (ImGui::Button("Start Server")) {
             Get_Application().Start_Server();
         }
+    } else {
+        Network& network = Get_Application().Get_Network();
+        ImGui::Text(("State: " + to_string(network.Get_Network_State())).c_str());
+        if (network.Get_Network_State() == Network::Running) {
+            ImGui::Text(("Clients: " + to_string(network.Get_Num_Connected_Clients())).c_str());
+        }
     }
     if (ImGui::Button("Close Game")) {
         glfwSetWindowShouldClose(&Get_Window(), true);

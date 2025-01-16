@@ -1,7 +1,6 @@
 #pragma once
 #include <map>
 #include <steam/isteamnetworkingsockets.h>
-inline bool has_initialized_GameNetworkingSockets = false;
 
 class Network {
 public:
@@ -37,6 +36,7 @@ public:
     ~Network();
     void Network_Update();
     Network_State Get_Network_State();
+    int Get_Num_Connected_Clients() const;
 };
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg);
