@@ -123,16 +123,18 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                     connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, nullptr, false);
                     break;
                 }
+
                 auto client = connection_to_clients.find(new_status->m_hConn);
                 assert(client != connection_to_clients.end());
-                const char* debug_message;
+                string debug_message;
                 if (new_status->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer) {
-                    debug_message = "Connection closed by client request with id: " + client->second.id;
+                    debug_message = "Connection closed by client request with id: " + to_string(client->second.id);
                 } else {
                     debug_message = "Internal problem on the server with id: " + client->second.id;
                 }
                 cout << debug_message << endl;
-                connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, debug_message, false);
+                connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, debug_message.c_str(), false);
+                connection_to_clients.erase(client);
             } else {
                 connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, nullptr, false);
                 state = Closing;
