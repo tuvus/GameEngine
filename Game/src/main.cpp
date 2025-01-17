@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "CardGame.h"
 #include "Application.h"
 #include "ApplicationFactory.h"
@@ -8,8 +10,8 @@ public:
         return "NewCardGame";
     }
 
-    ApplicationWindow* Create_Window(Application& application) override {
-        return new Card_Game(application);
+    unique_ptr<ApplicationWindow> Create_Window(Application& application) override {
+        return make_unique<Card_Game>(application);
     }
 
     function<void(std::chrono::milliseconds, Application&)> Create_Update_Function() override {
@@ -18,7 +20,6 @@ public:
 };
 
 int main() {
-    auto* factory = new CardGameFactory();
-    Create_Application(*factory, true);
-    delete factory;
+    unique_ptr<ApplicationFactory> factory = make_unique<CardGameFactory>();
+    Create_Application(move(factory), true);
 }

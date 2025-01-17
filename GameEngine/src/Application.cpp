@@ -8,17 +8,16 @@
 
 using namespace std;
 
-void Create_Application(ApplicationFactory& application_factory, bool client) {
-    cout << "Creating application: " + application_factory.Get_Name() << endl << endl;
-    const auto application = new Application(application_factory, client);
+void Create_Application(unique_ptr<ApplicationFactory> application_factory, bool client) {
+    cout << "Creating application: " + application_factory->Get_Name() << endl << endl;
+    const auto application = make_unique<Application>(move(application_factory), client);
     application->Start_Application();
-    delete application;
 }
 
-Application::Application(ApplicationFactory& application_factory, bool client): client(client),
-    application_name(application_factory.Get_Name()), application_state(ApplicationState::SettingUp),
-    update_function(application_factory.Create_Update_Function()), network(nullptr) {
-    if (client) application_window = application_factory.Create_Window(*this);
+Application::Application(unique_ptr<ApplicationFactory> application_factory, bool client): client(client),
+    application_name(application_factory->Get_Name()), application_state(ApplicationState::SettingUp),
+    network(nullptr), update_function(application_factory->Create_Update_Function()) {
+    if (client) application_window = application_factory->Create_Window(*this);
 }
 
 void Application::Start_Application() {
@@ -33,11 +32,11 @@ void Application::Start_Application() {
 }
 
 void Application::Start_Server() {
-    network = new Network(true);
+    network = make_unique<Network>(true);
 }
 
 void Application::Start_Client() {
-    network = new Network(false);
+    network = make_unique<Network>(false);
 }
 
 string Application::Get_Name() {
@@ -69,8 +68,3 @@ void Application::Application_Loop() {
 void Application::Close_Application() {
     application_state = ApplicationState::Closing;
 }
-
-Application::~Application() {
-    delete application_window;
-    delete network;
-};

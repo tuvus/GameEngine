@@ -30,8 +30,8 @@ public:
 
     string Get_Name() override { return "TestGame"; }
 
-    ApplicationWindow* Create_Window(Application& application) override {
-        return new TestWindow(application, render_function);
+    unique_ptr<ApplicationWindow> Create_Window(Application& application) override {
+        return make_unique<TestWindow>(application, render_function);
     }
 
     function<void(std::chrono::milliseconds, Application&)> Create_Update_Function() override {
@@ -41,8 +41,8 @@ public:
     ~TestFactory() override = default;
 };
 
-inline ApplicationFactory* CreateApplicationTestFactory(
+inline unique_ptr<ApplicationFactory> CreateApplicationTestFactory(
     function<void(std::chrono::milliseconds, ApplicationWindow&)> render_function,
     function<void(std::chrono::milliseconds, Application&)> update_function) {
-    return new TestFactory(render_function, update_function);
+    return make_unique<TestFactory>(render_function, update_function);
 }
