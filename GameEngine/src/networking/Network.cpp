@@ -9,7 +9,8 @@
 using namespace std;
 const uint16 DEFAULT_SERVER_PORT = 27020;
 
-Network::Network(bool server) : server(server) {
+Network::Network(bool server, std::function<void()> close_network_function) : close_network_function(
+    close_network_function), server(server) {
     network_instance = this;
     state = Setting_Up;
 
@@ -36,17 +37,18 @@ Network::Network(bool server) : server(server) {
         if (poll_group == k_HSteamNetPollGroup_Invalid) cerr << "Failed to setup poll group listener on port " <<
             addrServer.m_port << endl;
         cout << "Starting server, listening on port: " << addrServer.m_port << endl;
-        state = Running;
+        state = Server_Running;
     } else {
         cout << "Starting client" << endl;
         remote_host_connection = connection_api->ConnectByIPAddress(addrServer, 1, &config_options);
         if (remote_host_connection == k_HSteamNetConnection_Invalid)
             cerr << "Failed to create connection to the host" << endl;
-        state = Connecting;
+        state = Client_Connecting;
     }
 }
 
 Network::~Network() {
+    state = Closed;
     if (server) {
         for (auto client : connection_to_clients) {
             connection_api->CloseConnection(client.first, 0, "Shutting down server", false);
@@ -58,19 +60,21 @@ Network::~Network() {
         poll_group = k_HSteamNetPollGroup_Invalid;
     }
     GameNetworkingSockets_Kill();
-
-    state = Closed;
 }
 
 void Network::Network_Update() {
     Poll_Incoming_Messages();
     connection_api->RunCallbacks();
+    if (state == Closing) {
+        close_network_function();
+    }
 }
 
 /**
  * Handles receiving messages sent from the clients.
  */
 void Network::Poll_Incoming_Messages() {
+    if (state == Closing || state == Closed) return;
     while (true) {
         ISteamNetworkingMessage* incoming_message = nullptr;
         int numMessages = -2;
@@ -133,9 +137,13 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                     debug_message = "Internal problem on the server with id: " + client->second.id;
                 }
                 cout << debug_message << endl;
-                connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, debug_message.c_str(), false);
+                connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, debug_message.c_str(),
+                    false);
                 connection_to_clients.erase(client);
             } else {
+                if (new_status->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer)
+                    cout << "Leaving server due to server request" << endl;
+                else cout << "Leaving server" << endl;
                 connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, nullptr, false);
                 state = Closing;
             }
@@ -166,7 +174,7 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
         case k_ESteamNetworkingConnectionState_Connected: {
             if (server) break;
             cout << "Client connected" << endl;
-            state = Connected;
+            state = Client_Connected;
         }
         default:
             break;
@@ -180,6 +188,31 @@ Network::Network_State Network::Get_Network_State() {
 int Network::Get_Num_Connected_Clients() const {
     return connection_to_clients.size();
 }
+
+bool Network::Is_Server() const {
+    return server;
+}
+
+std::string Network::Get_Network_State_Str() const {
+    switch (state) {
+        case Setting_Up:
+            if (server) return "Starting Server";
+            return "Starting Client";
+        case Server_Running:
+            return "Server Running";
+        case Client_Connecting:
+            return "Connecting to server";
+        case Client_Connected:
+            return "Connected to server";
+        case Closing:
+            if (server) return "Shutting down server";
+            return "Closing client";
+        case Closed:
+            return "Closed";
+    }
+    return "Error";
+}
+
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg) {
     if (error_type == k_ESteamNetworkingSocketsDebugOutputType_Bug) {

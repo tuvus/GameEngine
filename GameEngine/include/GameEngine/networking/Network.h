@@ -1,14 +1,16 @@
 #pragma once
+#include <functional>
 #include <map>
+#include <string>
 #include <steam/isteamnetworkingsockets.h>
 
 class Network {
 public:
     enum Network_State {
         Setting_Up,
-        Running,
-        Connecting,
-        Connected,
+        Server_Running,
+        Client_Connecting,
+        Client_Connected,
         Closing,
         Closed,
     };
@@ -18,6 +20,7 @@ private:
         int id;
     };
 
+    std::function<void()> close_network_function;
     bool server;
     Network_State state;
     HSteamListenSocket listen_socket;
@@ -32,11 +35,13 @@ private:
 
 public:
     void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
-    Network(bool server);
+    Network(bool server, std::function<void()> close_network_function);
     ~Network();
     void Network_Update();
     Network_State Get_Network_State();
     int Get_Num_Connected_Clients() const;
+    bool Is_Server() const;
+    std::string Get_Network_State_Str() const;
 };
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg);

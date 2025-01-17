@@ -32,6 +32,7 @@ public:
     void Start_Application();
     void Start_Server();
     void Start_Client();
+    void Close_Network();
     string Get_Name();
     void Close_Application();
     Network& Get_Network();

@@ -16,10 +16,15 @@ void Card_Game::Render(std::chrono::milliseconds deltaTime) {
         }
     } else {
         Network& network = Get_Application().Get_Network();
-        ImGui::Text(("State: " + to_string(network.Get_Network_State())).c_str());
-        if (network.Get_Network_State() == Network::Running) {
+        ImGui::Text(("State: " + network.Get_Network_State_Str()).c_str());
+
+        if (network.Get_Network_State() == Network::Server_Running) {
             ImGui::Text(("Clients: " + to_string(network.Get_Num_Connected_Clients())).c_str());
         }
+
+        string close_text = "Shutdown Server";
+        if (!network.Is_Server()) close_text = "Leave Server";
+        if (ImGui::Button(close_text.c_str())) Get_Application().Close_Network();
     }
     if (ImGui::Button("Close Game")) {
         glfwSetWindowShouldClose(&Get_Window(), true);

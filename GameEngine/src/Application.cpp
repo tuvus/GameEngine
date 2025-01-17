@@ -15,8 +15,8 @@ void Create_Application(unique_ptr<ApplicationFactory> application_factory, bool
 }
 
 Application::Application(unique_ptr<ApplicationFactory> application_factory, bool client): client(client),
-    application_name(application_factory->Get_Name()), application_state(ApplicationState::SettingUp),
-    network(nullptr), update_function(application_factory->Create_Update_Function()) {
+    application_name(application_factory->Get_Name()), application_state(ApplicationState::SettingUp), network(nullptr),
+    update_function(application_factory->Create_Update_Function()) {
     if (client) application_window = application_factory->Create_Window(*this);
 }
 
@@ -32,11 +32,15 @@ void Application::Start_Application() {
 }
 
 void Application::Start_Server() {
-    network = make_unique<Network>(true);
+    network = make_unique<Network>(true, [this] { this->Close_Network(); });
 }
 
 void Application::Start_Client() {
-    network = make_unique<Network>(false);
+    network = make_unique<Network>(false, [this] { this->Close_Network(); });
+}
+
+void Application::Close_Network() {
+    network.reset();
 }
 
 string Application::Get_Name() {
