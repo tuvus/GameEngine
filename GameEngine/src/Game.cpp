@@ -11,25 +11,33 @@
 
 using namespace std;
 
-void CreateGame(Game& game) {
-    cout << "Creating game: " + game.GetName() << endl << endl;
-    game.StartGame();
+void Create_Game(Game& game) {
+    cout << "Creating game: " + game.Get_Name() << endl << endl;
+    game.Start_Game();
 }
 
 Game::Game() = default;
 
-void Game::StartGame() {
-    cout << "Starting game: " + GetName() << endl;
+void Game::Start_Game() {
+    cout << "Starting game: " + Get_Name() << endl;
     if (!glfwInit()) {
         cerr << "An error occurred with initializing glfw!" << endl;
         exit(-1);
     }
 
-    auto errorCallBack = [](const int error, const char* description) {
+    // ensure OpenGL version matches GLSL
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    #ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    #endif
+
+    auto error_call_back = [](const int error, const char* description) {
         cerr << "glfw error " << error << " " << description;
     };
-    glfwSetErrorCallback(errorCallBack);
-    window = glfwCreateWindow(1280, 800, GetName().c_str(), nullptr, nullptr);
+    glfwSetErrorCallback(error_call_back);
+    window = glfwCreateWindow(1280, 800, Get_Name().c_str(), nullptr, nullptr);
     if (!window) {
         cerr << "Opening window failed" << endl;
         exit(-1);
@@ -44,13 +52,13 @@ void Game::StartGame() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init();
-    GameLoop();
+    ImGui_ImplOpenGL3_Init("#version 150");
+    Game_Loop();
 }
 
 
-void Game::GameLoop() {
-    chrono::time_point<chrono::system_clock> frameEndTime = chrono::system_clock::now();
+void Game::Game_Loop() {
+    chrono::time_point<chrono::system_clock> frame_end_time = chrono::system_clock::now();
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         ImGui_ImplOpenGL3_NewFrame();
@@ -59,10 +67,10 @@ void Game::GameLoop() {
 
         ImGui::Begin("Start Menu");
 
-        chrono::time_point<chrono::system_clock> frameStartTime = chrono::system_clock::now();
-        UpdateGame(chrono::duration_cast<std::chrono::milliseconds>(frameStartTime - frameEndTime));
-        this_thread::sleep_until(frameStartTime + 16ms);
-        frameEndTime = chrono::system_clock::now();
+        chrono::time_point<chrono::system_clock> frame_start_time = chrono::system_clock::now();
+        Update_Game(chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time));
+        this_thread::sleep_until(frame_start_time + 16ms);
+        frame_end_time = chrono::system_clock::now();
 
         ImGui::End();
 
@@ -74,10 +82,10 @@ void Game::GameLoop() {
         glViewport(0, 0, display_w, display_h);
         glClear(GL_COLOR_BUFFER_BIT);
     }
-    EndGame();
+    End_Game();
 }
 
-void Game::EndGame() {
+void Game::End_Game() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

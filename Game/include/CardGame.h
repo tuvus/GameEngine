@@ -3,11 +3,11 @@
 
 using namespace std;
 
-class CardGame : public Game {
+class Card_Game : public Game {
 public:
-    string GetName() override;
-    void StartGame() override;
-    void UpdateGame(chrono::milliseconds deltaTime) override;
-    void EndGame() override;
-    ~CardGame() override;
+    string Get_Name() override;
+    void Start_Game() override;
+    void Update_Game(chrono::milliseconds deltaTime) override;
+    void End_Game() override;
+    ~Card_Game() override;
 };
