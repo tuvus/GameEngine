@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.25)
 project(Game VERSION 0.1.0)
 
 set(CMAKE_TOOLCHAIN_FILE, "${CMAKE_SOURCE_DIR}/vcpkg.cmake")
-set(CMAKE_GENERATOR ninja)
 
 set(Sources
         src/CardGame.cpp
