@@ -3,6 +3,12 @@
 #include "ApplicationFactoryTestUtils.h"
 #include "gtest/gtest.h"
 
+/**
+ * Due to the way GameNetworkingSockets works it isn't easy to run two applications at the same time.
+ * I'll try and figure out a better way to test connection in the future.
+ * For now, I will leave the code here before I realised that the tests don't work.
+ */
+
 // TEST(GTest, ServerSetsUp) {
 //     int* frames = new int();
 //     atomic_bool* server_ran = new atomic_bool();
