@@ -22,25 +22,25 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
     SteamNetworkingUtils()->SetDebugOutputFunction(k_ESteamNetworkingSocketsDebugOutputType_Debug, Debug_Output);
 
     connection_api = SteamNetworkingSockets();
-    SteamNetworkingIPAddr addrServer;
-    addrServer.Clear();
-    addrServer.SetIPv6LocalHost(DEFAULT_SERVER_PORT);
+    SteamNetworkingIPAddr addr_server;
+    addr_server.Clear();
+    addr_server.SetIPv6LocalHost(DEFAULT_SERVER_PORT);
     SteamNetworkingConfigValue_t config_options;
 
     config_options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)On_Connect_Changed_Adapter);
 
     if (server) {
-        listen_socket = connection_api->CreateListenSocketIP(addrServer, 1, &config_options);
+        listen_socket = connection_api->CreateListenSocketIP(addr_server, 1, &config_options);
         if (listen_socket == k_HSteamListenSocket_Invalid) cerr << "Failed to setup socket listener on port " <<
-            addrServer.m_port << endl;
+            addr_server.m_port << endl;
         poll_group = connection_api->CreatePollGroup();
         if (poll_group == k_HSteamNetPollGroup_Invalid) cerr << "Failed to setup poll group listener on port " <<
-            addrServer.m_port << endl;
-        cout << "Starting server, listening on port: " << addrServer.m_port << endl;
+            addr_server.m_port << endl;
+        cout << "Starting server, listening on port: " << addr_server.m_port << endl;
         state = Server_Running;
     } else {
         cout << "Starting client" << endl;
-        remote_host_connection = connection_api->ConnectByIPAddress(addrServer, 1, &config_options);
+        remote_host_connection = connection_api->ConnectByIPAddress(addr_server, 1, &config_options);
         if (remote_host_connection == k_HSteamNetConnection_Invalid)
             cerr << "Failed to create connection to the host" << endl;
         state = Client_Connecting;
@@ -77,26 +77,26 @@ void Network::Poll_Incoming_Messages() {
     if (state == Closing || state == Closed) return;
     while (true) {
         ISteamNetworkingMessage* incoming_message = nullptr;
-        int numMessages = -2;
+        int num_messages = -2;
 
-        if (server) numMessages = connection_api->ReceiveMessagesOnPollGroup(poll_group, &incoming_message, 1);
-        else numMessages = connection_api->ReceiveMessagesOnConnection(remote_host_connection, &incoming_message, 1);
+        if (server) num_messages = connection_api->ReceiveMessagesOnPollGroup(poll_group, &incoming_message, 1);
+        else num_messages = connection_api->ReceiveMessagesOnConnection(remote_host_connection, &incoming_message, 1);
 
-        if (numMessages == 0) break;
-        if (numMessages < 0)
-            cerr << "Error checking messages on server: " << server << ". Number of messages is: " << numMessages <<
+        if (num_messages == 0) break;
+        if (num_messages < 0)
+            cerr << "Error checking messages on server: " << server << ". Number of messages is: " << num_messages <<
                 endl;
-        assert(numMessages == 1 && incoming_message);
+        assert(num_messages == 1 && incoming_message);
         // It's easier to parse the string as a c-string instead of a c++ string at first
         std::string cstring_message;
         cstring_message.assign((const char*)incoming_message->m_pData, incoming_message->m_cbSize);
         const char* message = cstring_message.c_str();
 
         if (server) {
-            auto itClient = connection_to_clients.find(incoming_message->m_conn);
-            assert(itClient != connection_to_clients.end());
+            auto client = connection_to_clients.find(incoming_message->m_conn);
+            assert(client != connection_to_clients.end());
 
-            cout << "Message from " << itClient->second.id << ": " << message << endl;
+            cout << "Message from " << client->second.id << ": " << message << endl;
         } else {
             cout << cstring_message << endl;
         }

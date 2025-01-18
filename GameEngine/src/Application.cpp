@@ -56,12 +56,12 @@ void Application::Application_Loop() {
     chrono::time_point<chrono::system_clock> frame_end_time = chrono::system_clock::now();
     while (application_state == ApplicationState::Running) {
         chrono::time_point<chrono::system_clock> frame_start_time = chrono::system_clock::now();
-        auto deltaTime = chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time);
+        auto delta_time = chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time);
 
         if (network) network->Network_Update();
-        if (client) application_window->Render_Update(deltaTime);
+        if (client) application_window->Render_Update(delta_time);
 
-        update_function(deltaTime, *this);
+        update_function(delta_time, *this);
 
         this_thread::sleep_until(frame_start_time + 16ms);
         frame_end_time = chrono::system_clock::now();
