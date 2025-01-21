@@ -1,13 +1,12 @@
 #pragma once
-#include "Game.h"
+#include "Application.h"
+#include "ApplicationWindow.h"
 
 using namespace std;
 
-class Card_Game : public Game {
+class Card_Game : public ApplicationWindow {
 public:
-    string Get_Name() override;
-    void Start_Game() override;
-    void Update_Game(chrono::milliseconds deltaTime) override;
-    void End_Game() override;
+    Card_Game(Application& application);
+    void Render(std::chrono::milliseconds deltaTime) override;
     ~Card_Game() override;
 };

@@ -1,30 +1,34 @@
 #include "CardGame.h"
 
 #include <imgui.h>
-#include <iostream>
 
 using namespace std;
 
-string Card_Game::Get_Name() {
-    return "NewCardGame";
-}
+Card_Game::Card_Game(Application& application) : ApplicationWindow(application) {}
 
-void Card_Game::Start_Game() {
-    Game::Start_Game();
-    cout << "Here is the card game!" << endl;
-}
+void Card_Game::Render(std::chrono::milliseconds deltaTime) {
+    if (&Get_Application().Get_Network() == nullptr) {
+        if (ImGui::Button("Start Client")) {
+            Get_Application().Start_Client();
+        }
+        if (ImGui::Button("Start Server")) {
+            Get_Application().Start_Server();
+        }
+    } else {
+        Network& network = Get_Application().Get_Network();
+        ImGui::Text(("State: " + network.Get_Network_State_Str()).c_str());
 
-void Card_Game::Update_Game(chrono::milliseconds deltaTime) {
+        if (network.Get_Network_State() == Network::Server_Running) {
+            ImGui::Text(("Clients: " + to_string(network.Get_Num_Connected_Clients())).c_str());
+        }
+
+        string close_text = "Shutdown Server";
+        if (!network.Is_Server()) close_text = "Leave Server";
+        if (ImGui::Button(close_text.c_str())) Get_Application().Close_Network();
+    }
     if (ImGui::Button("Close Game")) {
-        glfwSetWindowShouldClose(&GetWindow(), true);
+        glfwSetWindowShouldClose(&Get_Window(), true);
     }
 }
 
-void Card_Game::End_Game() {
-    Game::End_Game();
-    cout << "Ending Game";
-}
-
 Card_Game::~Card_Game() = default;
-
-
