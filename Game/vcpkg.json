@@ -26,9 +26,9 @@
   }, {
     "name" : "imgui",
     "version>=" : "1.91.6",
-    "features": [
-      "glfw-binding",
-      "opengl3-binding"
-    ]
+    "features" : [ "glfw-binding", "opengl3-binding" ]
+  }, {
+    "name" : "gamenetworkingsockets",
+    "version>=" : "1.4.1#1"
   } ]
 }
