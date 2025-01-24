@@ -36,12 +36,15 @@ private:
 public:
     void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
     Network(bool server, std::function<void()> close_network_function);
-    ~Network();
+    virtual ~Network();
     void Network_Update();
     Network_State Get_Network_State();
     int Get_Num_Connected_Clients() const;
     bool Is_Server() const;
     std::string Get_Network_State_Str() const;
+    void Send_Message_To_Server(std::string message);
+    void Send_Message_To_Client(HSteamNetConnection client, std::string message);
+    void Send_Message_To_All_Clients(std::string message);
 };
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg);
