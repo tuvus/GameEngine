@@ -6,6 +6,8 @@
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 
+#include "networking/Client.h"
+
 using namespace std;
 const uint16 DEFAULT_SERVER_PORT = 27020;
 
@@ -31,18 +33,18 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
 
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addr_server, 1, &config_options);
-        if (listen_socket == k_HSteamListenSocket_Invalid)
-            cerr << "Failed to setup socket listener on port " << addr_server.m_port << endl;
+        if (listen_socket == k_HSteamListenSocket_Invalid) cerr << "Failed to setup socket listener on port " <<
+            addr_server.m_port << endl;
         poll_group = connection_api->CreatePollGroup();
-        if (poll_group == k_HSteamNetPollGroup_Invalid)
-            cerr << "Failed to setup poll group listener on port " << addr_server.m_port << endl;
+        if (poll_group == k_HSteamNetPollGroup_Invalid) cerr << "Failed to setup poll group listener on port " <<
+            addr_server.m_port << endl;
         cout << "Starting server, listening on port: " << addr_server.m_port << endl;
         state = Server_Running;
     } else {
         cout << "Starting client" << endl;
         remote_host_connection = connection_api->ConnectByIPAddress(addr_server, 1, &config_options);
-        if (remote_host_connection == k_HSteamNetConnection_Invalid) cerr << "Failed to create connection to the host"
-            << endl;
+        if (remote_host_connection == k_HSteamNetConnection_Invalid)
+            cerr << "Failed to create connection to the host" << endl;
         state = Client_Connecting;
     }
 }
@@ -88,17 +90,20 @@ void Network::Poll_Incoming_Messages() {
                 endl;
         assert(num_messages == 1 && incoming_message);
         // It's easier to parse the string as a c-string instead of a c++ string at first
-        std::string cstring_message;
-        cstring_message.assign((const char*)incoming_message->m_pData, incoming_message->m_cbSize);
-        const char* message = cstring_message.c_str();
+        std::string message = string(static_cast<const char*>(incoming_message->m_pData), incoming_message->m_cbSize);
 
         if (server) {
             auto client = connection_to_clients.find(incoming_message->m_conn);
             assert(client != connection_to_clients.end());
 
-            cout << "Message from " << client->second.id << ": " << message << endl;
+            if (message.starts_with("set:")) {
+                string new_name = message.substr(4);
+                client->second->Set_Name(new_name);
+            }
+
+            cout << "Message from " << client->second->Get_Name() << ": " << message << endl;
         } else {
-            cout << cstring_message << endl;
+            cout << message << endl;
         }
         incoming_message->Release();
     }
@@ -132,17 +137,17 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                 assert(client != connection_to_clients.end());
                 string debug_message;
                 if (new_status->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer) {
-                    debug_message = "Connection closed by client request with id: " + to_string(client->second.id);
+                    debug_message = "Connection closed by client request with id: " + client->second->Get_Name();
                 } else {
-                    debug_message = "Internal problem on the server with id: " + client->second.id;
+                    debug_message = "Internal problem on the server with id: " + client->second->Get_Name();
                 }
                 cout << debug_message << endl;
                 connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, debug_message.c_str(),
                     false);
                 connection_to_clients.erase(client);
             } else {
-                if (new_status->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer) cout <<
-                    "Leaving server due to server request" << endl;
+                if (new_status->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer)
+                    cout << "Leaving server due to server request" << endl;
                 else cout << "Leaving server" << endl;
                 connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, nullptr, false);
                 state = Closing;
@@ -168,13 +173,16 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
 
             int new_client_id = rand();
             cout << "Connecting client with it: " << new_client_id << endl;
-            connection_to_clients[new_status->m_hConn] = Network_Client{new_client_id};
+            connection_to_clients[new_status->m_hConn] = new Client(new_client_id);
             connection_api->SetConnectionName(new_status->m_hConn, to_string(new_client_id).c_str());
         }
         case k_ESteamNetworkingConnectionState_Connected: {
             if (server) break;
             cout << "Client connected" << endl;
             state = Client_Connected;
+            Client* client = new Client(this,1);
+            connection_to_clients[new_status->m_hConn] = client;
+            client->Set_Name_RPC("abcdef");
         }
         default:
             break;
@@ -219,8 +227,8 @@ void Network::Send_Message_To_Server(std::string message) {
 }
 
 void Network::Send_Message_To_Client(HSteamNetConnection client, std::string message) {
-    if (!connection_to_clients.contains(client)) cerr <<
-        "Trying to send a message to a client that hasn't been connected yet! Message: " << message << endl;
+    if (!connection_to_clients.contains(client))
+        cerr << "Trying to send a message to a client that hasn't been connected yet! Message: " << message << endl;
     connection_api->SendMessageToConnection(client, message.c_str(), (uint32)strlen(message.c_str()),
         k_nSteamNetworkingSend_Reliable, nullptr);
 }
