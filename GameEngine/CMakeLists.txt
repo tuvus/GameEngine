@@ -31,6 +31,10 @@ target_link_libraries(${PROJECT_NAME} PUBLIC glfw glad::glad imgui::imgui GameNe
 find_package(GameNetworkingSockets CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
 
+#zpp_bits decided not to add a 6-line cmake file so we have to find the path directly instead of using find_package()
+find_path(ZPP_BITS_INCLUDE_DIRS "zpp_bits.h")
+target_include_directories(${PROJECT_NAME} PRIVATE ${ZPP_BITS_INCLUDE_DIRS})
+
 if (NOT DONT_RUN_GAME_ENGINE_TESTS)
     add_subdirectory(tests)
 endif ()

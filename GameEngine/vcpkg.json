@@ -27,5 +27,8 @@
   }, {
     "name" : "gamenetworkingsockets",
     "version>=" : "1.4.1#1"
+  }, {
+    "name" : "zpp-bits",
+    "version>=" : "4.4.17"
   } ]
 }
