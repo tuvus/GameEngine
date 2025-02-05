@@ -5,6 +5,7 @@
 #include <iostream>
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
+#include <zpp_bits.h>
 
 #include "networking/Client.h"
 
@@ -15,6 +16,7 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
     close_network_function), server(server) {
     network_instance = this;
     state = Setting_Up;
+    connection_to_clients = map<HSteamNetConnection, Client*>();
 
     SteamDatagramErrMsg err_msg;
     if (!GameNetworkingSockets_Init(nullptr, err_msg)) {
@@ -92,6 +94,19 @@ void Network::Poll_Incoming_Messages() {
         // It's easier to parse the string as a c-string instead of a c++ string at first
         std::string message = string(static_cast<const char*>(incoming_message->m_pData), incoming_message->m_cbSize);
 
+        auto [data, in, out] = zpp::bits::data_in_out();
+        data.clear();
+        const auto byteData = static_cast<const byte*>(incoming_message->m_pData);
+        for (int i = 0; i < incoming_message->m_cbSize; ++i) {
+            data.push_back(byteData[i]);
+        }
+        String_Message string_message;
+        if (failure(in(string_message))) {
+            cout << "Error deserializing message" << endl;
+            continue;
+        }
+        message = string_message.message;
+
         if (server) {
             auto client = connection_to_clients.find(incoming_message->m_conn);
             assert(client != connection_to_clients.end());
@@ -157,7 +172,7 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
             if (!server) break;
             auto client = connection_to_clients.find(new_status->m_hConn);
             if (client != connection_to_clients.end()) {
-                cerr << "Trying to conect a client that has already been connected!" << endl;
+                cerr << "Trying to connect a client that has already been connected!" << endl;
             }
             cout << "Connecting client " << new_status->m_info.m_szConnectionDescription << endl;
             if (connection_api->AcceptConnection(new_status->m_hConn) != k_EResultOK) {
@@ -172,15 +187,15 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
             }
 
             int new_client_id = rand();
-            cout << "Connecting client with it: " << new_client_id << endl;
-            connection_to_clients[new_status->m_hConn] = new Client(new_client_id);
+            cout << "Connecting client with id: " << new_client_id << endl;
+            connection_to_clients[new_status->m_hConn] = new Client(this, new_client_id, false);
             connection_api->SetConnectionName(new_status->m_hConn, to_string(new_client_id).c_str());
         }
         case k_ESteamNetworkingConnectionState_Connected: {
             if (server) break;
             cout << "Client connected" << endl;
             state = Client_Connected;
-            Client* client = new Client(this,1);
+            Client* client = new Client(this, 1, true);
             connection_to_clients[new_status->m_hConn] = client;
             client->Set_Name_RPC("abcdef");
         }
@@ -222,14 +237,19 @@ std::string Network::Get_Network_State_Str() const {
 }
 
 void Network::Send_Message_To_Server(std::string message) {
-    connection_api->SendMessageToConnection(remote_host_connection, message.c_str(), (uint32)strlen(message.c_str()),
+    auto [data, in, out] = zpp::bits::data_in_out();
+    out(String_Message{1312, 312312, message});
+    connection_api->SendMessageToConnection(remote_host_connection, data.data(), static_cast<uint32>(data.size()),
         k_nSteamNetworkingSend_Reliable, nullptr);
 }
 
 void Network::Send_Message_To_Client(HSteamNetConnection client, std::string message) {
     if (!connection_to_clients.contains(client))
         cerr << "Trying to send a message to a client that hasn't been connected yet! Message: " << message << endl;
-    connection_api->SendMessageToConnection(client, message.c_str(), (uint32)strlen(message.c_str()),
+
+    auto [data, in, out] = zpp::bits::data_in_out();
+    out(String_Message{1312, 312312, message});
+    connection_api->SendMessageToConnection(client, data.data(), static_cast<uint32>(data.size()),
         k_nSteamNetworkingSend_Reliable, nullptr);
 }
 

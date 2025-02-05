@@ -9,10 +9,10 @@ private:
     Network* network;
     long id;
     std::string name;
+    bool local_client;
 
 public:
-    Client(long id);
-    Client(Network* network, long id);
+    Client(Network* network, long id, bool local_client);
     ~Client() = default;
     void Recieve_Message(std::string& message);
     long Get_Id() const;

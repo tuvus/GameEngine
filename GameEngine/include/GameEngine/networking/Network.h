@@ -2,9 +2,23 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <zpp_bits.h>
 #include <steam/isteamnetworkingsockets.h>
 
 class Client;
+
+struct Network_Message {
+    uint64_t message_id;
+    uint64_t sender_id;
+};
+
+struct String_Message : Network_Message {
+    std::string message;
+
+    constexpr static auto serialize(auto& archive, auto& self) {
+        return archive(std::common_reference_t<Network_Message&, decltype(self)>(self), self.message);
+    }
+};
 
 class Network {
 public:
@@ -26,6 +40,7 @@ private:
     HSteamNetConnection remote_host_connection;
     ISteamNetworkingSockets* connection_api;
     std::map<HSteamNetConnection, Client*> connection_to_clients;
+
 
     void Poll_Incoming_Messages();
     void Process_Message(std::string& message, Client& client);
