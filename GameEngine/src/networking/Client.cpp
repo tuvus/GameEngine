@@ -21,7 +21,7 @@ void Client::Set_Name(const std::string& name) {
     }
 }
 
-void Client::Set_Name_RPC(const std::string& name) {
+void Client::Set_Name_RPC(const std::string& name) const {
     network->Send_Message_To_Server("set:" + name);
 }
 

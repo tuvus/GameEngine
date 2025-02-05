@@ -91,8 +91,6 @@ void Network::Poll_Incoming_Messages() {
             cerr << "Error checking messages on server: " << server << ". Number of messages is: " << num_messages <<
                 endl;
         assert(num_messages == 1 && incoming_message);
-        // It's easier to parse the string as a c-string instead of a c++ string at first
-        std::string message = string(static_cast<const char*>(incoming_message->m_pData), incoming_message->m_cbSize);
 
         auto [data, in, out] = zpp::bits::data_in_out();
         data.clear();
@@ -100,25 +98,28 @@ void Network::Poll_Incoming_Messages() {
         for (int i = 0; i < incoming_message->m_cbSize; ++i) {
             data.push_back(byteData[i]);
         }
-        String_Message string_message;
-        if (failure(in(string_message))) {
+        variant<String_Message, Rpc_Message> network_message;
+        if (failure(in(network_message))) {
             cout << "Error deserializing message" << endl;
             continue;
         }
-        message = string_message.message;
 
         if (server) {
             auto client = connection_to_clients.find(incoming_message->m_conn);
             assert(client != connection_to_clients.end());
-
-            if (message.starts_with("set:")) {
-                string new_name = message.substr(4);
-                client->second->Set_Name(new_name);
+            if (std::holds_alternative<String_Message>(network_message)) {
+                string message = std::get<String_Message>(network_message).message;
+                if (message.starts_with("set:")) {
+                    string new_name = message.substr(4);
+                    client->second->Set_Name(new_name);
+                }
+                cout << "Message from " << client->second->Get_Name() << ": " << message << endl;
             }
-
-            cout << "Message from " << client->second->Get_Name() << ": " << message << endl;
         } else {
-            cout << message << endl;
+            if (std::holds_alternative<String_Message>(network_message)) {
+                string message = std::get<String_Message>(network_message).message;
+                cout << message << endl;
+            }
         }
         incoming_message->Release();
     }
@@ -238,17 +239,17 @@ std::string Network::Get_Network_State_Str() const {
 
 void Network::Send_Message_To_Server(std::string message) {
     auto [data, in, out] = zpp::bits::data_in_out();
-    out(String_Message{1312, 312312, message});
+    out(variant<String_Message, Rpc_Message>(String_Message{1312, 312312, message}));
     connection_api->SendMessageToConnection(remote_host_connection, data.data(), static_cast<uint32>(data.size()),
         k_nSteamNetworkingSend_Reliable, nullptr);
 }
 
 void Network::Send_Message_To_Client(HSteamNetConnection client, std::string message) {
-    if (!connection_to_clients.contains(client))
-        cerr << "Trying to send a message to a client that hasn't been connected yet! Message: " << message << endl;
+    if (!connection_to_clients.contains(client)) cerr <<
+        "Trying to send a message to a client that hasn't been connected yet! Message: " << message << endl;
 
     auto [data, in, out] = zpp::bits::data_in_out();
-    out(String_Message{1312, 312312, message});
+    out(variant<String_Message, Rpc_Message>(String_Message{1312, 312312, message}));
     connection_api->SendMessageToConnection(client, data.data(), static_cast<uint32>(data.size()),
         k_nSteamNetworkingSend_Reliable, nullptr);
 }

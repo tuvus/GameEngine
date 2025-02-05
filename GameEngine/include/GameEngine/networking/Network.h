@@ -20,6 +20,14 @@ struct String_Message : Network_Message {
     }
 };
 
+struct Rpc_Message : Network_Message {
+    std::vector<std::byte> rpc_call;
+
+    constexpr static auto serialize(auto& archive, auto& self) {
+        return archive(std::common_reference_t<Network_Message&, decltype(self)>(self), self.rpc_call);
+    }
+};
+
 class Network {
 public:
     enum Network_State {
