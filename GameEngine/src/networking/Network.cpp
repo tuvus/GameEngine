@@ -3,14 +3,18 @@
 #include <cassert>
 #include <functional>
 #include <iostream>
+#include "zpp_bits.h"
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
-#include <zpp_bits.h>
 
 #include "networking/Client.h"
 
 using namespace std;
+using namespace std::literals;
+using namespace zpp::bits::literals;
 const uint16 DEFAULT_SERVER_PORT = 27020;
+
+using rpc = zpp::bits::rpc<zpp::bits::bind<&Client::Set_Name, "SetName"_sha256_int>>;
 
 Network::Network(bool server, std::function<void()> close_network_function) : close_network_function(
     close_network_function), server(server) {
@@ -35,18 +39,21 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
 
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addr_server, 1, &config_options);
-        if (listen_socket == k_HSteamListenSocket_Invalid) cerr << "Failed to setup socket listener on port " <<
-            addr_server.m_port << endl;
+        if (listen_socket == k_HSteamListenSocket_Invalid) {
+            cerr << "Failed to setup socket listener on port " << addr_server.m_port << endl;
+        }
         poll_group = connection_api->CreatePollGroup();
-        if (poll_group == k_HSteamNetPollGroup_Invalid) cerr << "Failed to setup poll group listener on port " <<
-            addr_server.m_port << endl;
+        if (poll_group == k_HSteamNetPollGroup_Invalid) {
+            cerr << "Failed to setup poll group listener on port " << addr_server.m_port << endl;
+        }
         cout << "Starting server, listening on port: " << addr_server.m_port << endl;
         state = Server_Running;
     } else {
         cout << "Starting client" << endl;
         remote_host_connection = connection_api->ConnectByIPAddress(addr_server, 1, &config_options);
-        if (remote_host_connection == k_HSteamNetConnection_Invalid)
+        if (remote_host_connection == k_HSteamNetConnection_Invalid) {
             cerr << "Failed to create connection to the host" << endl;
+        }
         state = Client_Connecting;
     }
 }
@@ -103,24 +110,21 @@ void Network::Poll_Incoming_Messages() {
             cout << "Error deserializing message" << endl;
             continue;
         }
+        // auto client = connection_to_clients.find(incoming_message->m_conn);
+        // assert(client != connection_to_clients.end());
 
-        if (server) {
-            auto client = connection_to_clients.find(incoming_message->m_conn);
-            assert(client != connection_to_clients.end());
-            if (std::holds_alternative<String_Message>(network_message)) {
-                string message = std::get<String_Message>(network_message).message;
-                if (message.starts_with("set:")) {
-                    string new_name = message.substr(4);
-                    client->second->Set_Name(new_name);
-                }
-                cout << "Message from " << client->second->Get_Name() << ": " << message << endl;
-            }
-        } else {
-            if (std::holds_alternative<String_Message>(network_message)) {
-                string message = std::get<String_Message>(network_message).message;
-                cout << message << endl;
-            }
+        if (std::holds_alternative<String_Message>(network_message)) {
+            string message = std::get<String_Message>(network_message).message;
+            cout << "Message: " << message << endl;
+        } else if (std::holds_alternative<Rpc_Message>(network_message)) {
+            Rpc_Message rpc_message = std::get<Rpc_Message>(network_message);
+
+            auto [data2, in2, out2] = zpp::bits::data_in_out();
+            data2 = rpc_message.rpc_call;
+//            auto [client, server] = rpc::client_server(in2, out2, data2);
+//            server.serve().or_throw();
         }
+
         incoming_message->Release();
     }
 }
@@ -162,9 +166,9 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                     false);
                 connection_to_clients.erase(client);
             } else {
-                if (new_status->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer)
+                if (new_status->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer) {
                     cout << "Leaving server due to server request" << endl;
-                else cout << "Leaving server" << endl;
+                } else cout << "Leaving server" << endl;
                 connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState, nullptr, false);
                 state = Closing;
             }
@@ -245,9 +249,9 @@ void Network::Send_Message_To_Server(std::string message) {
 }
 
 void Network::Send_Message_To_Client(HSteamNetConnection client, std::string message) {
-    if (!connection_to_clients.contains(client)) cerr <<
-        "Trying to send a message to a client that hasn't been connected yet! Message: " << message << endl;
-
+    if (!connection_to_clients.contains(client)) {
+        cerr << "Trying to send a message to a client that hasn't been connected yet! Message: " << message << endl;
+    }
     auto [data, in, out] = zpp::bits::data_in_out();
     out(variant<String_Message, Rpc_Message>(String_Message{1312, 312312, message}));
     connection_api->SendMessageToConnection(client, data.data(), static_cast<uint32>(data.size()),
@@ -260,6 +264,38 @@ void Network::Send_Message_To_All_Clients(std::string message) {
     }
 }
 
+template <auto Id>
+void Network::Send_Rpc_Call_To_Server(auto&&... arguments) {
+    auto [data, in, out] = zpp::bits::data_in_out();
+    auto client = rpc::client(in, out);
+    client.request<Id>(make_index_sequence<sizeof...(arguments)>{}, arguments...);
+    Rpc_Message rpc_message = Rpc_Message{14123, 124142, vector(data)};
+    data.clear();
+    out(variant<String_Message, Rpc_Message>(rpc_message));
+    connection_api->SendMessageToConnection(remote_host_connection, data.data(), static_cast<uint32>(data.size()),
+        k_nSteamNetworkingSend_Reliable, nullptr);
+}
+
+// template <auto Id>
+// void Network::Send_Rpc_Call_To_Client(HSteamNetConnection client_connection, auto&&... arguments) {
+//     auto [data, in, out] = zpp::bits::data_in_out();
+//     auto client = rpc::client(in, out);
+//     client.request<Id>(arguments...);
+//     Rpc_Message rpc_message = Rpc_Message{14123, 124142, vector(data)};
+//     data.clear();
+//     out(variant<String_Message, Rpc_Message>(rpc_message));
+//     connection_api->SendMessageToConnection(client_connection, data.data(), static_cast<uint32>(data.size()),
+//         k_nSteamNetworkingSend_Reliable, nullptr);
+// }
+//
+// template <auto Id>
+// void Network::Send_Rpc_Call_To_All_Clients(auto&&... arguments) {
+//     for (auto& client : connection_to_clients) {
+//         if (client.first != k_HSteamNetConnection_Invalid) {
+//             Send_Rpc_Call_To_Client<Id>(client.first, arguments...);
+//         }
+//     }
+// }
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg) {
     if (error_type == k_ESteamNetworkingSocketsDebugOutputType_Bug) {

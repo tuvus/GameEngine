@@ -2,7 +2,7 @@
 #include <functional>
 #include <map>
 #include <string>
-#include <zpp_bits.h>
+#include "zpp_bits.h"
 #include <steam/isteamnetworkingsockets.h>
 
 class Client;
@@ -67,6 +67,13 @@ public:
     void Send_Message_To_Server(std::string message);
     void Send_Message_To_Client(HSteamNetConnection client, std::string message);
     void Send_Message_To_All_Clients(std::string message);
+    template <auto Id>
+    void Send_Rpc_Call_To_Server(auto&&... arguments);
+    // template <auto Id>
+    // void Send_Rpc_Call_To_Client(HSteamNetConnection client, va_list arguments);
+    // template <auto Id>
+    // void Send_Rpc_Call_To_All_Clients(auto&&... arguments);
+
 };
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg);

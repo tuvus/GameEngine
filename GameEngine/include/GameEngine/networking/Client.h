@@ -15,7 +15,7 @@ public:
     ~Client() = default;
     void Recieve_Message(std::string& message);
     long Get_Id() const;
-    void Set_Name(const std::string& name);
+    void Set_Name(const std::string& name, bool rpc = false);
     void Set_Name_RPC(const std::string& name) const;
     std::string Get_Name();
     bool Is_Local_Client() const;

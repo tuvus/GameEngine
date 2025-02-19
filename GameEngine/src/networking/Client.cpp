@@ -14,9 +14,15 @@ void Client::Recieve_Message(std::string& message) {
 }
 
 
-void Client::Set_Name(const std::string& name) {
-    this->name = name;
-    if (!Is_Local_Client()) {
+void Client::Set_Name(const std::string& name, bool rpc) {
+    if (Is_Local_Client()) {
+        if (rpc) {
+            // This must have come from the server
+            this->name = name;
+        } else {
+            network->Send_Rpc_Call_To_Server<"SetName"_sha256_int>();
+        }
+    } else {
         network->Send_Message_To_All_Clients("set:" + name);
     }
 }
