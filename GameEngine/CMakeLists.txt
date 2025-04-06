@@ -25,7 +25,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_BINARY_DIR} ${PROJEC
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw glad::glad imgui::imgui GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
+find_package(rpclib CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC glfw glad::glad imgui::imgui GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets rpclib::rpc)
 find_package(GameNetworkingSockets CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
 

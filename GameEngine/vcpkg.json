@@ -27,5 +27,7 @@
   }, {
     "name" : "gamenetworkingsockets",
     "version>=" : "1.4.1#1"
-  } ]
-}
+  }, {
+    "name" : "rpclib",
+    "version>=" : "2.3.0#2"
+  } ]}
