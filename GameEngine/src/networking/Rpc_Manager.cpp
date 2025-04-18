@@ -1,7 +1,6 @@
 #include "networking/Rpc_Manager.h"
 
 #include <iostream>
-#include "asio/"
 
 using namespace std;
 
@@ -11,6 +10,16 @@ RPC_Manager::RPC_Manager() : dispatcher(std::make_shared<rpc::detail::dispatcher
         cout << "The function worked!" << endl;
     });
     call_rpc("testfunc");
+    cout << "Ending the dispatcher" << endl;
+}
+
+clmdep_msgpack::v1::object unpack(char* data, size_t length) {
+    clmdep_msgpack::v1::object_handle result;
+
+    // Pass the msgpack::object_handle
+    unpack(result, data, length);
+    // Get msgpack::object from msgpack::object_handle (shallow copy)
+    return result.get();
 }
 
 template <typename... Args>
@@ -18,19 +27,10 @@ void RPC_Manager::call_rpc(std::string const& function_name, Args... args) {
     auto args_obj = make_tuple(args...);
     auto call_obj = make_tuple(function_name, args_obj);
 
-    auto buffer = new RPCLIB_MSGPACK::sbuffer;
-    RPCLIB_MSGPACK::pack(*buffer, call_obj);
-
-    RPCLIB_MSGPACK::unpacker pac = RPCLIB_MSGPACK::unpacker();
-    pac.reserve_buffer(buffer->size());
-    RPCLIB_ASIO::buffer(pac.buffer(), buffer->size()),
-
-    // memcpy(pac.buffer(), buffer->data(), buffer->size());
+    auto buffer = new clmdep_msgpack::v1::sbuffer;
+    clmdep_msgpack::v1::pack(*buffer, call_obj);
     delete buffer;
-    RPCLIB_MSGPACK::unpacked result;
-    while(pac.next(result)) {
-        auto message = result.get();
-        dispatcher->dispatch(message);
 
-    }
+    dispatcher->dispatch(unpack(buffer->data(), buffer->size()));
 }
+
