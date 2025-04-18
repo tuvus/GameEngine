@@ -6,6 +6,8 @@
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 
+#include "networking/Rpc_Manager.h"
+
 using namespace std;
 const uint16 DEFAULT_SERVER_PORT = 27020;
 
@@ -29,6 +31,7 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
 
     config_options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)On_Connect_Changed_Adapter);
 
+    RPC_Manager();
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addr_server, 1, &config_options);
         if (listen_socket == k_HSteamListenSocket_Invalid) cerr << "Failed to setup socket listener on port " <<

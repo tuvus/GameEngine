@@ -8,6 +8,7 @@ set(Sources
         src/Application.cpp
         src/ApplicationWindow.cpp
         src/networking/Network.cpp
+        src/networking/Rpc_Manager.cpp
 )
 
 set(Headers
@@ -15,6 +16,7 @@ set(Headers
         ${PROJECT_SOURCE_DIR}/include/GameEngine/ApplicationWindow.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/ApplicationFactory.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Network.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Rpc_Manager.h
 )
 
 
