@@ -7,7 +7,7 @@ using namespace std;
 
 RPC_Manager::RPC_Manager() : dispatcher(std::make_shared<rpc::detail::dispatcher>()) {
     cout << "Testing the dispatcher" << endl;
-    dispatcher->bind("testfunc", []() {
+    bind_rpc("testfunc", []() {
         cout << "The function worked!" << endl;
     });
     call_rpc("testfunc");
@@ -34,3 +34,7 @@ void RPC_Manager::call_rpc(std::string const& function_name, Args... args) {
     delete buffer;
 }
 
+template <typename Function>
+void RPC_Manager::bind_rpc(std::string const& function_name, Function function) {
+    dispatcher->bind(function_name, function);
+}

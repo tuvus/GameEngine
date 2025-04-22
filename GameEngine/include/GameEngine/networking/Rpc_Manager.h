@@ -10,4 +10,6 @@ public:
     RPC_Manager();
     template <typename... Args>
     void call_rpc(std::string const &function_name, Args... args);
+    template <typename Function>
+    void bind_rpc(std::string const &function_name, Function function);
 };
