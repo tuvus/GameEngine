@@ -1,6 +1,7 @@
 #include "networking/Rpc_Manager.h"
 
 #include <iostream>
+#include "rpc/client.h"
 
 using namespace std;
 
@@ -25,12 +26,11 @@ clmdep_msgpack::v1::object unpack(char* data, size_t length) {
 template <typename... Args>
 void RPC_Manager::call_rpc(std::string const& function_name, Args... args) {
     auto args_obj = make_tuple(args...);
-    auto call_obj = make_tuple(function_name, args_obj);
+    auto call_obj = make_tuple(static_cast<uint8_t>(0), 1, function_name, args_obj);
 
     auto buffer = new clmdep_msgpack::v1::sbuffer;
     clmdep_msgpack::v1::pack(*buffer, call_obj);
-    delete buffer;
-
     dispatcher->dispatch(unpack(buffer->data(), buffer->size()));
+    delete buffer;
 }
 
