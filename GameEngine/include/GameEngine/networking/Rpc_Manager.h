@@ -10,6 +10,7 @@ public:
     RPC_Manager();
     template <typename... Args>
     void call_rpc(std::string const &function_name, Args... args);
+    void RPC_Manager::call_rpc(char* data, size_t length) const;
     template <typename Function>
     void bind_rpc(std::string const &function_name, Function function);
 };

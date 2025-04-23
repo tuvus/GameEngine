@@ -4,6 +4,8 @@
 #include <string>
 #include <steam/isteamnetworkingsockets.h>
 
+#include "Rpc_Manager.h"
+
 class Network {
 public:
     enum Network_State {
@@ -32,6 +34,7 @@ private:
     void Poll_Incoming_Messages();
     static void On_Connect_Changed_Adapter(SteamNetConnectionStatusChangedCallback_t* new_status);
     static Network* network_instance;
+    std::unique_ptr<RPC_Manager> rpc_manager;
 
 public:
     void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
@@ -42,6 +45,10 @@ public:
     int Get_Num_Connected_Clients() const;
     bool Is_Server() const;
     std::string Get_Network_State_Str() const;
+    template <typename... Args>
+    void call_rpc(std::string const &function_name, Args... args);
+    template <typename Function>
+    void bind_rpc(std::string const &function_name, Function function);
 };
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg);

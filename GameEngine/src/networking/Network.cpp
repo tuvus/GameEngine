@@ -31,7 +31,7 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
 
     config_options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)On_Connect_Changed_Adapter);
 
-    RPC_Manager();
+    rpc_manager = make_unique<RPC_Manager>();
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addr_server, 1, &config_options);
         if (listen_socket == k_HSteamListenSocket_Invalid) cerr << "Failed to setup socket listener on port " <<
@@ -214,6 +214,16 @@ std::string Network::Get_Network_State_Str() const {
             return "Closed";
     }
     return "Error";
+}
+
+template <typename... Args>
+void Network::call_rpc(std::string const& function_name, Args... args) {
+    rpc_manager->call_rpc(function_name, args);
+}
+
+template <typename Function>
+void Network::bind_rpc(std::string const& function_name, Function function) {
+    rpc_manager->bind_rpc(function_name, function);
 }
 
 

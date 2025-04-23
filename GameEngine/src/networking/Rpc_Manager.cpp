@@ -6,17 +6,10 @@
 using namespace std;
 
 RPC_Manager::RPC_Manager() : dispatcher(std::make_shared<rpc::detail::dispatcher>()) {
-    cout << "Testing the dispatcher" << endl;
-    bind_rpc("testfunc", []() {
-        cout << "The function worked!" << endl;
-    });
-    call_rpc("testfunc");
-    cout << "Ending the dispatcher" << endl;
 }
 
 clmdep_msgpack::v1::object unpack(char* data, size_t length) {
     clmdep_msgpack::v1::object_handle result;
-
     // Pass the msgpack::object_handle
     unpack(result, data, length);
     // Get msgpack::object from msgpack::object_handle (shallow copy)
@@ -32,6 +25,10 @@ void RPC_Manager::call_rpc(std::string const& function_name, Args... args) {
     clmdep_msgpack::v1::pack(*buffer, call_obj);
     dispatcher->dispatch(unpack(buffer->data(), buffer->size()));
     delete buffer;
+}
+
+void RPC_Manager::call_rpc(char* data, size_t length) const {
+    dispatcher->dispatch(unpack(data, length));
 }
 
 template <typename Function>
