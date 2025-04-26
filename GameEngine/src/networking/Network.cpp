@@ -216,14 +216,40 @@ std::string Network::Get_Network_State_Str() const {
     return "Error";
 }
 
+void Network::invoke_rpc(char* data, size_t length) {
+    if (server) {
+        auto result = rpc_manager->call_data_rpc(data, length);
+        if (result == RPC_Manager::INVALID) {
+            cout << "Dropping invalid rpc call!";
+            return;
+        }
+        // Send rpc call to all clients
+
+    } else {
+        rpc_manager->call_data_rpc(data, length);
+    }
+}
+
+
 template <typename... Args>
 void Network::call_rpc(std::string const& function_name, Args... args) {
-    rpc_manager->call_rpc(function_name, args);
+    // auto serialized_rpc = rpc_manager->pack_rpc(function_name, args);
+    auto call_obj = make_tuple(static_cast<uint8_t>(0), 1, function_name, make_tuple(args...));
+
+    auto buffer = new clmdep_msgpack::v1::sbuffer;
+    clmdep_msgpack::v1::pack(*buffer, call_obj);
+
+    if (server) {
+        invoke_rpc(buffer->data(), buffer->size());
+    } else {
+        // Send the rpc call to the server
+    }
+    delete buffer;
 }
 
 template <typename Function>
 void Network::bind_rpc(std::string const& function_name, Function function) {
-    rpc_manager->bind_rpc(function_name, function);
+    rpc_manager->bind_rpc<Function>(function_name, function);
 }
 
 

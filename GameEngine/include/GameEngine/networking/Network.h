@@ -35,6 +35,13 @@ private:
     static void On_Connect_Changed_Adapter(SteamNetConnectionStatusChangedCallback_t* new_status);
     static Network* network_instance;
     std::unique_ptr<RPC_Manager> rpc_manager;
+    /**
+     * Actually calls the rpc on the server or client.
+     * Should only be called internally when actually applying the effects of the function related to the rpc.
+     * @param data The name and parameters of the function cal
+     * @param length The size of the data
+     */
+    void invoke_rpc(char* data, size_t length);
 
 public:
     void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
@@ -45,10 +52,26 @@ public:
     int Get_Num_Connected_Clients() const;
     bool Is_Server() const;
     std::string Get_Network_State_Str() const;
+
+    /**
+     * Calls the function on the server.
+     * If the function returns a valid result it calls the function on every client.
+     * This method can be called on the server or on any client.
+     * @param function_name The name of the function being called
+     * @param args The arguments for the function call
+     */
     template <typename... Args>
-    void call_rpc(std::string const &function_name, Args... args);
+    void call_rpc(std::string const& function_name, Args... args);
+
+    /**
+     * Sets up the RPC call on the local machine.
+     * Maps the function name to the given function.
+     * Note that the RPC call must be bound on both the server and client to work properly.
+     * @param function_name The name of the function being bound
+     * @param function The logic to run when the function is called
+     */
     template <typename Function>
-    void bind_rpc(std::string const &function_name, Function function);
+    void bind_rpc(std::string const& function_name, Function function);
 };
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg);
