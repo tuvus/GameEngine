@@ -1,12 +1,15 @@
 #pragma once
+
 #include <functional>
 #include <map>
-#include <string>
 #include <steam/isteamnetworkingsockets.h>
+#include <string>
 
-class Network {
-public:
-    enum Network_State {
+class Network
+{
+  public:
+    enum Network_State
+    {
         Setting_Up,
         Server_Running,
         Client_Connecting,
@@ -15,8 +18,9 @@ public:
         Closed,
     };
 
-private:
-    struct Network_Client {
+  private:
+    struct Network_Client
+    {
         int id;
     };
 
@@ -33,7 +37,7 @@ private:
     static void On_Connect_Changed_Adapter(SteamNetConnectionStatusChangedCallback_t* new_status);
     static Network* network_instance;
 
-public:
+  public:
     void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
     Network(bool server, std::function<void()> close_network_function);
     ~Network();

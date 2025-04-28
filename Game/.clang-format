@@ -1,0 +1,37 @@
+# Base style and major tweaks
+BasedOnStyle: LLVM   # (or "Google", "Microsoft", "Chromium", "Mozilla", "WebKit", etc.)
+
+# General formatting rules
+IndentWidth: 4               # 4 spaces per indent level
+TabWidth: 4                  # Tabs visually align with 4 spaces
+UseTab: Never                # Always use spaces (not tabs)
+BreakBeforeBraces: Allman # Braces on new lines or Attach, first brace on same line
+AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortLoopsOnASingleLine: false
+ColumnLimit: 100             # Soft limit on line length
+DerivePointerAlignment: false
+PointerAlignment: Left       # e.g., int* ptr; (not int *ptr)
+
+# Formatting options for functions
+SpaceBeforeParens: ControlStatements # if () { }, but no space for functions like foo()
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceAfterCStyleCast: true
+
+# Namespace formatting
+NamespaceIndentation: All   # Indent inside namespaces
+
+# Includes
+SortIncludes: true
+IncludeBlocks: Preserve    # Don't reorder unrelated include blocks
+
+# Comments
+ReflowComments: true       # Reformat long comments to respect ColumnLimit
+
+# C++ specific tweaks
+Standard: Latest            # Use latest C++ standard available
+AlwaysBreakTemplateDeclarations: Yes
+
+# Experimental (optional)
+IndentCaseLabels: true      # Indent `case` labels inside switch

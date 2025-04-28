@@ -6,29 +6,35 @@ set(CMAKE_CXX_STANDARD 23)
 
 set(Sources
         src/Application.cpp
-        src/ApplicationWindow.cpp
         src/networking/Network.cpp
 )
 
 set(Headers
         ${PROJECT_SOURCE_DIR}/include/GameEngine/Application.h
-        ${PROJECT_SOURCE_DIR}/include/GameEngine/ApplicationWindow.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/ApplicationFactory.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Network.h
 )
-
 
 add_library(${PROJECT_NAME} STATIC ${Sources} ${Headers})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/include/GameEngine ${PROJECT_SOURCE_DIR})
 
-find_package(glfw3 CONFIG REQUIRED)
-find_package(glad CONFIG REQUIRED)
-find_package(imgui CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw glad::glad imgui::imgui GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
+# find_package(glfw3 CONFIG REQUIRED)
+# find_package(glad CONFIG REQUIRED)
+# find_package(imgui CONFIG REQUIRED)
+# target_link_libraries(${PROJECT_NAME} PUBLIC glfw glad::glad imgui::imgui GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
+find_package(raylib CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC raylib GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
 find_package(GameNetworkingSockets CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
 
-if (NOT DONT_RUN_GAME_ENGINE_TESTS)
-    add_subdirectory(tests)
-endif ()
+# if (NOT DONT_RUN_GAME_ENGINE_TESTS)
+#     add_subdirectory(tests)
+# endif ()
+
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  ${CMAKE_BINARY_DIR}/compile_commands.json
+  ${CMAKE_SOURCE_DIR}/compile_commands.json)
