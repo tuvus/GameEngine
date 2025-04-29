@@ -1,2 +1,0 @@
-CompileFlags: # Tweak the parse settings
-  Add: -Iinclude -xc++

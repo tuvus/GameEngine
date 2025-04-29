@@ -1,8 +1,6 @@
 #pragma once
 
-#include <chrono>
-#include <functional>
-#include <string>
+#include <memory>
 
 class Application;
 
@@ -10,8 +8,7 @@ class ApplicationFactory
 {
   public:
     ApplicationFactory() = default;
-    virtual std::string Get_Name() = 0;
-    virtual std::function<void(std::chrono::milliseconds, Application&)>
-    Create_Update_Function() = 0;
     virtual ~ApplicationFactory() = default;
+
+    virtual std::unique_ptr<Application> Create_Application(bool client) = 0;
 };

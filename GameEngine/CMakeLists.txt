@@ -15,6 +15,7 @@ set(Headers
         ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Network.h
 )
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
 add_library(${PROJECT_NAME} STATIC ${Sources} ${Headers})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/include/GameEngine ${PROJECT_SOURCE_DIR})
@@ -32,9 +33,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE GameNetworkingSockets::static Game
 #     add_subdirectory(tests)
 # endif ()
 
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  ${CMAKE_BINARY_DIR}/compile_commands.json
-  ${CMAKE_SOURCE_DIR}/compile_commands.json)
+# Copy compile_commands.json after build config
+add_custom_command(
+  TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_BINARY_DIR}/compile_commands.json"
+    "${CMAKE_SOURCE_DIR}/compile_commands.json"
+)

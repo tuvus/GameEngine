@@ -1,23 +1,20 @@
+#include "Application.h"
+#include "ApplicationFactory.h"
+
 #include <iostream>
 #include <raylib.h>
 #include <thread>
 
-using namespace std;
-
-#include "Application.h"
-#include "ApplicationFactory.h"
-
 void Create_Application(unique_ptr<ApplicationFactory> application_factory, bool client)
 {
-    cout << "Creating application: " + application_factory->Get_Name() << endl << endl;
-    const auto application = make_unique<Application>(move(application_factory), client);
+    const auto application = application_factory->Create_Application(client);
+    cout << "Creating application: " << application->Get_Name() << endl << endl;
     application->Start_Application();
 }
 
-Application::Application(unique_ptr<ApplicationFactory> application_factory, bool client)
-    : client(client), application_name(application_factory->Get_Name()),
-      application_state(ApplicationState::SettingUp), network(nullptr),
-      update_function(application_factory->Create_Update_Function())
+Application::Application(std::string name, bool client)
+    : client(client), application_name(name), application_state(ApplicationState::SettingUp),
+      network(nullptr)
 {
 }
 
@@ -26,7 +23,7 @@ void Application::Start_Application()
     cout << "Starting application: " + Get_Name() << endl;
     if (client)
     {
-        // do something
+        Start_Client();
     }
     else
     {
@@ -43,7 +40,9 @@ void Application::Start_Server()
 
 void Application::Start_Client()
 {
-    network = make_unique<Network>(false, [this] { this->Close_Network(); });
+    /*network = make_unique<Network>(false, [this] { this->Close_Network(); });*/
+
+    // PROBABLY DON'T HARD CODE THIS - CHANGE LATER?
     InitWindow(800, 450, application_name.c_str());
     SetTargetFPS(60);
 }
@@ -75,11 +74,13 @@ void Application::Application_Loop()
 
         if (network)
             network->Network_Update();
-        if (client)
-            // todo
-            continue;
 
         update_function(delta_time, *this);
+
+        if (client)
+        {
+            render_function(delta_time, *this);
+        }
 
         this_thread::sleep_until(frame_start_time + 16ms);
         frame_end_time = chrono::system_clock::now();

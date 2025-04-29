@@ -4,9 +4,9 @@
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 
-using namespace std;
-
 #include "networking/Network.h"
+
+using namespace std;
 
 const uint16 DEFAULT_SERVER_PORT = 27020;
 
