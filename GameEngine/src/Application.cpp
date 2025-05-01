@@ -12,9 +12,10 @@ void Create_Application(unique_ptr<ApplicationFactory> application_factory, bool
     application->Start_Application();
 }
 
-Application::Application(std::string name, bool client)
-    : client(client), application_name(name), application_state(ApplicationState::SettingUp),
-      network(nullptr)
+Application::Application(std::string name, bool client, uint16_t screen_width,
+                         uint16_t screen_height)
+    : application_name(name), client(client), screen_width(screen_width),
+      screen_height(screen_height), application_state(ApplicationState::SettingUp), network(nullptr)
 {
 }
 
@@ -40,11 +41,11 @@ void Application::Start_Server()
 
 void Application::Start_Client()
 {
-    /*network = make_unique<Network>(false, [this] { this->Close_Network(); });*/
+    network = make_unique<Network>(false, [this] { this->Close_Network(); });
 
-    // PROBABLY DON'T HARD CODE THIS - CHANGE LATER?
-    InitWindow(800, 450, application_name.c_str());
+    InitWindow(screen_width, screen_height, application_name.c_str());
     SetTargetFPS(60);
+    init_client();
 }
 
 void Application::Close_Network()
@@ -70,16 +71,17 @@ void Application::Application_Loop()
     {
         chrono::time_point<chrono::system_clock> frame_start_time = chrono::system_clock::now();
         auto delta_time =
-            chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time);
+            /*chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time);*/
+            16ms; // TODO: ???
 
         if (network)
             network->Network_Update();
 
-        update_function(delta_time, *this);
+        update(delta_time, *this);
 
         if (client)
         {
-            render_function(delta_time, *this);
+            render(delta_time, *this);
         }
 
         this_thread::sleep_until(frame_start_time + 16ms);

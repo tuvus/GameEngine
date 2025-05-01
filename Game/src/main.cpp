@@ -10,9 +10,7 @@ class CardGameFactory : public ApplicationFactory
   public:
     std::unique_ptr<Application> Create_Application(bool client) override
     {
-        auto g = std::make_unique<Card_Game>(client);
-        g->init_game();
-        return g;
+        return std::make_unique<Card_Game>(client);
     }
 };
 

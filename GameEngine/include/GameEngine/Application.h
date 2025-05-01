@@ -3,6 +3,7 @@
 #include "networking//Network.h"
 
 #include <chrono>
+#include <cstdint>
 
 using namespace std;
 
@@ -24,14 +25,20 @@ class Application
     ApplicationState application_state;
     unique_ptr<Network> network;
 
+    uint16_t screen_width;
+    uint16_t screen_height;
+
     void Application_Loop();
 
   public:
-    Application(std::string name, bool client);
+    Application(std::string name, bool client, uint16_t screen_width, uint16_t screen_height);
     virtual ~Application() = default;
 
-    virtual void update_function(chrono::milliseconds, Application&) = 0;
-    virtual void render_function(chrono::milliseconds, Application&) = 0;
+    // required logical update function
+    virtual void update(chrono::milliseconds, Application&) = 0;
+    // optional client functions
+    virtual void init_client() {}
+    virtual void render(chrono::milliseconds, Application&) {};
 
     void Start_Application();
     void Start_Server();
