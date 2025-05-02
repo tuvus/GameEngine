@@ -25,20 +25,20 @@ class Application
     ApplicationState application_state;
     unique_ptr<Network> network;
 
-    uint16_t screen_width;
-    uint16_t screen_height;
-
     void Application_Loop();
 
   public:
     Application(std::string name, bool client, uint16_t screen_width, uint16_t screen_height);
     virtual ~Application() = default;
 
-    // required logical update function
-    virtual void update(chrono::milliseconds, Application&) = 0;
-    // optional client functions
-    virtual void init_client() {}
-    virtual void render(chrono::milliseconds, Application&) {};
+    uint16_t screen_width;
+    uint16_t screen_height;
+
+    // Required logical update function
+    virtual void Update(chrono::milliseconds, Application&) = 0;
+    // Optional client functions
+    virtual void Init_Client() {}
+    virtual void Render(chrono::milliseconds, Application&) {};
 
     void Start_Application();
     void Start_Server();

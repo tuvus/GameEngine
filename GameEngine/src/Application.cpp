@@ -45,7 +45,7 @@ void Application::Start_Client()
 
     InitWindow(screen_width, screen_height, application_name.c_str());
     SetTargetFPS(60);
-    init_client();
+    Init_Client();
 }
 
 void Application::Close_Network()
@@ -77,11 +77,11 @@ void Application::Application_Loop()
         if (network)
             network->Network_Update();
 
-        update(delta_time, *this);
+        Update(delta_time, *this);
 
         if (client)
         {
-            render(delta_time, *this);
+            Render(delta_time, *this);
         }
 
         this_thread::sleep_until(frame_start_time + 16ms);
