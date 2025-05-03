@@ -36,6 +36,25 @@ enum class Alignment
     Stretch
 };
 
+class MemoryArena
+{
+    uint8_t* base = nullptr; // Start of memory block
+    size_t capacity = 0;     // Total size
+    size_t offset = 0;       // How much is currently used
+
+  public:
+    MemoryArena(size_t size); // Allocate block
+    ~MemoryArena();           // Free block
+
+    void reset(); // Clear all allocations
+
+    template <typename T>
+    T* alloc(); // Allocate one object
+
+    template <typename T>
+    T* alloc_array(size_t count); // Allocate an array
+};
+
 class EUI_Input;
 class EUI_Style;
 class EUI_Element;
@@ -48,7 +67,7 @@ class EUI_Input
     bool right_mouse_pressed;
     bool left_mouse_down;
     bool right_mouse_down;
-    // add keyboard?
+    int key_pressed;
 };
 
 class EUI_Style
@@ -63,10 +82,19 @@ class EUI_Context
 {
   public:
     EUI_Element* root;
+    std::vector<EUI_Element*> layout_stack;
 
     EUI_Input input;
+    EUI_Element* hovered = nullptr;
+    EUI_Element* active = nullptr;
+    EUI_Element* focused = nullptr;
 
     EUI_Style default_style;
+
+    void Begin_Frame();
+    void BeginVBox(std::string);
+    void EndVBox();
+    void Render();
 };
 
 class EUI_Element
@@ -88,63 +116,14 @@ class EUI_Element
     std::string text;
     Image texture;
 
-    Color Get_Background_Color(const EUI_Context& ctx) const
-    {
-        if (style.background_color)
-            return *style.background_color;
-        if (parent)
-            return parent->Get_Background_Color(ctx);
-        return *ctx.default_style.background_color;
-    }
-    Color Get_Text_Color(const EUI_Context& ctx) const
-    {
-        if (style.text_color)
-            return *style.text_color;
-        if (parent)
-            return parent->Get_Text_Color(ctx);
-        return *ctx.default_style.text_color;
-    };
-    Color Get_Border_Color(const EUI_Context& ctx) const
-    {
-        if (style.border_color)
-            return *style.border_color;
-        if (parent)
-            return parent->Get_Border_Color(ctx);
-        return *ctx.default_style.border_color;
-    };
-    float Get_Border_Radius(const EUI_Context& ctx) const
-    {
-        if (style.border_radius)
-            return *style.border_radius;
-        if (parent)
-            return parent->Get_Border_Radius(ctx);
-        return *ctx.default_style.border_radius;
-    };
-    float Get_Border_Thickness(const EUI_Context& ctx) const
-    {
-        if (style.border_thickness)
-            return *style.border_thickness;
-        if (parent)
-            return parent->Get_Border_Thickness(ctx);
-        return *ctx.default_style.border_thickness;
-    };
-    Font Get_Font(const EUI_Context& ctx) const
-    {
-        if (style.font)
-            return *style.font;
-        if (parent)
-            return parent->Get_Font(ctx);
-        return *ctx.default_style.font;
-    };
+    Color Get_Background_Color(const EUI_Context& ctx) const;
+    Color Get_Text_Color(const EUI_Context& ctx) const;
+    Color Get_Border_Color(const EUI_Context& ctx) const;
+    float Get_Border_Radius(const EUI_Context& ctx) const;
+    float Get_Border_Thickness(const EUI_Context& ctx) const;
+    Font Get_Font(const EUI_Context& ctx) const;
 
-    EUI_Style Get_Effective_Style(const EUI_Context& ctx)
-    {
-        return {
-            .text_color = Get_Text_Color(ctx),
-            .background_color = Get_Background_Color(ctx),
-            .border_color = Get_Border_Color(ctx),
-            .border_radius = Get_Border_Radius(ctx),
-            .font = Get_Font(ctx),
-        };
-    }
+    EUI_Style Get_Effective_Style(const EUI_Context& ctx);
+
+    void Render();
 };
