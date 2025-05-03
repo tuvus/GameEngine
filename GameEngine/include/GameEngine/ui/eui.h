@@ -36,25 +36,6 @@ enum class Alignment
     Stretch
 };
 
-class MemoryArena
-{
-    uint8_t* base = nullptr; // Start of memory block
-    size_t capacity = 0;     // Total size
-    size_t offset = 0;       // How much is currently used
-
-  public:
-    MemoryArena(size_t size); // Allocate block
-    ~MemoryArena();           // Free block
-
-    void reset(); // Clear all allocations
-
-    template <typename T>
-    T* alloc(); // Allocate one object
-
-    template <typename T>
-    T* alloc_array(size_t count); // Allocate an array
-};
-
 class EUI_Input;
 class EUI_Style;
 class EUI_Element;
@@ -62,6 +43,7 @@ class EUI_Context;
 
 class EUI_Input
 {
+  public:
     Vector2 mouse_position;
     bool left_mouse_pressed;
     bool right_mouse_pressed;
@@ -81,45 +63,50 @@ class EUI_Style
 class EUI_Context
 {
   public:
-    MemoryArena arena;
-
     EUI_Element* root;
     std::vector<EUI_Element*> layout_stack;
 
     EUI_Input input;
+
     EUI_Element* hovered = nullptr;
     EUI_Element* active = nullptr;
     EUI_Element* focused = nullptr;
 
     EUI_Style default_style;
 
+    float global_scale = 1.0f;
+    float dpi_factor = 1.0f;
+
     void Begin_Frame();
-
-    void BeginVBox(std::string);
-    void BeginHBox(std::string);
-    void EndBox();
-
+    void End_Frame();
+    void Update_Input();
+    void Perform_Layout();
+    void Handle_Input();
     void Render();
 };
 
 class EUI_Element
 {
-    Element_Type type;
+  public:
+    virtual ~EUI_Element() = default;
+
     std::string id;
-
+    Element_Type type;
     Layout_Model layout;
-    Vector2 min_size, max_size, preferred_size;
-    Vector2 margin, padding;
-    Rectangle bounds;
 
-    bool visible, hovered, focused, active;
-
-    EUI_Element* parent;
+    EUI_Element* parent = nullptr;
     std::vector<EUI_Element*> children;
 
+    Rectangle bounds;
+    Vector2 min_size, max_size, preferred_size;
+    Vector2 margin, padding;
+
+    bool visible = true;
+    bool hovered = false;
+    bool focused = false;
+    bool active = false;
+
     EUI_Style style;
-    std::string text;
-    Image texture;
 
     Color Get_Background_Color(const EUI_Context& ctx) const;
     Color Get_Text_Color(const EUI_Context& ctx) const;
@@ -127,8 +114,11 @@ class EUI_Element
     float Get_Border_Radius(const EUI_Context& ctx) const;
     float Get_Border_Thickness(const EUI_Context& ctx) const;
     Font Get_Font(const EUI_Context& ctx) const;
+    EUI_Style Get_Effective_Style(const EUI_Context& ctx) const;
 
-    EUI_Style Get_Effective_Style(const EUI_Context& ctx);
+    virtual void Layout(EUI_Context& ctx) = 0;
+    virtual void Handle_Input(EUI_Context& ctx) = 0;
+    virtual void Render(EUI_Context& ctx) = 0;
 
-    void Render();
+    void add_child(EUI_Element* child);
 };
