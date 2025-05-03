@@ -27,7 +27,7 @@ typedef struct Tile
 class Card_Game : public Application
 {
   public:
-    Card_Game(bool client) : Application("Card Game", client, SCREEN_WIDTH, SCREEN_HEIGHT) {};
+    Card_Game(bool client) : Application("CARD GAME", client, SCREEN_WIDTH, SCREEN_HEIGHT) {};
 
     void Init_Client() override;
     void Update(chrono::milliseconds s, Application&) override;
