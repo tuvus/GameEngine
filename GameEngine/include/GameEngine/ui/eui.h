@@ -81,6 +81,8 @@ class EUI_Style
 class EUI_Context
 {
   public:
+    MemoryArena arena;
+
     EUI_Element* root;
     std::vector<EUI_Element*> layout_stack;
 
@@ -92,8 +94,11 @@ class EUI_Context
     EUI_Style default_style;
 
     void Begin_Frame();
+
     void BeginVBox(std::string);
-    void EndVBox();
+    void BeginHBox(std::string);
+    void EndBox();
+
     void Render();
 };
 
