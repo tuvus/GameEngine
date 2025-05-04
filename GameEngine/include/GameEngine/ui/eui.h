@@ -1,31 +1,13 @@
+#include <functional>
 #include <optional>
 #include <raylib.h>
 #include <string>
 #include <vector>
 
-enum class Element_Type
-{
-    Container,
-    Stack,
-    Flex,
-    Grid,
-    Absolute,
-    Overlay,
-    Label,
-    Button,
-    Image,
-    Spacer
-};
-
 enum class Layout_Model
 {
-    StackHorizontal,
-    StackVertical,
-    FlexHorizontal,
-    FlexVertical,
-    Grid,
-    Absolute,
-    Overlay
+    Horizontal,
+    Vertical
 };
 
 enum class Alignment
@@ -57,14 +39,21 @@ class EUI_Style
   public:
     std::optional<Color> background_color, text_color, border_color;
     std::optional<float> border_radius, border_thickness;
+
     std::optional<Font> font;
+    std::optional<float> font_size;
+    std::optional<float> font_spacing;
+
+    std::optional<Alignment> horizontal_alignment;
+    std::optional<Alignment> vertical_alignment;
 };
 
 class EUI_Context
 {
   public:
+    EUI_Context();
+
     EUI_Element* root;
-    std::vector<EUI_Element*> layout_stack;
 
     EUI_Input input;
 
@@ -91,11 +80,8 @@ class EUI_Element
     virtual ~EUI_Element() = default;
 
     std::string id;
-    Element_Type type;
-    Layout_Model layout;
 
     EUI_Element* parent = nullptr;
-    std::vector<EUI_Element*> children;
 
     Rectangle bounds;
     Vector2 min_size, max_size, preferred_size;
@@ -114,11 +100,49 @@ class EUI_Element
     float Get_Border_Radius(const EUI_Context& ctx) const;
     float Get_Border_Thickness(const EUI_Context& ctx) const;
     Font Get_Font(const EUI_Context& ctx) const;
+    Alignment Get_Horizontal_Alignment(const EUI_Context& ctx) const;
+    Alignment Get_Vertical_Alignment(const EUI_Context& ctx) const;
     EUI_Style Get_Effective_Style(const EUI_Context& ctx) const;
 
     virtual void Layout(EUI_Context& ctx) = 0;
     virtual void Handle_Input(EUI_Context& ctx) = 0;
     virtual void Render(EUI_Context& ctx) = 0;
 
+    virtual bool Is_Container() const { return false; };
+};
+
+class EUI_Container : public EUI_Element
+{
+  protected:
+    std::vector<EUI_Element*> children;
+
+  public:
+    EUI_Container(Layout_Model layout_model) : layout_model(layout_model) {}
+
+    Layout_Model layout_model;
+
+    std::vector<EUI_Element*>& Get_Children() const;
     void add_child(EUI_Element* child);
+
+    void Layout(EUI_Context& ctx) override;
+    void Handle_Input(EUI_Context& ctx) override;
+    void Render(EUI_Context& ctx) override;
+
+    bool Is_Container() const override { return true; }
+};
+
+class EUI_Button : public EUI_Element
+{
+  public:
+    EUI_Button(const std::string& text, std::function<void()> on_click)
+        : text(text), on_click(on_click)
+    {
+    }
+
+    std::string text;
+    std::function<void()> on_click;
+
+    void Layout(EUI_Context& ctx) override;
+    void Handle_Input(EUI_Context& ctx) override;
+    void Render(EUI_Context& ctx) override;
 };
