@@ -32,6 +32,10 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
     config_options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)On_Connect_Changed_Adapter);
 
     rpc_manager = make_unique<RPC_Manager>();
+
+    bind_rpc("test", [this](int a){cout << "THE TEST WORKED!" << a << endl;});
+    call_rpc("test", 1);
+
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addr_server, 1, &config_options);
         if (listen_socket == k_HSteamListenSocket_Invalid) cerr << "Failed to setup socket listener on port " <<
@@ -220,7 +224,7 @@ void Network::invoke_rpc(char* data, size_t length) {
     if (server) {
         auto result = rpc_manager->call_data_rpc(data, length);
         if (result == RPC_Manager::INVALID) {
-            cout << "Dropping invalid rpc call!";
+            cerr << "Dropping invalid rpc call!" << endl;
             return;
         }
         // Send rpc call to all clients
@@ -233,7 +237,8 @@ void Network::invoke_rpc(char* data, size_t length) {
 
 template <typename... Args>
 void Network::call_rpc(std::string const& function_name, Args... args) {
-    // auto serialized_rpc = rpc_manager->pack_rpc(function_name, args);
+    // TODO: Figure out packing in rpc_manager instead of here
+    // auto serialized_rpc = rpc_manager->pack_rpc<Args...>(function_name, args...);
     auto call_obj = make_tuple(static_cast<uint8_t>(0), 1, function_name, make_tuple(args...));
 
     auto buffer = new clmdep_msgpack::v1::sbuffer;
@@ -249,7 +254,8 @@ void Network::call_rpc(std::string const& function_name, Args... args) {
 
 template <typename Function>
 void Network::bind_rpc(std::string const& function_name, Function function) {
-    rpc_manager->bind_rpc<Function>(function_name, function);
+    // Directly calling the dispatcher for now
+    rpc_manager->dispatcher->bind(function_name, function);
 }
 
 
