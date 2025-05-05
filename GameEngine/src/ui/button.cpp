@@ -50,7 +50,7 @@ void EUI_Button::Handle_Input(EUI_Context& ctx)
     if (active && !ctx.input.left_mouse_down && hovered)
     {
         if (on_click)
-            on_click(); // Execute callback
+            on_click();
         active = false;
     }
 }
@@ -76,8 +76,10 @@ void EUI_Button::Render(EUI_Context& ctx)
     /*                                  style.font_spacing.value());*/
     int text_size = MeasureText(text.c_str(), style.font_size.value());
     Vector2 text_pos = {
-        bounds.x + (bounds.width - text_size - style.font_spacing.value() * text.length()) / 2,
+        bounds.x + (bounds.width - text_size /*- style.font_spacing.value() * text.length()*/) / 2,
         bounds.y + (bounds.height - style.font_size.value()) / 2};
-    DrawTextEx(style.font.value(), text.c_str(), text_pos, style.font_size.value(),
-               style.font_spacing.value(), style.text_color.value());
+    /*DrawTextEx(style.font.value(), text.c_str(), text_pos, style.font_size.value(),*/
+    /*           style.font_spacing.value(), style.text_color.value());*/
+    DrawText(text.c_str(), text_pos.x, text_pos.y, style.font_size.value(),
+             style.text_color.value());
 }

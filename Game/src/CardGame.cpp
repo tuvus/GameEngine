@@ -16,7 +16,6 @@ void resize_update(Card_Game& g)
 void Card_Game::Init_Client()
 {
     SetWindowFocused();
-    /*HideCursor();*/
 
     resize_update(*this);
 
@@ -28,9 +27,11 @@ void Card_Game::Init_Client()
 
     auto* label = new EUI_Button("Card Game!", [] {});
     label->style.font_size = 50;
+    label->margin = {0, 50};
     root->Add_Child(label);
     auto* button = new EUI_Button("Play", [this] { screen = GAME; });
     button->style.font_size = 30;
+    button->margin = {0, 50};
     root->Add_Child(button);
 
     ctx.root = root;

@@ -14,6 +14,7 @@ void EUI_Container::Layout(EUI_Context& ctx)
 {
     bool vertical = layout_model == Layout_Model::Vertical;
     float cursor = vertical ? bounds.y + padding.y : bounds.x + padding.x;
+    // TODO: make cursor center based on children??
 
     for (EUI_Element* child : children)
     {

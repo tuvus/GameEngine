@@ -37,8 +37,12 @@ class EUI_Input
 class EUI_Style
 {
   public:
-    std::optional<Color> background_color, text_color, border_color;
-    std::optional<float> border_radius, border_thickness;
+    std::optional<Color> background_color;
+    std::optional<Color> text_color;
+
+    std::optional<Color> border_color;
+    std::optional<float> border_radius;
+    std::optional<float> border_thickness;
 
     std::optional<Font> font;
     std::optional<float> font_size;
@@ -62,9 +66,8 @@ class EUI_Context
     EUI_Element* focused = nullptr;
 
     EUI_Style default_style = {
-
-        .text_color = BLACK,
         .background_color = RAYWHITE,
+        .text_color = BLACK,
 
         .border_color = BLACK,
         .border_radius = 1,
