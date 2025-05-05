@@ -41,6 +41,7 @@ float EUI_Element::Get_Border_Thickness(const EUI_Context& ctx) const
         return parent->Get_Border_Thickness(ctx);
     return *ctx.default_style.border_thickness;
 };
+
 Font EUI_Element::Get_Font(const EUI_Context& ctx) const
 {
     if (style.font)
@@ -49,6 +50,22 @@ Font EUI_Element::Get_Font(const EUI_Context& ctx) const
         return parent->Get_Font(ctx);
     return *ctx.default_style.font;
 };
+float EUI_Element::Get_Font_Size(const EUI_Context& ctx) const
+{
+    if (style.font_size)
+        return *style.font_size;
+    if (parent)
+        return parent->Get_Font_Size(ctx);
+    return *ctx.default_style.font_size;
+};
+float EUI_Element::Get_Font_Spacing(const EUI_Context& ctx) const
+{
+    if (style.font_spacing)
+        return *style.font_spacing;
+    if (parent)
+        return parent->Get_Font_Spacing(ctx);
+    return *ctx.default_style.font_spacing;
+};
 
 Alignment EUI_Element::Get_Horizontal_Alignment(const EUI_Context& ctx) const
 {
@@ -56,7 +73,7 @@ Alignment EUI_Element::Get_Horizontal_Alignment(const EUI_Context& ctx) const
         return *style.horizontal_alignment;
     if (parent)
         return parent->Get_Horizontal_Alignment(ctx);
-    return ctx.default_style.horizontal_alignment.value_or(Alignment::Start);
+    return ctx.default_style.horizontal_alignment.value();
 }
 
 Alignment EUI_Element::Get_Vertical_Alignment(const EUI_Context& ctx) const
@@ -65,7 +82,7 @@ Alignment EUI_Element::Get_Vertical_Alignment(const EUI_Context& ctx) const
         return *style.vertical_alignment;
     if (parent)
         return parent->Get_Vertical_Alignment(ctx);
-    return ctx.default_style.vertical_alignment.value_or(Alignment::Start);
+    return ctx.default_style.vertical_alignment.value();
 }
 
 EUI_Style EUI_Element::Get_Effective_Style(const EUI_Context& ctx) const
@@ -119,6 +136,18 @@ EUI_Style EUI_Element::Get_Effective_Style(const EUI_Context& ctx) const
         effective.font = parent->Get_Font(ctx);
     else
         effective.font = ctx.default_style.font;
+    if (style.font_size)
+        effective.font_size = style.font_size;
+    else if (parent)
+        effective.font_size = parent->Get_Font_Size(ctx);
+    else
+        effective.font_size = ctx.default_style.font_size;
+    if (style.font_spacing)
+        effective.font_spacing = style.font_spacing;
+    else if (parent)
+        effective.font_spacing = parent->Get_Font_Spacing(ctx);
+    else
+        effective.font_spacing = ctx.default_style.font_spacing;
 
     if (style.horizontal_alignment)
         effective.horizontal_alignment = style.horizontal_alignment;

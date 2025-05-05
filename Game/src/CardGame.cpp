@@ -1,4 +1,5 @@
 #include "CardGame.h"
+#include <iostream>
 #include <raylib.h>
 
 void resize_update(Card_Game& g)
@@ -8,14 +9,28 @@ void resize_update(Card_Game& g)
     g.tl_y = (g.screen_height - (g.tile_size * GRID_H)) / 2;
 
     g.center_x = (g.screen_width - MeasureText(g.Get_Name().c_str(), TITLE_FONT_SIZE)) / 2;
+    if (g.ctx.root)
+        g.ctx.root->bounds = {0, 0, (float) g.screen_width, (float) g.screen_height};
 }
 
 void Card_Game::Init_Client()
 {
     SetWindowFocused();
-    HideCursor();
+    /*HideCursor();*/
 
     resize_update(*this);
+
+    auto* root = new EUI_Container(Layout_Model::Vertical);
+    root->style.vertical_alignment = Alignment::Center;
+    root->style.horizontal_alignment = Alignment::Center;
+
+    root->bounds = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+
+    auto* button = new EUI_Button("Button", [] { std::cout << "Button pressed!\n"; });
+    button->style.font_size = 50;
+    root->Add_Child(button);
+
+    ctx.root = root;
 }
 
 void Card_Game::Update(chrono::milliseconds deltaTime, Application& a)
@@ -46,7 +61,12 @@ void draw_menu(Card_Game& g)
 {
     BeginDrawing();
 
-    DrawText(g.Get_Name().c_str(), g.center_x, 100, TITLE_FONT_SIZE, RAYWHITE);
+    g.ctx.Begin_Frame();
+    g.ctx.Update_Input();
+    g.ctx.Perform_Layout();
+    g.ctx.Handle_Input();
+    g.ctx.Render();
+    g.ctx.End_Frame();
 
     EndDrawing();
 }

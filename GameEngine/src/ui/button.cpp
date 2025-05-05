@@ -1,18 +1,33 @@
 #include "ui/eui.h"
+#include <iostream>
+#include <raylib.h>
 
 void EUI_Button::Layout(EUI_Context& ctx)
 {
     const auto effective_style = Get_Effective_Style(ctx);
 
-    Vector2 text_size =
-        MeasureTextEx(effective_style.font.value(), text.c_str(), effective_style.font_size.value(),
-                      effective_style.font_spacing.value());
+    // MEASURETEXTEX BROKEN ???
+    /*Vector2 text_size =*/
+    /*    MeasureTextEx(effective_style.font.value(), text.c_str(),
+     * effective_style.font_size.value(),*/
+    /*                  effective_style.font_spacing.value());*/
+    int text_size = MeasureText(text.c_str(), effective_style.font_size.value());
 
-    float width = padding.x * 2 + text_size.x;
-    float height = padding.y * 2 + text_size.y;
+    float width = padding.x * 2 + text_size + effective_style.font_spacing.value() * text.length();
+    float height = padding.y * 2 + effective_style.font_size.value();
 
-    bounds.width = preferred_size.x > 0 ? preferred_size.x : width;
-    bounds.height = preferred_size.y > 0 ? preferred_size.y : height;
+    preferred_size = {width, height};
+
+    // set min/max FINISH LATER
+    if (min_size.x <= 0)
+        min_size.x = 0;
+    if (min_size.y <= 0)
+        min_size.y = 0;
+
+    if (max_size.x <= 0)
+        max_size.x = 9999;
+    if (max_size.y <= 0)
+        max_size.y = 9999;
 }
 
 void EUI_Button::Handle_Input(EUI_Context& ctx)
@@ -22,7 +37,9 @@ void EUI_Button::Handle_Input(EUI_Context& ctx)
 
     hovered = CheckCollisionPointRec(ctx.input.mouse_position, bounds);
     if (hovered)
+    {
         ctx.hovered = this;
+    }
 
     if (hovered && ctx.input.left_mouse_pressed)
     {
@@ -55,9 +72,12 @@ void EUI_Button::Render(EUI_Context& ctx)
     }
 
     // Text
-    Vector2 text_size =
-        MeasureTextEx(style.font.value(), text.c_str(), 16, 1); // consistent with Layout
-    Vector2 text_pos = {bounds.x + (bounds.width - text_size.x) / 2,
-                        bounds.y + (bounds.height - text_size.y) / 2};
-    DrawTextEx(style.font.value(), text.c_str(), text_pos, 16, 1, style.text_color.value());
+    /*Vector2 text_size = MeasureTextEx(style.font.value(), text.c_str(), style.font_size.value(),*/
+    /*                                  style.font_spacing.value());*/
+    int text_size = MeasureText(text.c_str(), style.font_size.value());
+    Vector2 text_pos = {
+        bounds.x + (bounds.width - text_size - style.font_spacing.value() * text.length()) / 2,
+        bounds.y + (bounds.height - style.font_size.value()) / 2};
+    DrawTextEx(style.font.value(), text.c_str(), text_pos, style.font_size.value(),
+               style.font_spacing.value(), style.text_color.value());
 }

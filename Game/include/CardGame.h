@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Application.h"
+#include "ui/eui.h"
 
 #include <chrono>
 #include <raylib.h>
@@ -36,6 +37,7 @@ class Card_Game : public Application
     ~Card_Game();
 
     // drawing state
+    EUI_Context ctx;
     SCREEN screen = MENU;
     int center_x, center_y;
     // game screen render state

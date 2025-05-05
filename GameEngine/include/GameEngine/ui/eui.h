@@ -61,7 +61,22 @@ class EUI_Context
     EUI_Element* active = nullptr;
     EUI_Element* focused = nullptr;
 
-    EUI_Style default_style;
+    EUI_Style default_style = {
+
+        .text_color = BLACK,
+        .background_color = RAYWHITE,
+
+        .border_color = BLACK,
+        .border_radius = 1,
+        .border_thickness = 1,
+
+        .font = GetFontDefault(),
+        .font_size = 15,
+        .font_spacing = 1,
+
+        .horizontal_alignment = Alignment::Center,
+        .vertical_alignment = Alignment::Center,
+    };
 
     float global_scale = 1.0f;
     float dpi_factor = 1.0f;
@@ -83,7 +98,7 @@ class EUI_Element
 
     EUI_Element* parent = nullptr;
 
-    Rectangle bounds;
+    Rectangle bounds = {0};
     Vector2 min_size, max_size, preferred_size;
     Vector2 margin, padding;
 
@@ -100,6 +115,8 @@ class EUI_Element
     float Get_Border_Radius(const EUI_Context& ctx) const;
     float Get_Border_Thickness(const EUI_Context& ctx) const;
     Font Get_Font(const EUI_Context& ctx) const;
+    float Get_Font_Size(const EUI_Context& ctx) const;
+    float Get_Font_Spacing(const EUI_Context& ctx) const;
     Alignment Get_Horizontal_Alignment(const EUI_Context& ctx) const;
     Alignment Get_Vertical_Alignment(const EUI_Context& ctx) const;
     EUI_Style Get_Effective_Style(const EUI_Context& ctx) const;
@@ -122,7 +139,7 @@ class EUI_Container : public EUI_Element
     Layout_Model layout_model;
 
     std::vector<EUI_Element*>& Get_Children() const;
-    void add_child(EUI_Element* child);
+    void Add_Child(EUI_Element* child);
 
     void Layout(EUI_Context& ctx) override;
     void Handle_Input(EUI_Context& ctx) override;

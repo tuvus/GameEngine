@@ -7,12 +7,17 @@ set(CMAKE_CXX_STANDARD 23)
 set(Sources
         src/Application.cpp
         src/networking/Network.cpp
+        src/ui/button.cpp
+        src/ui/container.cpp
+        src/ui/context.cpp
+        src/ui/element.cpp
 )
 
 set(Headers
         ${PROJECT_SOURCE_DIR}/include/GameEngine/Application.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/ApplicationFactory.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Network.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/ui/eui.h
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
