@@ -26,7 +26,7 @@ void Card_Game::Init_Client()
 
     root->bounds = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
-    auto* button = new EUI_Button("Button", [] { std::cout << "Button pressed!\n"; });
+    auto* button = new EUI_Button("Play", [this] { screen = GAME; });
     button->style.font_size = 50;
     root->Add_Child(button);
 
