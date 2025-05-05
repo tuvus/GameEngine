@@ -26,8 +26,11 @@ void Card_Game::Init_Client()
 
     root->bounds = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
+    auto* label = new EUI_Button("Card Game!", [] {});
+    label->style.font_size = 50;
+    root->Add_Child(label);
     auto* button = new EUI_Button("Play", [this] { screen = GAME; });
-    button->style.font_size = 50;
+    button->style.font_size = 30;
     root->Add_Child(button);
 
     ctx.root = root;
