@@ -33,10 +33,9 @@ void RPC_Manager::call_rpc(std::string const& function_name, tuple<Elements...> 
 
 RPC_Manager::Rpc_Validator_Result RPC_Manager::call_data_rpc(char* data, size_t length) const {
     auto response = dispatcher->dispatch(unpack(data, length));
-    auto handle = clmdep_msgpack::v1::object_handle();
-    response.capture_result(handle);
-    // return handle.as<Rpc_Validator_Result>();
-    return Rpc_Validator_Result::INVALID;
+    auto result = response.get_result()->get();
+    if (result.type != clmdep_msgpack::type::POSITIVE_INTEGER) return INVALID;
+    return static_cast<Rpc_Validator_Result>(result.as<int>());
 }
 
 template <typename Function>

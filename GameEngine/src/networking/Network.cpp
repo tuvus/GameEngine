@@ -33,8 +33,11 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
 
     rpc_manager = make_unique<RPC_Manager>();
 
-    bind_rpc("test", [this](int a){cout << "THE TEST WORKED!" << a << endl;});
-    call_rpc("test", 1);
+    rpc_manager->dispatcher->bind("test", [this](int a) {
+        cout << "THE TEST WORKED!" << a << endl;
+        return (int)RPC_Manager::Rpc_Validator_Result::VALID;
+    });
+    call_rpc("test", 2);
 
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addr_server, 1, &config_options);

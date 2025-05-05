@@ -5,8 +5,8 @@
 class RPC_Manager {
 public:
     enum Rpc_Validator_Result {
-        VALID,
         INVALID,
+        VALID,
     };
 
 public:
