@@ -25,3 +25,5 @@ public:
     template <typename... Args>
     clmdep_msgpack::v1::sbuffer* pack_rpc(std::string const& function_name, Args... args);
 };
+
+MSGPACK_ADD_ENUM(RPC_Manager::Rpc_Validator_Result);

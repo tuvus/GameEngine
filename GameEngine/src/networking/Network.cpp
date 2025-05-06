@@ -35,7 +35,7 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
 
     bind_rpc("test", [this](int a) {
         cout << "THE TEST WORKED!" << a << endl;
-        return (int)RPC_Manager::Rpc_Validator_Result::INVALID;
+        return RPC_Manager::Rpc_Validator_Result::VALID;
     });
 
     if (server) {
