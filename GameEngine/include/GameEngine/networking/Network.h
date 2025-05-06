@@ -6,6 +6,16 @@
 
 #include "Rpc_Manager.h"
 
+struct Rpc_Message {
+    std::vector<char> rpc_call;
+
+    Rpc_Message(char* rpc_data, size_t length) {
+        rpc_call = std::vector<char>(rpc_data, rpc_data + length);
+    }
+    // Tells msgpack how to serialize Rpc_Message
+    MSGPACK_DEFINE(rpc_call)
+};
+
 class Network {
 public:
     enum Network_State {
@@ -52,6 +62,9 @@ public:
     int Get_Num_Connected_Clients() const;
     bool Is_Server() const;
     std::string Get_Network_State_Str() const;
+    void Send_Message_To_Client(HSteamNetConnection connection, const Rpc_Message& rpc_message);
+    void Send_Message_To_Clients(const Rpc_Message& rpc_message);
+    void Send_Message_To_Server(const Rpc_Message& rpc_message);
 
     /**
      * Calls the function on the server.

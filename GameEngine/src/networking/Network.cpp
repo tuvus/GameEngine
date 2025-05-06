@@ -33,11 +33,10 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
 
     rpc_manager = make_unique<RPC_Manager>();
 
-    rpc_manager->dispatcher->bind("test", [this](int a) {
+    bind_rpc("test", [this](int a) {
         cout << "THE TEST WORKED!" << a << endl;
         return (int)RPC_Manager::Rpc_Validator_Result::VALID;
     });
-    call_rpc("test", 2);
 
     if (server) {
         listen_socket = connection_api->CreateListenSocketIP(addr_server, 1, &config_options);
@@ -223,6 +222,25 @@ std::string Network::Get_Network_State_Str() const {
     return "Error";
 }
 
+
+void Network::Send_Message_To_Client(const HSteamNetConnection connection, const Rpc_Message& rpc_message) {
+    clmdep_msgpack::sbuffer message_data;
+    clmdep_msgpack::packer packer(message_data);
+    packer.pack(rpc_message);
+    connection_api->SendMessageToConnection(connection, message_data.data(), static_cast<uint32>(message_data.size()), k_nSteamNetworkingSend_Reliable, nullptr);
+}
+
+void Network::Send_Message_To_Clients(const Rpc_Message& rpc_message) {
+    for (auto client_connection : connection_to_clients) {
+        Send_Message_To_Client(client_connection.first, rpc_message);
+    }
+}
+
+void Network::Send_Message_To_Server(const Rpc_Message& rpc_message) {
+    // Psych! We can actually reuse Send_Message_To_Client but pass the server connection instead!
+    Send_Message_To_Client(remote_host_connection, rpc_message);
+}
+
 void Network::invoke_rpc(char* data, size_t length) {
     if (server) {
         auto result = rpc_manager->call_data_rpc(data, length);
@@ -230,29 +248,27 @@ void Network::invoke_rpc(char* data, size_t length) {
             cerr << "Dropping invalid rpc call!" << endl;
             return;
         }
-        // Send rpc call to all clients
-
+        auto rpc_call_data = Rpc_Message(data, length);
+        Send_Message_To_Clients(rpc_call_data);
     } else {
-        rpc_manager->call_data_rpc(data, length);
+        // The rpc call must be valid by this point
+        if (rpc_manager->call_data_rpc(data, length) != RPC_Manager::VALID) {
+            cerr << "Client received an invalid rpc call! This is probably due to a desync!" << endl;
+        }
     }
 }
 
 
 template <typename... Args>
 void Network::call_rpc(std::string const& function_name, Args... args) {
-    // TODO: Figure out packing in rpc_manager instead of here
-    // auto serialized_rpc = rpc_manager->pack_rpc<Args...>(function_name, args...);
-    auto call_obj = make_tuple(static_cast<uint8_t>(0), 1, function_name, make_tuple(args...));
-
-    auto buffer = new clmdep_msgpack::v1::sbuffer;
-    clmdep_msgpack::v1::pack(*buffer, call_obj);
-
+    auto serialized_rpc = rpc_manager->pack_rpc(function_name, forward<Args>(args)...);
     if (server) {
-        invoke_rpc(buffer->data(), buffer->size());
+        invoke_rpc(get<0>(serialized_rpc), get<1>(serialized_rpc));
     } else {
         // Send the rpc call to the server
+        auto rpc_call_data = Rpc_Message(get<0>(serialized_rpc), get<1>(serialized_rpc));
+        Send_Message_To_Server(rpc_call_data);
     }
-    delete buffer;
 }
 
 template <typename Function>
