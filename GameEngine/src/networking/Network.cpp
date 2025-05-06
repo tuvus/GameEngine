@@ -5,7 +5,7 @@
 #include <steam/steamnetworkingsockets.h>
 
 #include "networking/Network.h"
-#incldue "networking/
+#include "networking/Rpc_Manager.h"
 
 using namespace std;
 const uint16 DEFAULT_SERVER_PORT = 27020;
@@ -105,29 +105,30 @@ void Network::Poll_Incoming_Messages()
                 connection_api->ReceiveMessagesOnPollGroup(poll_group, &incoming_message, 1);
         else
             num_messages = connection_api->ReceiveMessagesOnConnection(remote_host_connection,
-                                                                       &incoming_message, 1);
+                &incoming_message, 1);
 
         if (num_messages == 0)
             break;
         if (num_messages < 0)
             cerr << "Error checking messages on server: " << server
-                 << ". Number of messages is: " << num_messages << endl;
+                << ". Number of messages is: " << num_messages << endl;
         assert(num_messages == 1 && incoming_message);
+        // // It's easier to parse the string as a c-string instead of a c++ string at first
         // std::string cstring_message;
         // cstring_message.assign((const char*)incoming_message->m_pData, incoming_message->m_cbSize);
         // const char* message = cstring_message.c_str();
-
 
         if (server)
         {
             auto client = connection_to_clients.find(incoming_message->m_conn);
             assert(client != connection_to_clients.end());
-        } else {
+        }
+        else
+        {
             // cout << cstring_message << endl;
         }
-        }
+        Receive_Message(static_cast<char*>(incoming_message->m_pData), incoming_message->m_cbSize);
 
-        incoming_message->Release();
         incoming_message->Release();
     }
 }
@@ -145,7 +146,7 @@ void Network::On_Connect_Changed_Adapter(SteamNetConnectionStatusChangedCallback
 void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status)
 {
     assert(new_status->m_hConn == remote_host_connection ||
-           remote_host_connection == k_HSteamNetConnection_Invalid);
+        remote_host_connection == k_HSteamNetConnection_Invalid);
     switch (new_status->m_info.m_eState)
     {
         case k_ESteamNetworkingConnectionState_None:
@@ -275,25 +276,33 @@ std::string Network::Get_Network_State_Str() const
     return "Error";
 }
 
-void Network::Send_Message_To_Client(const HSteamNetConnection connection, const Rpc_Message& rpc_message) {
+void Network::Send_Message_To_Client(const HSteamNetConnection connection,
+                                     const Rpc_Message& rpc_message)
+{
     clmdep_msgpack::sbuffer message_data;
     clmdep_msgpack::packer packer(message_data);
     packer.pack(rpc_message);
-    connection_api->SendMessageToConnection(connection, message_data.data(), static_cast<uint32>(message_data.size()), k_nSteamNetworkingSend_Reliable, nullptr);
+    connection_api->SendMessageToConnection(connection, message_data.data(),
+                                            static_cast<uint32>(message_data.size()),
+                                            k_nSteamNetworkingSend_Reliable, nullptr);
 }
 
-void Network::Send_Message_To_Clients(const Rpc_Message& rpc_message) {
-    for (auto client_connection : connection_to_clients) {
+void Network::Send_Message_To_Clients(const Rpc_Message& rpc_message)
+{
+    for (auto client_connection : connection_to_clients)
+    {
         Send_Message_To_Client(client_connection.first, rpc_message);
     }
 }
 
-void Network::Send_Message_To_Server(const Rpc_Message& rpc_message) {
+void Network::Send_Message_To_Server(const Rpc_Message& rpc_message)
+{
     // Psych! We can actually reuse Send_Message_To_Client but pass the server connection instead!
     Send_Message_To_Client(remote_host_connection, rpc_message);
 }
 
-void Network::Receive_Message(char* data, size_t size) {
+void Network::Receive_Message(char* data, size_t size)
+{
     clmdep_msgpack::object_handle result;
     clmdep_msgpack::unpack(result, data, size);
     auto rpc_message = result.get().as<Rpc_Message>();
@@ -301,25 +310,34 @@ void Network::Receive_Message(char* data, size_t size) {
 
 }
 
-void Network::invoke_rpc(char* data, size_t size) {
-    if (server) {
+void Network::invoke_rpc(char* data, size_t size)
+{
+    if (server)
+    {
         auto result = rpc_manager->call_data_rpc(data, size);
-        if (result == RPC_Manager::INVALID) {
+        if (result == RPC_Manager::INVALID)
+        {
             cerr << "Dropping invalid rpc call!" << endl;
             return;
         }
         auto rpc_call_data = Rpc_Message(data, size);
         Send_Message_To_Clients(rpc_call_data);
-    } else {
+    }
+    else
+    {
         // The rpc call must be valid by this point
-        if (rpc_manager->call_data_rpc(data, size) != RPC_Manager::VALID) {
-            cerr << "Client received an invalid rpc call! This is probably due to a desync!" << endl;
+        if (rpc_manager->call_data_rpc(data, size) != RPC_Manager::VALID)
+        {
+            cerr << "Client received an invalid rpc call! This is probably due to a desync!" <<
+                endl;
         }
     }
 }
 
-void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg) {
-    if (error_type == k_ESteamNetworkingSocketsDebugOutputType_Bug) {
+void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg)
+{
+    if (error_type == k_ESteamNetworkingSocketsDebugOutputType_Bug)
+    {
         cerr << pszMsg << endl;
         cerr << pszMsg << endl;
     }

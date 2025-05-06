@@ -20,15 +20,19 @@ struct Rpc_Message
         rpc_call = std::vector<char>(rpc_data, rpc_data + length);
     }
 
-    explicit Rpc_Message(std::vector<char> rpc_call) : rpc_call(std::move(rpc_call)) {}
+    explicit Rpc_Message(std::vector<char> rpc_call) : rpc_call(std::move(rpc_call))
+    {
+    }
 
     // Tells msgpack how to serialize Rpc_Message
     MSGPACK_DEFINE(rpc_call)
 };
 
-class Network {
+class Network
+{
 public:
-    enum Network_State {
+    enum Network_State
+    {
         Setting_Up,
         Server_Running,
         Client_Connecting,
@@ -37,7 +41,7 @@ public:
         Closed,
     };
 
-  private:
+private:
     struct Network_Client
     {
         int id;
@@ -67,7 +71,7 @@ public:
      */
     void invoke_rpc(char* data, size_t size);
 
-  public:
+public:
     void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
     Network(bool server, std::function<void()> close_network_function);
     ~Network();
@@ -88,17 +92,22 @@ public:
      * @param args The arguments for the function call
      */
     template <typename... Args>
-    void call_rpc(std::string const& function_name, Args... args) {
+    void call_rpc(std::string const& function_name, Args... args)
+    {
         // TODO: Figure out how to let Rpc_Manager handle packing
         // clmdep_msgpack::v1::sbuffer* buffer = rpc_manager->pack_rpc(function_name, std::forward<Args>(args)...);
-        auto call_obj = make_tuple(static_cast<uint8_t>(0), 1, function_name, std::make_tuple(args...));
+        auto call_obj = make_tuple(static_cast<uint8_t>(0), 1, function_name,
+                                   std::make_tuple(args...));
 
         auto buffer = new clmdep_msgpack::v1::sbuffer;
         clmdep_msgpack::v1::pack(*buffer, call_obj);
 
-        if (server) {
+        if (server)
+        {
             invoke_rpc(buffer->data(), buffer->size());
-        } else {
+        }
+        else
+        {
             // Send the rpc call to the server
             auto rpc_call_data = Rpc_Message(buffer->data(), buffer->size());
             Send_Message_To_Server(rpc_call_data);
@@ -114,7 +123,8 @@ public:
      * @param function The logic to run when the function is called
      */
     template <typename Function>
-    void bind_rpc(std::string const& function_name, Function function) {
+    void bind_rpc(std::string const& function_name, Function function)
+    {
         // Directly calling the dispatcher for now
         rpc_manager->dispatcher->bind(function_name, function);
     }
