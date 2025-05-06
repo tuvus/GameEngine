@@ -258,19 +258,6 @@ void Network::invoke_rpc(char* data, size_t length) {
     }
 }
 
-
-template <typename... Args>
-void Network::call_rpc(std::string const& function_name, Args... args) {
-    auto serialized_rpc = rpc_manager->pack_rpc(function_name, forward<Args>(args)...);
-    if (server) {
-        invoke_rpc(get<0>(serialized_rpc), get<1>(serialized_rpc));
-    } else {
-        // Send the rpc call to the server
-        auto rpc_call_data = Rpc_Message(get<0>(serialized_rpc), get<1>(serialized_rpc));
-        Send_Message_To_Server(rpc_call_data);
-    }
-}
-
 template <typename Function>
 void Network::bind_rpc(std::string const& function_name, Function function) {
     // Directly calling the dispatcher for now

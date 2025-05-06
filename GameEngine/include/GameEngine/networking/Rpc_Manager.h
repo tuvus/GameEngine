@@ -23,5 +23,5 @@ public:
      * Converts the given function name and arguments into the serialized representation of the data along with its length.
      */
     template <typename... Args>
-    constexpr std::tuple<char*, size_t>* pack_rpc(std::string const& function_name, Args... args);
+    clmdep_msgpack::v1::sbuffer* pack_rpc(std::string const& function_name, Args... args);
 };

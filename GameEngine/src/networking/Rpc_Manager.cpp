@@ -44,13 +44,10 @@ void RPC_Manager::bind_rpc(string const& function_name, Function function) {
 }
 
 template <typename... Args>
-constexpr tuple<char*, size_t>* RPC_Manager::pack_rpc(std::string const& function_name, Args... args) {
+clmdep_msgpack::v1::sbuffer* RPC_Manager::pack_rpc(std::string const& function_name, Args... args) {
     auto call_obj = make_tuple(static_cast<uint8_t>(0), 1, function_name, make_tuple(args...));
 
     auto buffer = new clmdep_msgpack::v1::sbuffer;
     clmdep_msgpack::v1::pack(*buffer, call_obj);
-    auto packed = new tuple(buffer->data(), buffer->size());
-    delete buffer;
-
-    return packed;
+    return buffer;
 }

@@ -12,6 +12,7 @@ struct Rpc_Message {
     Rpc_Message(char* rpc_data, size_t length) {
         rpc_call = std::vector<char>(rpc_data, rpc_data + length);
     }
+
     // Tells msgpack how to serialize Rpc_Message
     MSGPACK_DEFINE(rpc_call)
 };
@@ -74,7 +75,23 @@ public:
      * @param args The arguments for the function call
      */
     template <typename... Args>
-    void call_rpc(std::string const& function_name, Args... args);
+    void call_rpc(std::string const& function_name, Args... args) {
+        // TODO: Figure out how to let Rpc_Manager handle packing
+        // clmdep_msgpack::v1::sbuffer* buffer = rpc_manager->pack_rpc(function_name, std::forward<Args>(args)...);
+        auto call_obj = make_tuple(static_cast<uint8_t>(0), 1, function_name, std::make_tuple(args...));
+
+        auto buffer = new clmdep_msgpack::v1::sbuffer;
+        clmdep_msgpack::v1::pack(*buffer, call_obj);
+
+        if (server) {
+            invoke_rpc(buffer->data(), buffer->size());
+        } else {
+            // Send the rpc call to the server
+            auto rpc_call_data = Rpc_Message(buffer->data(), buffer->size());
+            Send_Message_To_Server(rpc_call_data);
+        }
+        delete buffer;
+    }
 
     /**
      * Sets up the RPC call on the local machine.

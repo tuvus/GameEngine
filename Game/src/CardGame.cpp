@@ -1,4 +1,6 @@
 #include "CardGame.h"
+#include "rpc/client.h"
+#include "networking/Network.h"
 
 #include <imgui.h>
 
@@ -21,7 +23,9 @@ void Card_Game::Render(std::chrono::milliseconds deltaTime) {
         if (network.Get_Network_State() == Network::Server_Running) {
             ImGui::Text(("Clients: " + to_string(network.Get_Num_Connected_Clients())).c_str());
         }
-        // if (ImGui::Button("Send message")) Get_Application().Get_Network().call_rpc<int>("test", 3);
+        if (ImGui::Button("Send message")) Get_Application().Get_Network().call_rpc<int>("test", 3);
+        // rpc::client c("afsafd", 1321);
+        // c.call("tst", 1);
 
         string close_text = "Shutdown Server";
         if (!network.Is_Server()) close_text = "Leave Server";
