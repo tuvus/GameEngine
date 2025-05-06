@@ -1,25 +1,21 @@
 #include <memory>
 
-#include "CardGame.h"
 #include "Application.h"
 #include "ApplicationFactory.h"
+#include "CardGame.h"
+#include <raylib.h>
 
-class CardGameFactory : public ApplicationFactory {
-public:
-    string Get_Name() override {
-        return "NewCardGame";
-    }
-
-    unique_ptr<ApplicationWindow> Create_Window(Application& application) override {
-        return make_unique<Card_Game>(application);
-    }
-
-    function<void(std::chrono::milliseconds, Application&)> Create_Update_Function() override {
-        return [](std::chrono::milliseconds delta_time, Application& application) {};
+class CardGameFactory : public ApplicationFactory
+{
+  public:
+    std::unique_ptr<Application> Create_Application(bool client) override
+    {
+        return std::make_unique<Card_Game>(client);
     }
 };
 
-int main() {
-    unique_ptr<ApplicationFactory> factory = make_unique<CardGameFactory>();
-    Create_Application(move(factory), true);
+int main()
+{
+    auto factory = make_unique<CardGameFactory>();
+    Create_Application(std::move(factory), true);
 }

@@ -1,4 +1,5 @@
 cmake-build-debug/
 .idea/
 build/
-imgui.ini
+.cache
+compile_commands.json
