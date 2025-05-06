@@ -12,21 +12,8 @@
     "name" : "vcpkg-cmake",
     "version>=" : "2024-04-23"
   }, {
-    "name" : "opengl-registry",
-    "version>=" : "2024-02-10#1"
-  }, {
-    "name" : "opengl",
-    "version>=" : "2022-12-04#3"
-  }, {
     "name" : "glfw3",
     "version>=" : "3.4#1"
-  }, {
-    "name" : "glad",
-    "version>=" : "0.1.36"
-  }, {
-    "name" : "imgui",
-    "version>=" : "1.91.6",
-    "features" : [ "glfw-binding", "opengl3-binding" ]
   }, {
     "name" : "gamenetworkingsockets",
     "version>=" : "1.4.1#1"
