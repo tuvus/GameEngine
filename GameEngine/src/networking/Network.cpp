@@ -35,10 +35,11 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
 
     bind_rpc("test", [this](int a) {
         cout << "THE TEST WORKED!" << a << endl;
-        return (int)RPC_Manager::Rpc_Validator_Result::VALID;
+        return (int)RPC_Manager::Rpc_Validator_Result::INVALID;
     });
 
     if (server) {
+        remote_host_connection = k_HSteamNetConnection_Invalid;
         listen_socket = connection_api->CreateListenSocketIP(addr_server, 1, &config_options);
         if (listen_socket == k_HSteamListenSocket_Invalid) cerr << "Failed to setup socket listener on port " <<
             addr_server.m_port << endl;
@@ -96,19 +97,20 @@ void Network::Poll_Incoming_Messages() {
             cerr << "Error checking messages on server: " << server << ". Number of messages is: " << num_messages <<
                 endl;
         assert(num_messages == 1 && incoming_message);
-        // It's easier to parse the string as a c-string instead of a c++ string at first
-        std::string cstring_message;
-        cstring_message.assign((const char*)incoming_message->m_pData, incoming_message->m_cbSize);
-        const char* message = cstring_message.c_str();
+        // // It's easier to parse the string as a c-string instead of a c++ string at first
+        // std::string cstring_message;
+        // cstring_message.assign((const char*)incoming_message->m_pData, incoming_message->m_cbSize);
+        // const char* message = cstring_message.c_str();
 
         if (server) {
             auto client = connection_to_clients.find(incoming_message->m_conn);
             assert(client != connection_to_clients.end());
-
-            cout << "Message from " << client->second.id << ": " << message << endl;
+            // cout << "Message from " << client->second.id << ": " << message << endl;
         } else {
-            cout << cstring_message << endl;
+            // cout << cstring_message << endl;
         }
+        Receive_Message(static_cast<char*>(incoming_message->m_pData), incoming_message->m_cbSize);
+
         incoming_message->Release();
     }
 }
@@ -241,18 +243,26 @@ void Network::Send_Message_To_Server(const Rpc_Message& rpc_message) {
     Send_Message_To_Client(remote_host_connection, rpc_message);
 }
 
-void Network::invoke_rpc(char* data, size_t length) {
+void Network::Receive_Message(char* data, size_t size) {
+    clmdep_msgpack::object_handle result;
+    clmdep_msgpack::unpack(result, data, size);
+    auto rpc_message = result.get().as<Rpc_Message>();
+    invoke_rpc(rpc_message.rpc_call.data(), rpc_message.rpc_call.size());
+
+}
+
+void Network::invoke_rpc(char* data, size_t size) {
     if (server) {
-        auto result = rpc_manager->call_data_rpc(data, length);
+        auto result = rpc_manager->call_data_rpc(data, size);
         if (result == RPC_Manager::INVALID) {
             cerr << "Dropping invalid rpc call!" << endl;
             return;
         }
-        auto rpc_call_data = Rpc_Message(data, length);
+        auto rpc_call_data = Rpc_Message(data, size);
         Send_Message_To_Clients(rpc_call_data);
     } else {
         // The rpc call must be valid by this point
-        if (rpc_manager->call_data_rpc(data, length) != RPC_Manager::VALID) {
+        if (rpc_manager->call_data_rpc(data, size) != RPC_Manager::VALID) {
             cerr << "Client received an invalid rpc call! This is probably due to a desync!" << endl;
         }
     }

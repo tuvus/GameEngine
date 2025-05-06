@@ -2,6 +2,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <utility>
 #include <steam/isteamnetworkingsockets.h>
 
 #include "Rpc_Manager.h"
@@ -9,9 +10,13 @@
 struct Rpc_Message {
     std::vector<char> rpc_call;
 
+    Rpc_Message() = default;
+
     Rpc_Message(char* rpc_data, size_t length) {
         rpc_call = std::vector<char>(rpc_data, rpc_data + length);
     }
+
+    explicit Rpc_Message(std::vector<char> rpc_call) : rpc_call(std::move(rpc_call)) {}
 
     // Tells msgpack how to serialize Rpc_Message
     MSGPACK_DEFINE(rpc_call)
@@ -46,13 +51,16 @@ private:
     static void On_Connect_Changed_Adapter(SteamNetConnectionStatusChangedCallback_t* new_status);
     static Network* network_instance;
     std::unique_ptr<RPC_Manager> rpc_manager;
+
+    void Receive_Message(char* data, size_t size);
+
     /**
      * Actually calls the rpc on the server or client.
      * Should only be called internally when actually applying the effects of the function related to the rpc.
      * @param data The name and parameters of the function cal
-     * @param length The size of the data
+     * @param size The size of the data
      */
-    void invoke_rpc(char* data, size_t length);
+    void invoke_rpc(char* data, size_t size);
 
 public:
     void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
