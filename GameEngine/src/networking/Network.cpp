@@ -33,11 +33,6 @@ Network::Network(bool server, std::function<void()> close_network_function) : cl
 
     rpc_manager = make_unique<RPC_Manager>();
 
-    bind_rpc("test", [this](int a) {
-        cout << "THE TEST WORKED!" << a << endl;
-        return RPC_Manager::Rpc_Validator_Result::VALID;
-    });
-
     if (server) {
         remote_host_connection = k_HSteamNetConnection_Invalid;
         listen_socket = connection_api->CreateListenSocketIP(addr_server, 1, &config_options);
@@ -267,13 +262,6 @@ void Network::invoke_rpc(char* data, size_t size) {
         }
     }
 }
-
-template <typename Function>
-void Network::bind_rpc(std::string const& function_name, Function function) {
-    // Directly calling the dispatcher for now
-    rpc_manager->dispatcher->bind(function_name, function);
-}
-
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg) {
     if (error_type == k_ESteamNetworkingSocketsDebugOutputType_Bug) {

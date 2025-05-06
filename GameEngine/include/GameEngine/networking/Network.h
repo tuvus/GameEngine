@@ -109,7 +109,10 @@ public:
      * @param function The logic to run when the function is called
      */
     template <typename Function>
-    void bind_rpc(std::string const& function_name, Function function);
+    void bind_rpc(std::string const& function_name, Function function) {
+        // Directly calling the dispatcher for now
+        rpc_manager->dispatcher->bind(function_name, function);
+    }
 };
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg);
