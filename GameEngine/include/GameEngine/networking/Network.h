@@ -1,18 +1,22 @@
 #pragma once
+
 #include <functional>
 #include <map>
 #include <string>
 #include <utility>
 #include <steam/isteamnetworkingsockets.h>
+#include <string>
 
 #include "Rpc_Manager.h"
 
-struct Rpc_Message {
+struct Rpc_Message
+{
     std::vector<char> rpc_call;
 
     Rpc_Message() = default;
 
-    Rpc_Message(char* rpc_data, size_t length) {
+    Rpc_Message(char* rpc_data, size_t length)
+    {
         rpc_call = std::vector<char>(rpc_data, rpc_data + length);
     }
 
@@ -33,8 +37,9 @@ public:
         Closed,
     };
 
-private:
-    struct Network_Client {
+  private:
+    struct Network_Client
+    {
         int id;
     };
 
@@ -62,7 +67,7 @@ private:
      */
     void invoke_rpc(char* data, size_t size);
 
-public:
+  public:
     void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
     Network(bool server, std::function<void()> close_network_function);
     ~Network();

@@ -1,67 +1,88 @@
 #include "Application.h"
-
-#include <chrono>
-#include <iostream>
-#include <thread>
 #include "ApplicationFactory.h"
-#include "ApplicationWindow.h"
 
-using namespace std;
+#include <iostream>
+#include <raylib.h>
+#include <thread>
 
-void Create_Application(unique_ptr<ApplicationFactory> application_factory, bool client) {
-    cout << "Creating application: " + application_factory->Get_Name() << endl << endl;
-    const auto application = make_unique<Application>(move(application_factory), client);
+void Create_Application(unique_ptr<ApplicationFactory> application_factory, bool client)
+{
+    const auto application = application_factory->Create_Application(client);
+    cout << "Creating application: " << application->Get_Name() << endl << endl;
     application->Start_Application();
 }
 
-Application::Application(unique_ptr<ApplicationFactory> application_factory, bool client): client(client),
-    application_name(application_factory->Get_Name()), application_state(ApplicationState::SettingUp), network(nullptr),
-    update_function(application_factory->Create_Update_Function()) {
-    if (client) application_window = application_factory->Create_Window(*this);
+Application::Application(std::string name, bool client, uint16_t screen_width,
+                         uint16_t screen_height)
+    : application_name(name), client(client), screen_width(screen_width),
+      screen_height(screen_height), application_state(ApplicationState::SettingUp), network(nullptr)
+{
 }
 
-void Application::Start_Application() {
+void Application::Start_Application()
+{
     cout << "Starting application: " + Get_Name() << endl;
-    if (client) {
-        application_window->Start_Application_Window();
-    } else {
+    if (client)
+    {
+        Start_Client();
+    }
+    else
+    {
         Start_Server();
     }
 
     Application_Loop();
 }
 
-void Application::Start_Server() {
+void Application::Start_Server()
+{
     network = make_unique<Network>(true, [this] { this->Close_Network(); });
 }
 
-void Application::Start_Client() {
+void Application::Start_Client()
+{
     network = make_unique<Network>(false, [this] { this->Close_Network(); });
+
+    InitWindow(screen_width, screen_height, application_name.c_str());
+    SetTargetFPS(60);
+    Init_Client();
 }
 
-void Application::Close_Network() {
+void Application::Close_Network()
+{
     network.reset();
 }
 
-string Application::Get_Name() {
+string Application::Get_Name()
+{
     return application_name;
 }
 
-Network& Application::Get_Network() {
-    return *network;
+Network* Application::Get_Network()
+{
+    return network.get();
 }
 
-void Application::Application_Loop() {
+void Application::Application_Loop()
+{
     application_state = ApplicationState::Running;
     chrono::time_point<chrono::system_clock> frame_end_time = chrono::system_clock::now();
-    while (application_state == ApplicationState::Running) {
+    while (application_state == ApplicationState::Running)
+    {
         chrono::time_point<chrono::system_clock> frame_start_time = chrono::system_clock::now();
-        auto delta_time = chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time);
+        auto delta_time =
+            /*chrono::duration_cast<std::chrono::milliseconds>(frame_start_time - frame_end_time);*/
+            16ms; // TODO: ???
 
-        if (network) network->Network_Update();
-        if (client) application_window->Render_Update(delta_time);
+        if (network)
+            network->Network_Update();
 
-        update_function(delta_time, *this);
+        Update(delta_time, *this);
+
+        if (client)
+        {
+            Render(delta_time, *this);
+        }
 
         this_thread::sleep_until(frame_start_time + 16ms);
         frame_end_time = chrono::system_clock::now();
@@ -69,6 +90,7 @@ void Application::Application_Loop() {
     Close_Application();
 }
 
-void Application::Close_Application() {
+void Application::Close_Application()
+{
     application_state = ApplicationState::Closing;
 }

@@ -2,44 +2,112 @@
 #include "rpc/client.h"
 #include "networking/Network.h"
 
-#include <imgui.h>
 #include <iostream>
+#include <raylib.h>
 
-using namespace std;
+void resize_update(Card_Game& g)
+{
+    g.tile_size = g.screen_height / GRID_H;
+    g.tl_x = (g.screen_width - (g.tile_size * GRID_W)) / 2;
+    g.tl_y = (g.screen_height - (g.tile_size * GRID_H)) / 2;
 
-Card_Game::Card_Game(Application& application) : ApplicationWindow(application) {}
+    g.center_x = (g.screen_width - MeasureText(g.Get_Name().c_str(), TITLE_FONT_SIZE)) / 2;
+    if (g.ctx.root)
+        g.ctx.root->bounds = {0, 0, (float) g.screen_width, (float) g.screen_height};
+}
 
-void Card_Game::Render(std::chrono::milliseconds deltaTime) {
-    if (&Get_Application().Get_Network() == nullptr) {
-        if (ImGui::Button("Start Client")) {
-            Get_Application().Start_Client();
-            Get_Application().Get_Network().bind_rpc("send message", [](int input) {
-                cout << "Received message" << endl;
-                return static_cast<RPC_Manager::Rpc_Validator_Result>(input);
-            });
-        }
-        if (ImGui::Button("Start Server")) {
-            Get_Application().Start_Server();
-            Get_Application().Get_Network().bind_rpc("send message", [](int input) {
-                cout << "Received message" << endl;
-                return static_cast<RPC_Manager::Rpc_Validator_Result>(input);
-            });
-        }
-    } else {
-        Network& network = Get_Application().Get_Network();
-        ImGui::Text(("State: " + network.Get_Network_State_Str()).c_str());
+void Card_Game::Init_Client()
+{
+    SetWindowFocused();
 
-        if (network.Get_Network_State() == Network::Server_Running) {
-            ImGui::Text(("Clients: " + to_string(network.Get_Num_Connected_Clients())).c_str());
-        }
-        if (ImGui::Button("Send message")) Get_Application().Get_Network().call_rpc<int>("send message", 1);
+    resize_update(*this);
 
-        string close_text = "Shutdown Server";
-        if (!network.Is_Server()) close_text = "Leave Server";
-        if (ImGui::Button(close_text.c_str())) Get_Application().Close_Network();
+    auto* root = new EUI_Container(Layout_Model::Vertical);
+    root->style.vertical_alignment = Alignment::Center;
+    root->style.horizontal_alignment = Alignment::Center;
+
+    root->bounds = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+
+    auto* label = new EUI_Button("Card Game!", [] {});
+    label->style.font_size = 50;
+    label->margin = {0, 50};
+    root->Add_Child(label);
+    auto* button = new EUI_Button("Play", [this] { screen = GAME; });
+    button->style.font_size = 30;
+    button->margin = {0, 50};
+    root->Add_Child(button);
+
+    ctx.root = root;
+}
+
+void Card_Game::Update(chrono::milliseconds deltaTime, Application& a)
+{
+    if (IsKeyPressed(KEY_F))
+    {
+        ToggleFullscreen();
+        screen_width = GetScreenWidth();
+        screen_height = GetScreenHeight();
+
+        resize_update(*this);
     }
-    if (ImGui::Button("Close Game")) {
-        glfwSetWindowShouldClose(&Get_Window(), true);
+
+    if (IsKeyPressed(KEY_B))
+    {
+        ToggleBorderlessWindowed();
+        screen_width = GetScreenWidth();
+        screen_height = GetScreenHeight();
+
+        resize_update(*this);
+    }
+
+    if (WindowShouldClose())
+        Close_Application();
+}
+
+void draw_menu(Card_Game& g)
+{
+    BeginDrawing();
+
+    g.ctx.Begin_Frame();
+    g.ctx.Update_Input();
+    g.ctx.Perform_Layout();
+    g.ctx.Handle_Input();
+    g.ctx.Render();
+    g.ctx.End_Frame();
+
+    EndDrawing();
+}
+
+void draw_game(Card_Game& g)
+{
+    // Draw
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    for (int y = g.tl_y; y < g.tl_y + GRID_H * g.tile_size; y += g.tile_size)
+    {
+        for (int x = g.tl_x; x < g.tl_x + GRID_W * g.tile_size; x += g.tile_size)
+        {
+            unsigned char red = y % 255;
+            unsigned char blue = x % 255;
+            unsigned char green = (x + y) % 255;
+            DrawRectangleLines(x, y, g.tile_size, g.tile_size, Color{red, green, blue, 255});
+        }
+    }
+
+    EndDrawing();
+}
+
+void Card_Game::Render(chrono::milliseconds deltaTime, Application& a)
+{
+    switch (screen)
+    {
+        case MENU:
+            draw_menu(*this);
+            break;
+        case GAME:
+            draw_game(*this);
+            break;
     }
 }
 
