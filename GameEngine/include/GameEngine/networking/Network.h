@@ -5,11 +5,9 @@
 #include <steam/isteamnetworkingsockets.h>
 #include <string>
 
-class Network
-{
+class Network {
   public:
-    enum Network_State
-    {
+    enum Network_State {
         Setting_Up,
         Server_Running,
         Client_Connecting,
@@ -19,8 +17,7 @@ class Network
     };
 
   private:
-    struct Network_Client
-    {
+    struct Network_Client {
         int id;
     };
 

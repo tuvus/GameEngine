@@ -14,19 +14,13 @@ using namespace std;
 #define SCREEN_HEIGHT 720
 #define TITLE_FONT_SIZE 24
 
-enum SCREEN
-{
-    MENU,
-    GAME
-};
+enum SCREEN { MENU, GAME };
 
-typedef struct Tile
-{
+typedef struct Tile {
     Color color;
 } Tile;
 
-class Card_Game : public Application
-{
+class Card_Game : public Application {
   public:
     Card_Game(bool client) : Application("CARD GAME", client, SCREEN_WIDTH, SCREEN_HEIGHT) {};
 

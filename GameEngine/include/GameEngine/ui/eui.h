@@ -4,27 +4,16 @@
 #include <string>
 #include <vector>
 
-enum class Layout_Model
-{
-    Horizontal,
-    Vertical
-};
+enum class Layout_Model { Horizontal, Vertical };
 
-enum class Alignment
-{
-    Start,
-    Center,
-    End,
-    Stretch
-};
+enum class Alignment { Start, Center, End, Stretch };
 
 class EUI_Input;
 class EUI_Style;
 class EUI_Element;
 class EUI_Context;
 
-class EUI_Input
-{
+class EUI_Input {
   public:
     Vector2 mouse_position;
     bool left_mouse_pressed;
@@ -34,8 +23,7 @@ class EUI_Input
     int key_pressed;
 };
 
-class EUI_Style
-{
+class EUI_Style {
   public:
     std::optional<Color> background_color;
     std::optional<Color> text_color;
@@ -50,10 +38,11 @@ class EUI_Style
 
     std::optional<Alignment> horizontal_alignment;
     std::optional<Alignment> vertical_alignment;
+    std::optional<Alignment> text_horizontal_alignment;
+    std::optional<Alignment> text_vertical_alignment;
 };
 
-class EUI_Context
-{
+class EUI_Context {
   public:
     EUI_Context();
 
@@ -66,19 +55,21 @@ class EUI_Context
     EUI_Element* focused = nullptr;
 
     EUI_Style default_style = {
-        .background_color = RAYWHITE,
+        /*.background_color = RAYWHITE,*/
         .text_color = BLACK,
 
         .border_color = BLACK,
-        .border_radius = 1,
-        .border_thickness = 1,
+        .border_radius = 0,
+        .border_thickness = 0,
 
         .font = GetFontDefault(),
         .font_size = 15,
         .font_spacing = 1,
 
-        .horizontal_alignment = Alignment::Center,
-        .vertical_alignment = Alignment::Center,
+        .horizontal_alignment = Alignment::Start,
+        .vertical_alignment = Alignment::Start,
+        .text_horizontal_alignment = Alignment::Start,
+        .text_vertical_alignment = Alignment::Start,
     };
 
     float global_scale = 1.0f;
@@ -92,8 +83,7 @@ class EUI_Context
     void Render();
 };
 
-class EUI_Element
-{
+class EUI_Element {
   public:
     virtual ~EUI_Element() = default;
 
@@ -101,14 +91,14 @@ class EUI_Element
 
     EUI_Element* parent = nullptr;
 
-    Rectangle bounds = {0};
+    Vector2 pos, dim = {0};
     Vector2 min_size, max_size, preferred_size;
     Vector2 margin, padding;
 
-    bool visible = true;
-    bool hovered = false;
-    bool focused = false;
-    bool active = false;
+    bool is_visible = true;
+    bool is_hovered = false;
+    bool is_focused = false;
+    bool is_active = false;
 
     EUI_Style style;
 
@@ -122,6 +112,8 @@ class EUI_Element
     float Get_Font_Spacing(const EUI_Context& ctx) const;
     Alignment Get_Horizontal_Alignment(const EUI_Context& ctx) const;
     Alignment Get_Vertical_Alignment(const EUI_Context& ctx) const;
+    Alignment Get_Text_Horizontal_Alignment(const EUI_Context& ctx) const;
+    Alignment Get_Text_Vertical_Alignment(const EUI_Context& ctx) const;
     EUI_Style Get_Effective_Style(const EUI_Context& ctx) const;
 
     virtual void Layout(EUI_Context& ctx) = 0;
@@ -131,38 +123,57 @@ class EUI_Element
     virtual bool Is_Container() const { return false; };
 };
 
-class EUI_Container : public EUI_Element
-{
+class EUI_Container : public EUI_Element {
   protected:
+    EUI_Container(Layout_Model lm) : layout_model(lm) {}
     std::vector<EUI_Element*> children;
 
   public:
-    EUI_Container(Layout_Model layout_model) : layout_model(layout_model) {}
-
     Layout_Model layout_model;
+
+    float gap = 0;
 
     std::vector<EUI_Element*>& Get_Children() const;
     void Add_Child(EUI_Element* child);
 
-    void Layout(EUI_Context& ctx) override;
+    virtual void Layout(EUI_Context& ctx) override = 0;
     void Handle_Input(EUI_Context& ctx) override;
     void Render(EUI_Context& ctx) override;
 
     bool Is_Container() const override { return true; }
 };
 
-class EUI_Button : public EUI_Element
-{
+class EUI_VBox : public EUI_Container {
   public:
-    EUI_Button(const std::string& text, std::function<void()> on_click)
-        : text(text), on_click(on_click)
-    {
-    }
+    EUI_VBox() : EUI_Container(Layout_Model::Vertical) {}
+
+    void Layout(EUI_Context& ctx) override;
+};
+
+class EUI_HBox : public EUI_Container {
+  public:
+    EUI_HBox() : EUI_Container(Layout_Model::Horizontal) {}
+
+    void Layout(EUI_Context& ctx) override;
+};
+
+class EUI_Text : public EUI_Element {
+  public:
+    EUI_Text(const std::string& text);
 
     std::string text;
-    std::function<void()> on_click;
+    Vector2 text_pos;
 
     void Layout(EUI_Context& ctx) override;
     void Handle_Input(EUI_Context& ctx) override;
     void Render(EUI_Context& ctx) override;
+};
+
+class EUI_Button : public EUI_Text {
+  public:
+    EUI_Button(const std::string& text, std::function<void()> on_click);
+
+    std::function<void()> on_click;
+
+    void Handle_Input(EUI_Context& ctx) override;
 };
