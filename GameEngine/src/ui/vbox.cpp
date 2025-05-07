@@ -15,7 +15,7 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
 
     // for auto-sizing nested containers
     float spacing = 0;
-    if (children.size())
+    if (Is_Container() && children.size())
         spacing = (dim.y - padding.y * 2) / children.size();
 
     // layout children and calculate total content height
@@ -25,7 +25,7 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
             child->dim = {dim.x - padding.x * 2, spacing};
         }
         child->Layout(ctx);
-        total_content_height += child->dim.y;
+        total_content_height += child->preferred_size.y;
         cursor += spacing;
     }
 
@@ -33,7 +33,7 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
     cursor = pos.y + padding.y;
     switch (main_axis_alignment) {
         case Alignment::Center:
-            cursor = pos.y + (dim.y - total_content_height - total_gap - padding.y) / 2.0f;
+            cursor = pos.y + (dim.y - total_content_height - total_gap) / 2.0f;
             break;
         case Alignment::End:
             cursor = pos.y + dim.y - total_content_height - total_gap - padding.y;
@@ -60,10 +60,10 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
         // cross axis alignment
         switch (child->Get_Horizontal_Alignment(ctx)) {
             case Alignment::Center:
-                x += (dim.x - width - padding.x * 2) / 2.0f;
+                x = pos.x + (dim.x - width) / 2.0f;
                 break;
             case Alignment::End:
-                x += (dim.x - width - padding.x);
+                x = pos.x + (dim.x - width - padding.x);
                 break;
             case Alignment::Stretch:
             case Alignment::Start:

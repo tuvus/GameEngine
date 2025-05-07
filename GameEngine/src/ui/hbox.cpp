@@ -29,7 +29,7 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
             child->dim = {spacing, dim.y - padding.y * 2};
         }
         child->Layout(ctx);
-        total_content_width += child->dim.x;
+        total_content_width += child->preferred_size.x;
         cursor += spacing;
     }
 
@@ -37,7 +37,7 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
     cursor = pos.x + padding.x;
     switch (main_axis_alignment) {
         case Alignment::Center:
-            cursor = pos.x + (dim.x - total_content_width - total_gap - padding.x) / 2.0f;
+            cursor = pos.x + (dim.x - total_content_width - total_gap) / 2.0f;
             break;
         case Alignment::End:
             cursor = pos.x + dim.x - total_content_width - total_gap - padding.x;
@@ -64,10 +64,10 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
         // cross axis alignment
         switch (child->Get_Vertical_Alignment(ctx)) {
             case Alignment::Center:
-                y += (dim.y - height - padding.y * 2) / 2.0f;
+                y = pos.y + (dim.y - height) / 2.0f;
                 break;
             case Alignment::End:
-                y += (dim.y - height - padding.y);
+                y = pos.y + (dim.y - height - padding.y);
                 break;
             case Alignment::Stretch:
             case Alignment::Start:

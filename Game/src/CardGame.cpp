@@ -27,12 +27,13 @@ void Card_Game::Init_Client() {
 
     root->pos = {0, 0};
     root->dim = {SCREEN_WIDTH, SCREEN_HEIGHT};
-    root->padding = {250, 250};
+    root->padding = {50, 50};
 
     auto* v = new EUI_VBox();
     auto* h = new EUI_HBox();
     auto* l = new EUI_VBox();
     l->style.background_color = LIME;
+    l->padding = {10, 10};
     auto* r = new EUI_HBox();
     r->style.background_color = BROWN;
     h->Add_Child(l);
@@ -45,14 +46,12 @@ void Card_Game::Init_Client() {
     v->style.border_thickness = 1;
     v->style.border_color = RED;
 
-    v->style.horizontal_alignment = Alignment::Center;
-    v->style.vertical_alignment = Alignment::Center;
-    /*v->style.horizontal_alignment = Alignment::Start;*/
-    /*v->style.vertical_alignment = Alignment::Start;*/
     /*v->style.horizontal_alignment = Alignment::Center;*/
-    /*v->style.vertical_alignment = Alignment::End;*/
+    /*v->style.vertical_alignment = Alignment::Center;*/
+    v->style.horizontal_alignment = Alignment::Center;
+    v->style.vertical_alignment = Alignment::End;
 
-    /*v->padding = {15, 15};*/
+    v->padding = {15, 15};
 
     /*h->pos = {SCREEN_WIDTH / 2.0f, 0};*/
     /*h->dim = {SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT};*/
@@ -61,21 +60,20 @@ void Card_Game::Init_Client() {
     h->style.border_thickness = 1;
     h->style.border_color = BLUE;
 
-    h->style.horizontal_alignment = Alignment::Center;
-    h->style.vertical_alignment = Alignment::Center;
-    /*h->style.horizontal_alignment = Alignment::Start;*/
-    /*h->style.vertical_alignment = Alignment::Start;*/
-    /*h->style.horizontal_alignment = Alignment::End;*/
+    /*h->style.horizontal_alignment = Alignment::Center;*/
     /*h->style.vertical_alignment = Alignment::Center;*/
+    h->style.horizontal_alignment = Alignment::End;
+    h->style.vertical_alignment = Alignment::Center;
 
     h->padding = {15, 15};
 
     root->Add_Child(v);
     root->Add_Child(h);
 
-    auto* label = new EUI_Text("Card Game!");
+    auto* label = new EUI_Text("CG CG");
     label->style.font_size = 50;
     v->Add_Child(label);
+    label->style.border_thickness = 1;
     /*root->Add_Child(label);*/
 
     /*auto* label2 = new EUI_Label("YUHHH!");*/
@@ -88,7 +86,7 @@ void Card_Game::Init_Client() {
     /*h->Add_Child(label3);*/
     /*root->Add_Child(label3);*/
 
-    auto* button = new EUI_Button("Play", [this] { screen = GAME; });
+    auto* button = new EUI_Button("PLAY PLAY", [this] { screen = GAME; });
     button->style.font_size = 30;
     button->padding = {10, 5};
     /*button->dim.x = 200;*/
