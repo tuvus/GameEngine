@@ -23,7 +23,7 @@ class Application
     bool client;
     string application_name;
     ApplicationState application_state;
-    unique_ptr<Network> network;
+    shared_ptr<Network> network;
 
     void Application_Loop();
 
@@ -41,11 +41,14 @@ class Application
     virtual void Render(chrono::milliseconds, Application&) {};
 
     void Start_Application();
-    void Start_Server();
+    void Start_Headless();
     void Start_Client();
 
+    void Start_Server();
+    void Connect_To_Server();
+
     string Get_Name();
-    Network* Get_Network();
+    shared_ptr<Network> Get_Network();
 
     void Close_Application();
     void Close_Network();

@@ -17,6 +17,7 @@ using namespace std;
 enum SCREEN
 {
     MENU,
+    LOBBY,
     GAME
 };
 

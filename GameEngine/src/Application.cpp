@@ -22,30 +22,32 @@ Application::Application(std::string name, bool client, uint16_t screen_width,
 void Application::Start_Application()
 {
     cout << "Starting application: " + Get_Name() << endl;
-    if (client)
-    {
-        Start_Client();
-    }
-    else
-    {
-        Start_Server();
-    }
-
+    client? Start_Client() : Start_Headless();
     Application_Loop();
 }
 
-void Application::Start_Server()
+void Application::Start_Headless()
 {
-    network = make_unique<Network>(true, [this] { this->Close_Network(); });
+    // Headless will always be servers
+    Start_Server();
 }
 
 void Application::Start_Client()
 {
-    network = make_unique<Network>(false, [this] { this->Close_Network(); });
-
+    // Clients can be both host and player or just a player
     InitWindow(screen_width, screen_height, application_name.c_str());
     SetTargetFPS(60);
     Init_Client();
+}
+
+void Application::Start_Server()
+{
+    network = make_shared<Network>(true, [this] { this->Close_Network(); });
+}
+
+void Application::Connect_To_Server()
+{
+    network = make_shared<Network>(false, [this] { this->Close_Network(); });
 }
 
 void Application::Close_Network()
@@ -58,9 +60,9 @@ string Application::Get_Name()
     return application_name;
 }
 
-Network* Application::Get_Network()
+shared_ptr<Network> Application::Get_Network()
 {
-    return network.get();
+    return network;
 }
 
 void Application::Application_Loop()

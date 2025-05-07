@@ -78,6 +78,28 @@ void draw_menu(Card_Game& g)
     EndDrawing();
 }
 
+void draw_lobby(Card_Game& g)
+{
+    BeginDrawing();
+    auto* root = new EUI_Container(Layout_Model::Vertical);
+    root->style.vertical_alignment = Alignment::Center;
+    root->style.horizontal_alignment = Alignment::Center;
+
+    root->bounds = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+
+    auto* label = new EUI_Button("Card Game!", [] {});
+    label->style.font_size = 50;
+    label->margin = {0, 50};
+    root->Add_Child(label);
+    auto* button = new EUI_Button("Play", [g] { g.screen = GAME; });
+    button->style.font_size = 30;
+    button->margin = {0, 50};
+    root->Add_Child(button);
+
+    g.ctx.root = root;
+    EndDrawing();
+}
+
 void draw_game(Card_Game& g)
 {
     // Draw
@@ -104,6 +126,9 @@ void Card_Game::Render(chrono::milliseconds deltaTime, Application& a)
     {
         case MENU:
             draw_menu(*this);
+            break;
+        case LOBBY:
+            draw_lobby(*this);
             break;
         case GAME:
             draw_game(*this);
