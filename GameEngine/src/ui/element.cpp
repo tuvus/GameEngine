@@ -94,9 +94,11 @@ Alignment EUI_Element::Get_Text_Vertical_Alignment(const EUI_Context& ctx) const
 EUI_Style EUI_Element::Get_Effective_Style(const EUI_Context& ctx) const {
     EUI_Style effective;
 
-    // Background color - DO NOT INHERIT
+    // Background color - DO NOT INHERIT FROM PARENT
     if (style.background_color.has_value())
         effective.background_color = style.background_color;
+    else
+        effective.background_color = ctx.default_style.background_color;
 
     if (style.text_color.has_value())
         effective.text_color = style.text_color;
@@ -105,24 +107,18 @@ EUI_Style EUI_Element::Get_Effective_Style(const EUI_Context& ctx) const {
     else
         effective.text_color = ctx.default_style.text_color;
 
+    // DONT INHERIT BORDER FROM PARENT!
     if (style.border_color.has_value())
         effective.border_color = style.border_color;
-    else if (parent)
-        effective.border_color = parent->Get_Border_Color(ctx);
     else
         effective.border_color = ctx.default_style.border_color;
-
     if (style.border_radius.has_value())
         effective.border_radius = style.border_radius;
-    else if (parent)
-        effective.border_radius = parent->Get_Border_Radius(ctx);
     else
         effective.border_radius = ctx.default_style.border_radius;
 
     if (style.border_thickness.has_value())
         effective.border_thickness = style.border_thickness;
-    else if (parent)
-        effective.border_thickness = parent->Get_Border_Thickness(ctx);
     else
         effective.border_thickness = ctx.default_style.border_thickness;
 

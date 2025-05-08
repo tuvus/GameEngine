@@ -1,11 +1,10 @@
 #include "ui/eui.h"
 #include <algorithm>
-#include <iostream>
 
 void EUI_HBox::Layout(EUI_Context& ctx) {
     Alignment main_axis_alignment = Get_Horizontal_Alignment(ctx);
 
-    float cursor = pos.x + padding.x;
+    float cursor = pos.x + padding.left;
     float total_content_width = 0;
 
     // gap between elements in container
@@ -17,33 +16,36 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
     float interval = 0;
 
     // for auto-sizing nested containers
-    float spacing = 0;
+    float default_spacing = 0;
     if (children.size())
-        spacing = (dim.x - padding.x * 2) / children.size();
+        default_spacing = (dim.x - padding.left - padding.right) / children.size();
 
     // layout children and calculate total content height
     for (EUI_Element* child : children) {
         /* TODO:if (ABSOLUTE) continue; */
         if (child->Is_Container()) {
-            child->pos = {cursor, pos.y + padding.y};
-            child->dim = {spacing, dim.y - padding.y * 2};
+            child->pos = {cursor, pos.y + padding.top};
+            child->dim = {default_spacing, dim.y - padding.top - padding.bottom};
         }
         child->Layout(ctx);
         total_content_width += child->preferred_size.x;
-        cursor += spacing;
+        cursor += default_spacing;
     }
 
     // pick starting cursor location
-    cursor = pos.x + padding.x;
+    cursor = pos.x + padding.left;
     switch (main_axis_alignment) {
         case Alignment::Center:
-            cursor = pos.x + (dim.x - total_content_width - total_gap) / 2.0f;
+            cursor =
+                pos.x +
+                (dim.x - total_content_width - total_gap + padding.left - padding.right) / 2.0f;
             break;
         case Alignment::End:
-            cursor = pos.x + dim.x - total_content_width - total_gap - padding.x;
+            cursor = pos.x + dim.x - total_content_width - total_gap - padding.right;
             break;
         case Alignment::Stretch:
-            interval = (dim.x - total_content_width - padding.x * 2) / (children.size() - 1);
+            interval = (dim.x - total_content_width - padding.left - padding.right) /
+                       (children.size() - 1);
             break;
         case Alignment::Start:
             break;
@@ -59,15 +61,15 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
         float height = std::clamp(child->preferred_size.y, child->min_size.y, child->max_size.y);
 
         float x = cursor;
-        float y = pos.y + padding.y;
+        float y = pos.y + padding.top;
 
         // cross axis alignment
         switch (child->Get_Vertical_Alignment(ctx)) {
             case Alignment::Center:
-                y = pos.y + (dim.y - height) / 2.0f;
+                y = pos.y + (dim.y - height + padding.top - padding.bottom) / 2.0f;
                 break;
             case Alignment::End:
-                y = pos.y + (dim.y - height - padding.y);
+                y = pos.y + (dim.y - height - padding.bottom);
                 break;
             case Alignment::Stretch:
             case Alignment::Start:

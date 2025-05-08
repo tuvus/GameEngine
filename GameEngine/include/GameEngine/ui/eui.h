@@ -4,6 +4,12 @@
 #include <string>
 #include <vector>
 
+// TOP, RIGHT, BOTTOM, LEFT
+typedef struct Sides {
+  public:
+    float top, right, bottom, left;
+} Sides;
+
 enum class Layout_Model { Horizontal, Vertical };
 
 enum class Alignment { Start, Center, End, Stretch };
@@ -93,7 +99,7 @@ class EUI_Element {
 
     Vector2 pos, dim = {0};
     Vector2 min_size, max_size, preferred_size;
-    Vector2 margin, padding;
+    Sides margin, padding;
 
     bool is_visible = true;
     bool is_hovered = false;

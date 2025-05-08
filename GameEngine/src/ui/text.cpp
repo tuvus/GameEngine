@@ -15,8 +15,9 @@ void EUI_Text::Layout(EUI_Context& ctx) {
     float text_width = MeasureText(text.c_str(), style.font_size.value());
     float text_height = style.font_size.value();
 
-    float width = text_width + style.font_spacing.value() * text.length() + padding.x * 2;
-    float height = text_height + padding.y * 2;
+    float width =
+        text_width + style.font_spacing.value() * text.length() + padding.left + padding.right;
+    float height = text_height + padding.top + padding.bottom;
 
     preferred_size = {width, height};
 
@@ -49,10 +50,10 @@ void EUI_Text::Render(EUI_Context& ctx) {
 
     switch (style.text_vertical_alignment.value()) {
         case Alignment::Center:
-            text_pos.y = pos.y + (dim.y - text_height) / 2;
+            text_pos.y = pos.y + (dim.y - text_height) / 2.0f;
             break;
         case Alignment::End:
-            text_pos.y = pos.y - (text_height - padding.y);
+            text_pos.y = pos.y + dim.y - text_height - padding.bottom;
             break;
         case Alignment::Stretch:
         case Alignment::Start:
@@ -63,7 +64,7 @@ void EUI_Text::Render(EUI_Context& ctx) {
             text_pos.x = pos.x + (dim.x - text_width) / 2;
             break;
         case Alignment::End:
-            text_pos.x = pos.x - (text_width - padding.x);
+            text_pos.x = pos.x + dim.x - text_width - padding.right;
             break;
         case Alignment::Stretch:
         case Alignment::Start:

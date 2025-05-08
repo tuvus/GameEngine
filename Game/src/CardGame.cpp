@@ -27,17 +27,23 @@ void Card_Game::Init_Client() {
 
     root->pos = {0, 0};
     root->dim = {SCREEN_WIDTH, SCREEN_HEIGHT};
-    root->padding = {50, 50};
+    root->padding = {50, 50, 50, 50};
 
     auto* v = new EUI_VBox();
     auto* h = new EUI_HBox();
     auto* l = new EUI_VBox();
     l->style.background_color = LIME;
-    l->padding = {10, 10};
-    auto* r = new EUI_HBox();
-    r->style.background_color = BROWN;
+    l->padding = {10, 10, 10, 10};
+    auto* r = new EUI_VBox();
+    r->style.background_color = PURPLE;
+    auto* g = new EUI_HBox();
+    g->style.background_color = GOLD;
+    auto* o = new EUI_Text("hello caiti");
+    o->style.background_color = ORANGE;
     h->Add_Child(l);
     h->Add_Child(r);
+    r->Add_Child(o);
+    r->Add_Child(g);
 
     /*v->pos = {0, 0};*/
     /*v->dim = {SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT};*/
@@ -46,12 +52,12 @@ void Card_Game::Init_Client() {
     v->style.border_thickness = 1;
     v->style.border_color = RED;
 
-    /*v->style.horizontal_alignment = Alignment::Center;*/
-    /*v->style.vertical_alignment = Alignment::Center;*/
     v->style.horizontal_alignment = Alignment::Center;
-    v->style.vertical_alignment = Alignment::End;
+    v->style.vertical_alignment = Alignment::Center;
+    /*v->style.horizontal_alignment = Alignment::Center;*/
+    /*v->style.vertical_alignment = Alignment::End;*/
 
-    v->padding = {15, 15};
+    v->padding = {15, 15, 15, 15};
 
     /*h->pos = {SCREEN_WIDTH / 2.0f, 0};*/
     /*h->dim = {SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT};*/
@@ -60,12 +66,12 @@ void Card_Game::Init_Client() {
     h->style.border_thickness = 1;
     h->style.border_color = BLUE;
 
-    /*h->style.horizontal_alignment = Alignment::Center;*/
-    /*h->style.vertical_alignment = Alignment::Center;*/
-    h->style.horizontal_alignment = Alignment::End;
+    h->style.horizontal_alignment = Alignment::Center;
     h->style.vertical_alignment = Alignment::Center;
+    /*h->style.horizontal_alignment = Alignment::End;*/
+    /*h->style.vertical_alignment = Alignment::Center;*/
 
-    h->padding = {15, 15};
+    h->padding = {15, 15, 15, 15};
 
     root->Add_Child(v);
     root->Add_Child(h);
@@ -76,12 +82,12 @@ void Card_Game::Init_Client() {
     label->style.border_thickness = 1;
     /*root->Add_Child(label);*/
 
-    /*auto* label2 = new EUI_Label("YUHHH!");*/
+    /*auto* label2 = new EUI_Text("YUHHH!");*/
     /*label2->style.font_size = 40;*/
     /*v->Add_Child(label2);*/
     /*root->Add_Child(label2);*/
-
-    /*auto* label3 = new EUI_Label("WOWOW!");*/
+    /**/
+    /*auto* label3 = new EUI_Text("WOWOW!");*/
     /*label3->style.font_size = 40;*/
     /*h->Add_Child(label3);*/
     /*root->Add_Child(label3);*/
