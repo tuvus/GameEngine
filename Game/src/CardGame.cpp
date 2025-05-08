@@ -20,85 +20,27 @@ void Card_Game::Init_Client() {
 
     resize_update(*this);
 
-    auto* root = new EUI_HBox();
-    /*root->style.vertical_alignment = Alignment::Center;*/
-    /*root->style.horizontal_alignment = Alignment::Center;*/
-    root->style.background_color = RAYWHITE;
-
+    auto* root = new EUI_VBox();
     root->pos = {0, 0};
     root->dim = {SCREEN_WIDTH, SCREEN_HEIGHT};
-    root->padding = {50, 50, 50, 50};
+    root->padding = {10, 20, 30, 40};
+    root->style.background_color = RAYWHITE;
 
-    auto* v = new EUI_VBox();
-    auto* h = new EUI_HBox();
-    auto* l = new EUI_VBox();
-    l->style.background_color = LIME;
-    l->padding = {10, 10, 10, 10};
-    auto* r = new EUI_VBox();
-    r->style.background_color = PURPLE;
-    auto* g = new EUI_HBox();
-    g->style.background_color = GOLD;
-    auto* o = new EUI_Text("hello caiti");
-    o->style.background_color = ORANGE;
-    h->Add_Child(l);
-    h->Add_Child(r);
-    r->Add_Child(o);
-    r->Add_Child(g);
+    auto* green_box = new EUI_VBox();
+    green_box->style.background_color = GREEN;
+    auto* orange_box = new EUI_VBox();
+    orange_box->style.background_color = ORANGE;
+    auto* text1 = new EUI_Text("yo");
+    text1->padding = {0, 100, 0, 0};
+    text1->style.border_thickness = 1;
+    auto* text2 = new EUI_Text("gurt");
+    text1->padding = {0, 50, 0, 0};
+    text1->style.border_thickness = 1;
 
-    /*v->pos = {0, 0};*/
-    /*v->dim = {SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT};*/
-
-    v->style.background_color = LIGHTGRAY;
-    v->style.border_thickness = 1;
-    v->style.border_color = RED;
-
-    v->style.horizontal_alignment = Alignment::Center;
-    v->style.vertical_alignment = Alignment::Center;
-    /*v->style.horizontal_alignment = Alignment::Center;*/
-    /*v->style.vertical_alignment = Alignment::End;*/
-
-    v->padding = {15, 15, 15, 15};
-
-    /*h->pos = {SCREEN_WIDTH / 2.0f, 0};*/
-    /*h->dim = {SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT};*/
-
-    h->style.background_color = GRAY;
-    h->style.border_thickness = 1;
-    h->style.border_color = BLUE;
-
-    h->style.horizontal_alignment = Alignment::Center;
-    h->style.vertical_alignment = Alignment::Center;
-    /*h->style.horizontal_alignment = Alignment::End;*/
-    /*h->style.vertical_alignment = Alignment::Center;*/
-
-    h->padding = {15, 15, 15, 15};
-
-    root->Add_Child(v);
-    root->Add_Child(h);
-
-    auto* label = new EUI_Text("CG CG");
-    label->style.font_size = 50;
-    v->Add_Child(label);
-    label->style.border_thickness = 1;
-    /*root->Add_Child(label);*/
-
-    /*auto* label2 = new EUI_Text("YUHHH!");*/
-    /*label2->style.font_size = 40;*/
-    /*v->Add_Child(label2);*/
-    /*root->Add_Child(label2);*/
-    /**/
-    /*auto* label3 = new EUI_Text("WOWOW!");*/
-    /*label3->style.font_size = 40;*/
-    /*h->Add_Child(label3);*/
-    /*root->Add_Child(label3);*/
-
-    auto* button = new EUI_Button("PLAY PLAY", [this] { screen = GAME; });
-    button->style.font_size = 30;
-    button->padding = {10, 5};
-    /*button->dim.x = 200;*/
-    /*button->dim.y = 100;*/
-    l->Add_Child(button);
-    /*root->Add_Child(button);*/
+    root->Add_Child(green_box);
+    root->Add_Child(text1);
+    root->Add_Child(orange_box);
+    root->Add_Child(text2);
 
     ctx.root = root;
     ctx.Perform_Layout();

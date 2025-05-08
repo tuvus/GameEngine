@@ -6,6 +6,7 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
 
     float cursor = pos.y + padding.top;
     float total_content_height = 0;
+    float total_leaf_height = 0;
 
     // gap between elements in container
     float total_gap = gap * (children.size() - 1);
@@ -15,18 +16,32 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
 
     // for auto-sizing nested containers
     float default_spacing = 0;
-    if (Is_Container() && children.size())
-        default_spacing = (dim.y - padding.top - padding.bottom) / children.size();
+    int num_containers = 0;
 
-    // layout children and calculate total content height
+    // calculate total non-container content height
+    for (EUI_Element* child : children) {
+        if (child->Is_Container()) {
+            num_containers++;
+            continue;
+        }
+        child->Layout(ctx);
+        total_leaf_height += child->preferred_size.y;
+    }
+
+    if (children.size())
+        default_spacing =
+            (dim.y - padding.top - padding.bottom - total_leaf_height) / num_containers;
+
+    // place containers
     for (EUI_Element* child : children) {
         if (child->Is_Container()) {
             child->pos = {pos.x + padding.left, cursor};
             child->dim = {dim.x - padding.left - padding.right, default_spacing};
+            child->preferred_size = child->dim;
+            child->Layout(ctx);
         }
-        child->Layout(ctx);
         total_content_height += child->preferred_size.y;
-        cursor += default_spacing;
+        cursor += child->preferred_size.y;
     }
 
     // pick starting cursor location

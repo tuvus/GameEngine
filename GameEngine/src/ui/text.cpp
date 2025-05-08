@@ -50,7 +50,7 @@ void EUI_Text::Render(EUI_Context& ctx) {
 
     switch (style.text_vertical_alignment.value()) {
         case Alignment::Center:
-            text_pos.y = pos.y + (dim.y - text_height) / 2.0f;
+            text_pos.y = pos.y + (dim.y - text_height + padding.top - padding.bottom) / 2.0f;
             break;
         case Alignment::End:
             text_pos.y = pos.y + dim.y - text_height - padding.bottom;
@@ -61,7 +61,7 @@ void EUI_Text::Render(EUI_Context& ctx) {
     }
     switch (style.text_horizontal_alignment.value()) {
         case Alignment::Center:
-            text_pos.x = pos.x + (dim.x - text_width) / 2;
+            text_pos.x = pos.x + (dim.x - text_width + padding.left - padding.right) / 2;
             break;
         case Alignment::End:
             text_pos.x = pos.x + dim.x - text_width - padding.right;
