@@ -27,9 +27,8 @@ void EUI_Container::Render(EUI_Context& ctx) {
     if (style.background_color.has_value())
         DrawRectangleRec({pos.x, pos.y, dim.x, dim.y}, style.background_color.value());
 
-    if (style.border_thickness.has_value() && style.border_thickness.value() > 0)
-        DrawRectangleLinesEx({pos.x, pos.y, dim.x, dim.y}, style.border_thickness.value(),
-                             style.border_color.value());
+    if (style.border_radius > 0)
+        DrawRectangleLinesEx({pos.x, pos.y, dim.x, dim.y}, style.border_radius, style.border_color);
 
     // Render children
     for (EUI_Element* child : children) {

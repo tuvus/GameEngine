@@ -4,7 +4,7 @@
 void EUI_VBox::Layout(EUI_Context& ctx) {
     Alignment main_axis_alignment = Get_Vertical_Alignment(ctx);
 
-    float cursor = pos.y + padding.top;
+    float cursor = pos.y + style.padding.top;
     float total_content_height = 0;
     float total_leaf_height = 0;
 
@@ -30,13 +30,13 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
 
     if (children.size())
         default_spacing =
-            (dim.y - padding.top - padding.bottom - total_leaf_height) / num_containers;
+            (dim.y - style.padding.top - style.padding.bottom - total_leaf_height) / num_containers;
 
     // place containers
     for (EUI_Element* child : children) {
         if (child->Is_Container()) {
-            child->pos = {pos.x + padding.left, cursor};
-            child->dim = {dim.x - padding.left - padding.right, default_spacing};
+            child->pos = {pos.x + style.padding.left, cursor};
+            child->dim = {dim.x - style.padding.left - style.padding.right, default_spacing};
             child->preferred_size = child->dim;
             child->Layout(ctx);
         }
@@ -45,16 +45,16 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
     }
 
     // pick starting cursor location
-    cursor = pos.y + padding.top;
+    cursor = pos.y + style.padding.top;
     switch (main_axis_alignment) {
         case Alignment::Center:
             cursor = pos.y + (dim.y - total_content_height - total_gap) / 2.0f;
             break;
         case Alignment::End:
-            cursor = pos.y + dim.y - total_content_height - total_gap - padding.bottom;
+            cursor = pos.y + dim.y - total_content_height - total_gap - style.padding.bottom;
             break;
         case Alignment::Stretch:
-            interval = (dim.y - total_content_height - padding.top - padding.bottom) /
+            interval = (dim.y - total_content_height - style.padding.top - style.padding.bottom) /
                        (children.size() - 1);
             break;
         case Alignment::Start:
@@ -70,16 +70,16 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
             float height =
                 std::clamp(child->preferred_size.y, child->min_size.y, child->max_size.y);
 
-            float x = pos.x + padding.left;
+            float x = pos.x + style.padding.left;
             float y = cursor;
 
             // cross axis alignment
             switch (child->Get_Horizontal_Alignment(ctx)) {
                 case Alignment::Center:
-                    x = pos.x + (dim.x - width + padding.left - padding.right) / 2.0f;
+                    x = pos.x + (dim.x - width + style.padding.left - style.padding.right) / 2.0f;
                     break;
                 case Alignment::End:
-                    x = pos.x + (dim.x - width - padding.right);
+                    x = pos.x + (dim.x - width - style.padding.right);
                     break;
                 case Alignment::Stretch:
                 case Alignment::Start:

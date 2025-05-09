@@ -14,6 +14,8 @@ enum class Layout_Model { Horizontal, Vertical };
 
 enum class Alignment { Start, Center, End, Stretch };
 
+enum class Position { Static, Relative, Absolute, Fixed, Sticky };
+
 class EUI_Input;
 class EUI_Style;
 class EUI_Element;
@@ -34,9 +36,11 @@ class EUI_Style {
     std::optional<Color> background_color;
     std::optional<Color> text_color;
 
-    std::optional<Color> border_color;
-    std::optional<float> border_radius;
-    std::optional<float> border_thickness;
+    Sides margin, padding = {0};
+    Position position = Position::Static;
+
+    Color border_color = BLACK;
+    float border_radius = 0;
 
     std::optional<Font> font;
     std::optional<float> font_size;
@@ -61,12 +65,14 @@ class EUI_Context {
     EUI_Element* focused = nullptr;
 
     EUI_Style default_style = {
-        /*.background_color = RAYWHITE,*/
+        .background_color = RAYWHITE,
         .text_color = BLACK,
+
+        .margin = {0},
+        .padding = {0},
 
         .border_color = BLACK,
         .border_radius = 0,
-        .border_thickness = 0,
 
         .font = GetFontDefault(),
         .font_size = 15,
@@ -99,7 +105,6 @@ class EUI_Element {
 
     Vector2 pos, dim = {0};
     Vector2 min_size, max_size, preferred_size;
-    Sides margin, padding;
 
     bool is_visible = true;
     bool is_hovered = false;
@@ -108,11 +113,8 @@ class EUI_Element {
 
     EUI_Style style;
 
-    Color Get_Background_Color(const EUI_Context& ctx) const;
+    // Getters for inheritable properties (optinals)
     Color Get_Text_Color(const EUI_Context& ctx) const;
-    Color Get_Border_Color(const EUI_Context& ctx) const;
-    float Get_Border_Radius(const EUI_Context& ctx) const;
-    float Get_Border_Thickness(const EUI_Context& ctx) const;
     Font Get_Font(const EUI_Context& ctx) const;
     float Get_Font_Size(const EUI_Context& ctx) const;
     float Get_Font_Spacing(const EUI_Context& ctx) const;

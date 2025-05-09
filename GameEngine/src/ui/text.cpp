@@ -2,7 +2,6 @@
 
 EUI_Text::EUI_Text(const std::string& text) : text(text) {
     // default styles
-    style.border_thickness = 0;
     style.border_radius = 0;
 
     style.text_horizontal_alignment = Alignment::Center;
@@ -15,9 +14,9 @@ void EUI_Text::Layout(EUI_Context& ctx) {
     float text_width = MeasureText(text.c_str(), style.font_size.value());
     float text_height = style.font_size.value();
 
-    float width =
-        text_width + style.font_spacing.value() * text.length() + padding.left + padding.right;
-    float height = text_height + padding.top + padding.bottom;
+    float width = text_width + style.font_spacing.value() * text.length() + style.padding.left +
+                  style.padding.right;
+    float height = text_height + style.padding.top + style.padding.bottom;
 
     preferred_size = {width, height};
 
@@ -40,9 +39,8 @@ void EUI_Text::Render(EUI_Context& ctx) {
         DrawRectangleRec({pos.x, pos.y, dim.x, dim.y}, style.background_color.value());
 
     // Border
-    if (style.border_thickness.has_value() && style.border_thickness.value() > 0)
-        DrawRectangleLinesEx({pos.x, pos.y, dim.x, dim.y}, style.border_thickness.value(),
-                             style.border_color.value());
+    if (style.border_radius > 0)
+        DrawRectangleLinesEx({pos.x, pos.y, dim.x, dim.y}, style.border_radius, style.border_color);
 
     // Text
     float text_width = MeasureText(text.c_str(), style.font_size.value());
@@ -50,10 +48,11 @@ void EUI_Text::Render(EUI_Context& ctx) {
 
     switch (style.text_vertical_alignment.value()) {
         case Alignment::Center:
-            text_pos.y = pos.y + (dim.y - text_height + padding.top - padding.bottom) / 2.0f;
+            text_pos.y =
+                pos.y + (dim.y - text_height + style.padding.top - style.padding.bottom) / 2.0f;
             break;
         case Alignment::End:
-            text_pos.y = pos.y + dim.y - text_height - padding.bottom;
+            text_pos.y = pos.y + dim.y - text_height - style.padding.bottom;
             break;
         case Alignment::Stretch:
         case Alignment::Start:
@@ -61,10 +60,11 @@ void EUI_Text::Render(EUI_Context& ctx) {
     }
     switch (style.text_horizontal_alignment.value()) {
         case Alignment::Center:
-            text_pos.x = pos.x + (dim.x - text_width + padding.left - padding.right) / 2;
+            text_pos.x =
+                pos.x + (dim.x - text_width + style.padding.left - style.padding.right) / 2;
             break;
         case Alignment::End:
-            text_pos.x = pos.x + dim.x - text_width - padding.right;
+            text_pos.x = pos.x + dim.x - text_width - style.padding.right;
             break;
         case Alignment::Stretch:
         case Alignment::Start:

@@ -4,7 +4,7 @@
 void EUI_HBox::Layout(EUI_Context& ctx) {
     Alignment main_axis_alignment = Get_Horizontal_Alignment(ctx);
 
-    float cursor = pos.x + padding.left;
+    float cursor = pos.x + style.padding.left;
     float total_content_width = 0;
     float total_leaf_width = 0;
 
@@ -19,19 +19,6 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
     // for auto-sizing nested containers
     float default_spacing = 0;
     int num_containers = 0;
-    /*if (children.size())*/
-    /*    default_spacing = (dim.x - padding.left - padding.right) / children.size();*/
-    /**/
-    /*// layout children and calculate total content height*/
-    /*for (EUI_Element* child : children) {*/
-    /*    if (child->Is_Container()) {*/
-    /*        child->pos = {cursor, pos.y + padding.top};*/
-    /*        child->dim = {default_spacing, dim.y - padding.top - padding.bottom};*/
-    /*    }*/
-    /*    child->Layout(ctx);*/
-    /*    total_content_width += child->preferred_size.x;*/
-    /*    cursor += default_spacing;*/
-    /*}*/
 
     // calculate total non-container content height
     for (EUI_Element* child : children) {
@@ -45,13 +32,13 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
 
     if (children.size())
         default_spacing =
-            (dim.x - padding.left - padding.right - total_leaf_width) / num_containers;
+            (dim.x - style.padding.left - style.padding.right - total_leaf_width) / num_containers;
 
     // place containers
     for (EUI_Element* child : children) {
         if (child->Is_Container()) {
-            child->pos = {cursor, pos.y + padding.top};
-            child->dim = {default_spacing, dim.y - padding.top - padding.bottom};
+            child->pos = {cursor, pos.y + style.padding.top};
+            child->dim = {default_spacing, dim.y - style.padding.top - style.padding.bottom};
             child->preferred_size = child->dim;
             child->Layout(ctx);
         }
@@ -60,18 +47,18 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
     }
 
     // pick starting cursor location
-    cursor = pos.x + padding.left;
+    cursor = pos.x + style.padding.left;
     switch (main_axis_alignment) {
         case Alignment::Center:
-            cursor =
-                pos.x +
-                (dim.x - total_content_width - total_gap + padding.left - padding.right) / 2.0f;
+            cursor = pos.x + (dim.x - total_content_width - total_gap + style.padding.left -
+                              style.padding.right) /
+                                 2.0f;
             break;
         case Alignment::End:
-            cursor = pos.x + dim.x - total_content_width - total_gap - padding.right;
+            cursor = pos.x + dim.x - total_content_width - total_gap - style.padding.right;
             break;
         case Alignment::Stretch:
-            interval = (dim.x - total_content_width - padding.left - padding.right) /
+            interval = (dim.x - total_content_width - style.padding.left - style.padding.right) /
                        (children.size() - 1);
             break;
         case Alignment::Start:
@@ -89,15 +76,15 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
                 std::clamp(child->preferred_size.y, child->min_size.y, child->max_size.y);
 
             float x = cursor;
-            float y = pos.y + padding.top;
+            float y = pos.y + style.padding.top;
 
             // cross axis alignment
             switch (child->Get_Vertical_Alignment(ctx)) {
                 case Alignment::Center:
-                    y = pos.y + (dim.y - height + padding.top - padding.bottom) / 2.0f;
+                    y = pos.y + (dim.y - height + style.padding.top - style.padding.bottom) / 2.0f;
                     break;
                 case Alignment::End:
-                    y = pos.y + (dim.y - height - padding.bottom);
+                    y = pos.y + (dim.y - height - style.padding.bottom);
                     break;
                 case Alignment::Stretch:
                 case Alignment::Start:

@@ -6,6 +6,7 @@ EUI_Context::EUI_Context() {
 }
 
 void EUI_Context::Update_Input() {
+    input = {0};
     input.mouse_position = GetMousePosition();
     input.left_mouse_down = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
     input.left_mouse_pressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
@@ -18,7 +19,6 @@ void EUI_Context::Begin_Frame() {
     active = nullptr;
 }
 void EUI_Context::End_Frame() {
-    input = {0};
 }
 void EUI_Context::Perform_Layout() {
     if (root)

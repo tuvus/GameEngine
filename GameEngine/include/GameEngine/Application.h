@@ -1,6 +1,7 @@
 #pragma once
 
 #include "networking//Network.h"
+#include "ui/eui.h"
 
 #include <chrono>
 #include <cstdint>
