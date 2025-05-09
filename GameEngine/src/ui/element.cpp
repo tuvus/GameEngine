@@ -22,27 +22,14 @@ float EUI_Element::Get_Font_Spacing(const EUI_Context& ctx) const {
     RETURN_STYLE_PROP(font_spacing, Get_Font_Spacing);
 }
 
-Alignment EUI_Element::Get_Horizontal_Alignment(const EUI_Context& ctx) const {
-    RETURN_STYLE_PROP(horizontal_alignment, Get_Horizontal_Alignment);
-}
-
-Alignment EUI_Element::Get_Vertical_Alignment(const EUI_Context& ctx) const {
-    RETURN_STYLE_PROP(vertical_alignment, Get_Vertical_Alignment);
-}
-
-Alignment EUI_Element::Get_Text_Horizontal_Alignment(const EUI_Context& ctx) const {
-    RETURN_STYLE_PROP(text_horizontal_alignment, Get_Text_Horizontal_Alignment);
-}
-
-Alignment EUI_Element::Get_Text_Vertical_Alignment(const EUI_Context& ctx) const {
-    RETURN_STYLE_PROP(text_vertical_alignment, Get_Text_Vertical_Alignment);
-}
-
 EUI_Style EUI_Element::Get_Effective_Style(const EUI_Context& ctx) const {
     EUI_Style effective;
 
     effective.background_color = style.background_color;
     effective.text_color = Get_Text_Color(ctx);
+
+    effective.padding = style.padding;
+    effective.margin = style.margin;
 
     effective.border_color = style.border_color;
     effective.border_radius = style.border_radius;
@@ -51,10 +38,10 @@ EUI_Style EUI_Element::Get_Effective_Style(const EUI_Context& ctx) const {
     effective.font_size = Get_Font_Size(ctx);
     effective.font_spacing = Get_Font_Spacing(ctx);
 
-    effective.horizontal_alignment = Get_Horizontal_Alignment(ctx);
-    effective.vertical_alignment = Get_Vertical_Alignment(ctx);
-    effective.text_horizontal_alignment = Get_Text_Horizontal_Alignment(ctx);
-    effective.text_vertical_alignment = Get_Text_Vertical_Alignment(ctx);
+    effective.horizontal_alignment = style.horizontal_alignment;
+    effective.vertical_alignment = style.vertical_alignment;
+    effective.text_horizontal_alignment = style.text_horizontal_alignment;
+    effective.text_vertical_alignment = style.text_vertical_alignment;
 
     return effective;
 }

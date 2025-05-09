@@ -20,18 +20,79 @@ void draw_UI(Card_Game& g) {
     g.curr_ctx.Render();
 }
 
-EUI_Element* init_menu_ui(Card_Game& g) {
+EUI_Element* init_test1_ui() {
     auto* root = new EUI_HBox();
     root->pos = {0, 0};
     root->dim = {SCREEN_WIDTH, SCREEN_HEIGHT};
-    root->style.font_size = 50;
     root->style.vertical_alignment = Alignment::Center;
     root->style.horizontal_alignment = Alignment::Center;
+    root->style.padding = {10, 20, 10, 20};
 
-    root->Add_Child(new EUI_Button("Play", [&g]() {
+    auto* orange = new EUI_VBox();
+    orange->style.background_color = ORANGE;
+    root->Add_Child(orange);
+    orange->style.padding = {20, 20, 20, 20};
+
+    auto* gold = new EUI_VBox();
+    gold->style.background_color = GOLD;
+    gold->style.vertical_alignment = Alignment::Center;
+    gold->style.horizontal_alignment = Alignment::Center;
+    root->Add_Child(gold);
+    gold->style.padding = {20, 20, 20, 20};
+
+    auto* purple = new EUI_VBox();
+    purple->style.background_color = PURPLE;
+    purple->style.vertical_alignment = Alignment::End;
+    purple->style.horizontal_alignment = Alignment::End;
+    root->Add_Child(purple);
+    purple->style.padding = {20, 20, 20, 20};
+
+    auto* text1 = new EUI_Text("this");
+    text1->style.font_size = 40;
+    text1->style.padding = {400};
+    orange->Add_Child(text1);
+
+    auto* lime = new EUI_VBox();
+    lime->style.background_color = LIME;
+    lime->style.vertical_alignment = Alignment::Center;
+    lime->style.horizontal_alignment = Alignment::End;
+    orange->Add_Child(lime);
+
+    auto* wow = new EUI_Text("WOW!");
+    lime->Add_Child(wow);
+
+    auto* text2 = new EUI_Text("is");
+    text2->style.font_size = 40;
+    gold->Add_Child(text2);
+
+    auto* text3 = new EUI_Text("auto-formatted!");
+    text3->style.font_size = 40;
+    purple->Add_Child(text3);
+
+    return root;
+}
+
+EUI_Element* init_menu_ui(Card_Game& g) {
+    auto* root = new EUI_VBox();
+    root->pos = {0, 0};
+    root->dim = {SCREEN_WIDTH, SCREEN_HEIGHT};
+    root->style.vertical_alignment = Alignment::Center;
+    root->style.horizontal_alignment = Alignment::Center;
+    root->gap = 20;
+
+    auto* title = new EUI_Text("Game Title!");
+    title->style.font_size = 40;
+    root->Add_Child(title);
+
+    auto* button = new EUI_Button("Play", [&g]() {
         g.screen = GAME;
         set_ui_screen(g, GAME);
-    }));
+    });
+    button->style.padding = {10, 20, 10, 20};
+    button->style.font_size = 20;
+    root->Add_Child(button);
+
+    return init_test1_ui();
 
     return root;
 }
@@ -40,7 +101,6 @@ EUI_Element* init_game_ui(Card_Game& g) {
     auto* root = new EUI_HBox();
     root->pos = {0, 0};
     root->dim = {SCREEN_WIDTH, SCREEN_HEIGHT};
-    root->style.font_size = 50;
     root->style.vertical_alignment = Alignment::Center;
     root->style.horizontal_alignment = Alignment::Center;
 
@@ -48,6 +108,7 @@ EUI_Element* init_game_ui(Card_Game& g) {
         g.screen = MENU;
         set_ui_screen(g, MENU);
     });
+    button->style.padding = {10, 20, 10, 20};
     root->Add_Child(button);
 
     return root;
@@ -92,7 +153,6 @@ void Card_Game::Update(chrono::milliseconds deltaTime, Application& a) {
 }
 
 void draw_menu(Card_Game& g) {
-    DrawRectangle(0, 0, 400, 400, RED);
     draw_UI(g);
 }
 
@@ -101,13 +161,7 @@ void draw_game(Card_Game& g) {
 }
 
 void Card_Game::Render(chrono::milliseconds deltaTime, Application& a) {
-    BeginDrawing();
-
-    if (curr_ctx.root && curr_ctx.root->style.background_color.has_value()) {
-        ClearBackground(curr_ctx.root->style.background_color.value());
-    } else {
-        ClearBackground(RAYWHITE);
-    }
+    ClearBackground(RAYWHITE);
 
     switch (screen) {
         case MENU:

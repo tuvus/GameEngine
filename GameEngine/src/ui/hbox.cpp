@@ -2,7 +2,7 @@
 #include <algorithm>
 
 void EUI_HBox::Layout(EUI_Context& ctx) {
-    Alignment main_axis_alignment = Get_Horizontal_Alignment(ctx);
+    Alignment main_axis_alignment = style.horizontal_alignment;
 
     float cursor = pos.x + style.padding.left;
     float total_content_width = 0;
@@ -79,7 +79,7 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
             float y = pos.y + style.padding.top;
 
             // cross axis alignment
-            switch (child->Get_Vertical_Alignment(ctx)) {
+            switch (child->style.vertical_alignment) {
                 case Alignment::Center:
                     y = pos.y + (dim.y - height + style.padding.top - style.padding.bottom) / 2.0f;
                     break;

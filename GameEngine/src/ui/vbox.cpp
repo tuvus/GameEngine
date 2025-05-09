@@ -2,7 +2,7 @@
 #include <algorithm>
 
 void EUI_VBox::Layout(EUI_Context& ctx) {
-    Alignment main_axis_alignment = Get_Vertical_Alignment(ctx);
+    Alignment main_axis_alignment = style.vertical_alignment;
 
     float cursor = pos.y + style.padding.top;
     float total_content_height = 0;
@@ -74,7 +74,7 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
             float y = cursor;
 
             // cross axis alignment
-            switch (child->Get_Horizontal_Alignment(ctx)) {
+            switch (style.horizontal_alignment) {
                 case Alignment::Center:
                     x = pos.x + (dim.x - width + style.padding.left - style.padding.right) / 2.0f;
                     break;

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <functional>
 #include <optional>
 #include <raylib.h>
@@ -46,10 +47,10 @@ class EUI_Style {
     std::optional<float> font_size;
     std::optional<float> font_spacing;
 
-    std::optional<Alignment> horizontal_alignment;
-    std::optional<Alignment> vertical_alignment;
-    std::optional<Alignment> text_horizontal_alignment;
-    std::optional<Alignment> text_vertical_alignment;
+    Alignment horizontal_alignment = Alignment::Start;
+    Alignment vertical_alignment = Alignment::Start;
+    Alignment text_horizontal_alignment = Alignment::Start;
+    Alignment text_vertical_alignment = Alignment::Start;
 };
 
 class EUI_Context {
@@ -112,15 +113,11 @@ class EUI_Element {
 
     EUI_Style style;
 
-    // Getters for inheritable properties (optinals)
+    // Getters for inheritable properties (optionals)
     Color Get_Text_Color(const EUI_Context& ctx) const;
     Font Get_Font(const EUI_Context& ctx) const;
     float Get_Font_Size(const EUI_Context& ctx) const;
     float Get_Font_Spacing(const EUI_Context& ctx) const;
-    Alignment Get_Horizontal_Alignment(const EUI_Context& ctx) const;
-    Alignment Get_Vertical_Alignment(const EUI_Context& ctx) const;
-    Alignment Get_Text_Horizontal_Alignment(const EUI_Context& ctx) const;
-    Alignment Get_Text_Vertical_Alignment(const EUI_Context& ctx) const;
     EUI_Style Get_Effective_Style(const EUI_Context& ctx) const;
 
     virtual void Layout(EUI_Context& ctx) = 0;

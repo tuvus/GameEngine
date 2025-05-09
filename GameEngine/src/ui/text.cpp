@@ -4,8 +4,10 @@ EUI_Text::EUI_Text(const std::string& text) : text(text) {
     // default styles
     style.border_radius = 0;
 
-    style.text_horizontal_alignment = Alignment::Center;
-    style.text_vertical_alignment = Alignment::Center;
+    style.horizontal_alignment = Alignment::Start;
+    style.vertical_alignment = Alignment::Start;
+    style.text_horizontal_alignment = Alignment::Start;
+    style.text_vertical_alignment = Alignment::Start;
 }
 
 void EUI_Text::Layout(EUI_Context& ctx) {
@@ -46,7 +48,7 @@ void EUI_Text::Render(EUI_Context& ctx) {
     float text_width = MeasureText(text.c_str(), style.font_size.value());
     float text_height = style.font_size.value();
 
-    switch (style.text_vertical_alignment.value()) {
+    switch (style.text_vertical_alignment) {
         case Alignment::Center:
             text_pos.y =
                 pos.y + (dim.y - text_height + style.padding.top - style.padding.bottom) / 2.0f;
@@ -58,7 +60,7 @@ void EUI_Text::Render(EUI_Context& ctx) {
         case Alignment::Start:
             text_pos.y = pos.y;
     }
-    switch (style.text_horizontal_alignment.value()) {
+    switch (style.text_horizontal_alignment) {
         case Alignment::Center:
             text_pos.x =
                 pos.x + (dim.x - text_width + style.padding.left - style.padding.right) / 2;
