@@ -65,7 +65,6 @@ class EUI_Context {
     EUI_Element* focused = nullptr;
 
     EUI_Style default_style = {
-        .background_color = RAYWHITE,
         .text_color = BLACK,
 
         .margin = {0},

@@ -17,24 +17,19 @@ void set_ui_screen(Card_Game& g, SCREEN screen) {
 }
 
 void draw_UI(Card_Game& g) {
-    g.curr_ctx.Begin_Frame();
-    g.curr_ctx.Update_Input();
-    g.curr_ctx.Handle_Input();
     g.curr_ctx.Render();
-    g.curr_ctx.End_Frame();
 }
 
 EUI_Element* init_menu_ui(Card_Game& g) {
     auto* root = new EUI_HBox();
     root->pos = {0, 0};
     root->dim = {SCREEN_WIDTH, SCREEN_HEIGHT};
-    root->style.background_color = RAYWHITE;
     root->style.font_size = 50;
     root->style.vertical_alignment = Alignment::Center;
     root->style.horizontal_alignment = Alignment::Center;
 
     root->Add_Child(new EUI_Button("Play", [&g]() {
-        /*g.screen = GAME;*/
+        g.screen = GAME;
         set_ui_screen(g, GAME);
     }));
 
@@ -50,7 +45,7 @@ EUI_Element* init_game_ui(Card_Game& g) {
     root->style.horizontal_alignment = Alignment::Center;
 
     auto* button = new EUI_Button("Menu", [&g]() {
-        /*g.screen = MENU;*/
+        g.screen = MENU;
         set_ui_screen(g, MENU);
     });
     root->Add_Child(button);
@@ -87,31 +82,31 @@ void Card_Game::Update(chrono::milliseconds deltaTime, Application& a) {
         resize_update(*this);
     }
 
+    curr_ctx.Begin_Frame();
+    curr_ctx.Update_Input();
+    curr_ctx.Handle_Input();
+    curr_ctx.End_Frame();
+
     if (WindowShouldClose())
         Close_Application();
 }
 
 void draw_menu(Card_Game& g) {
-    BeginDrawing();
-
+    DrawRectangle(0, 0, 400, 400, RED);
     draw_UI(g);
-
-    EndDrawing();
 }
 
 void draw_game(Card_Game& g) {
-    BeginDrawing();
-
     draw_UI(g);
-
-    EndDrawing();
 }
 
 void Card_Game::Render(chrono::milliseconds deltaTime, Application& a) {
-    if (curr_ctx.root) {
-        ClearBackground(curr_ctx.default_style.background_color.value());
+    BeginDrawing();
+
+    if (curr_ctx.root && curr_ctx.root->style.background_color.has_value()) {
+        ClearBackground(curr_ctx.root->style.background_color.value());
     } else {
-        ClearBackground(BLACK);
+        ClearBackground(RAYWHITE);
     }
 
     switch (screen) {
@@ -122,6 +117,8 @@ void Card_Game::Render(chrono::milliseconds deltaTime, Application& a) {
             draw_game(*this);
             break;
     }
+
+    EndDrawing();
 }
 
 Card_Game::~Card_Game() = default;
