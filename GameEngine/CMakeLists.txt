@@ -8,10 +8,13 @@ set(Sources
         src/Application.cpp
         src/networking/Network.cpp
         src/networking/Rpc_Manager.cpp
-        src/ui/button.cpp
-        src/ui/container.cpp
         src/ui/context.cpp
         src/ui/element.cpp
+        src/ui/container.cpp
+        src/ui/vbox.cpp
+        src/ui/hbox.cpp
+        src/ui/text.cpp
+        src/ui/button.cpp
 )
 
 set(Headers
@@ -20,6 +23,7 @@ set(Headers
         ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Network.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Rpc_Manager.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/ui/eui.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Rpc_Manager.h
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works

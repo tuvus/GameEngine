@@ -15,7 +15,8 @@ void Create_Application(unique_ptr<ApplicationFactory> application_factory, bool
 Application::Application(std::string name, bool client, uint16_t screen_width,
                          uint16_t screen_height)
     : application_name(name), client(client), screen_width(screen_width),
-      screen_height(screen_height), application_state(ApplicationState::SettingUp), network(nullptr)
+      screen_height(screen_height), application_state(ApplicationState::SettingUp),
+      network(nullptr)
 {
 }
 
@@ -54,6 +55,7 @@ void Application::Close_Network()
 {
     network.reset();
 }
+
 
 string Application::Get_Name()
 {

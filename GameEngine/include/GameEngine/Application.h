@@ -1,6 +1,7 @@
 #pragma once
 
 #include "networking//Network.h"
+#include "ui/eui.h"
 
 #include <chrono>
 #include <cstdint>
@@ -10,15 +11,13 @@ using namespace std;
 class ApplicationWindow;
 class ApplicationFactory;
 
-enum class ApplicationState
-{
+enum class ApplicationState {
     SettingUp,
     Running,
     Closing,
 };
 
-class Application
-{
+class Application {
   private:
     bool client;
     string application_name;

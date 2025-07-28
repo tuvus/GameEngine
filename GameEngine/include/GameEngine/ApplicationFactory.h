@@ -4,8 +4,7 @@
 
 class Application;
 
-class ApplicationFactory
-{
+class ApplicationFactory {
   public:
     ApplicationFactory() = default;
     virtual ~ApplicationFactory() = default;

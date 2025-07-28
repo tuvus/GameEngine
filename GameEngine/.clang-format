@@ -5,7 +5,7 @@ BasedOnStyle: LLVM   # (or "Google", "Microsoft", "Chromium", "Mozilla", "WebKit
 IndentWidth: 4               # 4 spaces per indent level
 TabWidth: 4                  # Tabs visually align with 4 spaces
 UseTab: Never                # Always use spaces (not tabs)
-BreakBeforeBraces: Allman # Braces on new lines or Attach, first brace on same line
+BreakBeforeBraces: Attach #  Allman: Braces on new lines Attach: First brace on same line
 AllowShortIfStatementsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortLoopsOnASingleLine: false

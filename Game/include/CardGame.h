@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Application.h"
-#include "ui/eui.h"
 
 #include <chrono>
 #include <raylib.h>
@@ -21,13 +20,11 @@ enum SCREEN
     GAME
 };
 
-typedef struct Tile
-{
+typedef struct Tile {
     Color color;
 } Tile;
 
-class Card_Game : public Application
-{
+class Card_Game : public Application {
   public:
     Card_Game(bool client) : Application("CARD GAME", client, SCREEN_WIDTH, SCREEN_HEIGHT) {};
 
@@ -37,10 +34,7 @@ class Card_Game : public Application
 
     ~Card_Game();
 
-    // drawing state
-    EUI_Context ctx;
+    EUI_Context curr_ctx = EUI_Context();
+    std::unordered_map<SCREEN, EUI_Element*> ui_screens;
     SCREEN screen = MENU;
-    int center_x, center_y;
-    // game screen render state
-    int tl_x, tl_y, tile_size;
 };
