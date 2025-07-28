@@ -91,7 +91,11 @@ void draw_lobby(Card_Game& g)
     label->style.font_size = 50;
     label->margin = {0, 50};
     root->Add_Child(label);
-    auto* button = new EUI_Button("Play", [g] { g.screen = GAME; });
+    auto* button = new EUI_Button("Play", [g] mutable
+    {
+        g.screen = GAME;
+        cout << "Starting Game!" << endl;
+    });
     button->style.font_size = 30;
     button->margin = {0, 50};
     root->Add_Child(button);
