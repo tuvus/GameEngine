@@ -1,7 +1,8 @@
 #include "CardGame.h"
-#include "rpc/client.h"
-#include "networking/Network.h"
 #include "Application.h"
+#include "Lobby.h"
+#include "networking/Network.h"
+#include "rpc/client.h"
 
 #include <iostream>
 #include <raylib.h>
@@ -14,9 +15,9 @@ void resize_update(Card_Game& g) {
     g.curr_ctx.Perform_Layout();
 }
 
-void set_ui_screen(Card_Game& g, SCREEN screen) {
-    g.curr_ctx.root = g.ui_screens[screen];
-    g.curr_ctx.Perform_Layout();
+void Card_Game::set_ui_screen(SCREEN screen) {
+    curr_ctx.root = ui_screens[screen];
+    curr_ctx.Perform_Layout();
 }
 
 void draw_UI(Card_Game& g) {
@@ -75,7 +76,7 @@ EUI_Element* init_test1_ui() {
     return root;
 }
 
-EUI_Element* init_menu_ui(Card_Game& g) {
+EUI_Element* Card_Game::init_menu_ui(Card_Game& g) {
     auto* root = new EUI_VBox();
     root->pos = {0, 0};
     root->dim = {SCREEN_WIDTH, SCREEN_HEIGHT};
@@ -87,13 +88,22 @@ EUI_Element* init_menu_ui(Card_Game& g) {
     title->style.font_size = 40;
     root->Add_Child(title);
 
-    auto* button = new EUI_Button("Play", [&g]() {
+
+    auto* join_button = new EUI_Button("Join Game", [this, &g]() {
+        Start_Client();
         g.screen = GAME;
-        set_ui_screen(g, GAME);
+        g.set_ui_screen(LOBBY);
     });
-    button->style.padding = {10, 20, 10, 20};
-    button->style.font_size = 20;
-    root->Add_Child(button);
+    join_button->style.padding = {10, 20, 10, 20};
+    root->Add_Child(join_button);
+
+    auto* host_button = new EUI_Button("Host Game", [this, &g]() {
+        Start_Server();
+        g.screen = GAME;
+        g.set_ui_screen(LOBBY);
+    });
+    host_button->style.padding = {10, 20, 10, 20};
+    root->Add_Child(host_button);
 
     return root;
 }
@@ -107,7 +117,7 @@ EUI_Element* init_game_ui(Card_Game& g) {
 
     auto* button = new EUI_Button("Menu", [&g]() {
         g.screen = MENU;
-        set_ui_screen(g, MENU);
+        g.set_ui_screen(MENU);
     });
     button->style.padding = {10, 20, 10, 20};
     root->Add_Child(button);
@@ -121,10 +131,11 @@ void Card_Game::Init_Client() {
     resize_update(*this);
 
     ui_screens.insert({MENU, init_menu_ui(*this)});
+    ui_screens.insert({LOBBY, new Lobby(*this)});
     ui_screens.insert({GAME, init_game_ui(*this)});
 
     screen = MENU;
-    set_ui_screen(*this, MENU);
+    set_ui_screen(MENU);
 }
 
 void Card_Game::Update(chrono::milliseconds deltaTime, Application& a) {
