@@ -1,5 +1,5 @@
-#include "Application.h"
-#include "ApplicationFactory.h"
+#include "application.h"
+#include "application_factory.h"
 
 #include <iostream>
 #include <raylib.h>

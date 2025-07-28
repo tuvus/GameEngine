@@ -4,7 +4,7 @@
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 
-#include "networking/Network.h"
+#include "networking/network.h"
 
 using namespace std;
 
