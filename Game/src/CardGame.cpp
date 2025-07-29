@@ -108,6 +108,10 @@ void Card_Game::Update_UI(chrono::milliseconds deltaTime) {
         resize_update();
     }
 
+    if (IsKeyPressed(KEY_Q) && IsKeyDown(KEY_LEFT_CONTROL)) {
+        Close_Application();
+    }
+
     curr_ctx.Begin_Frame();
     curr_ctx.Update_Input();
     curr_ctx.Handle_Input();
