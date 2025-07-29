@@ -18,7 +18,7 @@ public:
         root->Add_Child(title);
 
         auto* join_button = new EUI_Button("Join Game", [&card_game] {
-            card_game.Start_Client();
+            card_game.Connect_To_Server();
             card_game.set_ui_screen(LOBBY);
         });
         join_button->style.padding = {10, 20, 10, 20};

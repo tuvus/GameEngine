@@ -26,9 +26,14 @@ class Application {
 
     void Application_Loop();
 
+private:
+    void Start_Headless();
+    void Start_Client();
+
   public:
     Application(std::string name, bool client, uint16_t screen_width, uint16_t screen_height);
     virtual ~Application() = default;
+    void Start_Application();
 
     uint16_t screen_width;
     uint16_t screen_height;
@@ -38,10 +43,6 @@ class Application {
     // Optional client functions
     virtual void Init_Client() {}
     virtual void Update_UI(chrono::milliseconds) = 0;
-
-    void Start_Application();
-    void Start_Headless();
-    void Start_Client();
 
     void Start_Server();
     void Connect_To_Server();
