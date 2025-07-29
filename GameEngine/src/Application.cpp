@@ -38,7 +38,6 @@ void Application::Start_Client()
     // Clients can be both host and player or just a player
     InitWindow(screen_width, screen_height, application_name.c_str());
     SetTargetFPS(60);
-    Init_Client();
 }
 
 void Application::Start_Server()

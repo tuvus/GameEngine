@@ -77,6 +77,7 @@ EUI_Element* init_test1_ui() {
 }
 
 void Card_Game::Start_Client() {
+    Application::Start_Client();
     SetWindowFocused();
 
     resize_update();

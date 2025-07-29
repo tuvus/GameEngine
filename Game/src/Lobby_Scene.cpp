@@ -1,6 +1,7 @@
 #include "Lobby_Scene.h"
 
-Lobby_Scene::Lobby_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_game) {
+Lobby_Scene::Lobby_Scene(Card_Game& card_game)
+    : Scene(card_game), card_game(card_game), player_count(0) {
     auto* root = new EUI_VBox();
     root_elem = root;
     root->pos = {0, 0};
@@ -15,6 +16,10 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game) : Scene(card_game), card_game(car
         card_game.set_ui_screen(MENU);
     });
     root->Add_Child(leave_button);
+    card_game.Get_Network()->bind_rpc("setplayercount", [this](int new_player_count) {
+        player_count = new_player_count;
+        return RPC_Manager::Rpc_Validator_Result::VALID;
+    });
 }
 
 void Lobby_Scene::Update_UI(std::chrono::milliseconds, EUI_Context context) {
@@ -26,8 +31,11 @@ void Lobby_Scene::Update_UI(std::chrono::milliseconds, EUI_Context context) {
             status_text->text = "Connecting to server...";
             break;
         case Network::Server_Running:
+            if (player_count != card_game.Get_Network()->Get_Num_Connected_Clients() + 1)
+                card_game.Get_Network()->call_rpc(
+                    "setplayercount", card_game.Get_Network()->Get_Num_Connected_Clients() + 1);
         case Network::Client_Connected:
-            status_text->text = "Players: " + to_string(card_game.Get_Network()->Get_Num_Connected_Clients() + 1);
+            status_text->text = "Players: " + to_string(player_count);
             break;
         case Network::Closing:
             status_text->text = "Leaving";
