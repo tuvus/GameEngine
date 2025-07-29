@@ -3,11 +3,11 @@
 #include <chrono>
 
 class Scene {
-protected:
+  protected:
     Application& application;
     EUI_Element* root_elem;
 
-public:
+  public:
     Scene(Application& app) : application(app) {}
     virtual void Update_UI(std::chrono::milliseconds, EUI_Context) = 0;
     virtual void Update(std::chrono::milliseconds) = 0;

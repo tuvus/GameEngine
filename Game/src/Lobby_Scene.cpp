@@ -14,12 +14,14 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
     start_button = new EUI_Button("Start Game", [this, &card_game]() {
         card_game.Get_Network()->call_rpc("startgame");
     });
+    start_button->style.padding = {10, 20, 10, 20};
     root->Add_Child(start_button);
     start_button->is_visible = false;
     auto* leave_button = new EUI_Button("Leave Room", [this, &card_game]() {
         card_game.Close_Network();
         card_game.set_ui_screen(MENU);
     });
+    leave_button->style.padding = {10, 20, 10, 20};
     root->Add_Child(leave_button);
     card_game.Get_Network()->bind_rpc("setplayercount", [this](int new_player_count) {
         player_count = new_player_count;
