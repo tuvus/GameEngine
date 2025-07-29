@@ -4,12 +4,12 @@ project(Game VERSION 0.1.0)
 set(CMAKE_TOOLCHAIN_FILE, "${CMAKE_SOURCE_DIR}/vcpkg.cmake")
 
 set(Sources
-        src/CardGame.cpp
+        src/card_game.cpp
         src/main.cpp
 )
 
 set(Headers
-        include/CardGame.h
+        include/card_game.h
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -18,7 +18,7 @@ add_executable(Game ${Sources} ${Headers})
 #set(DONT_RUN_GAME_ENGINE_TESTS TRUE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
 add_subdirectory(${CMAKE_SOURCE_DIR}/../GameEngine ${CMAKE_CURRENT_BINARY_DIR}/GameEngine)
-target_link_libraries(Game PUBLIC GameEngine)
+target_link_libraries(Game PUBLIC engine)
 target_include_directories(Game PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 # Copy compile_commands.json after build config

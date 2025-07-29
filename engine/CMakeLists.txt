@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-set(PROJECT_NAME euclid)
+set(PROJECT_NAME Euclid)
 project(${PROJECT_NAME} VERSION 0.1.0 DESCRIPTION "Game engine for C++ games" LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 
