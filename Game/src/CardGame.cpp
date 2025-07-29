@@ -76,7 +76,7 @@ EUI_Element* init_test1_ui() {
     return root;
 }
 
-void Card_Game::Init_Client() {
+void Card_Game::Start_Client() {
     SetWindowFocused();
 
     resize_update();
@@ -112,7 +112,6 @@ void Card_Game::Update_UI(chrono::milliseconds deltaTime) {
     curr_ctx.Handle_Input();
     curr_ctx.End_Frame();
     ClearBackground(RAYWHITE);
-
 
     scene->Update_UI(deltaTime, curr_ctx);
 

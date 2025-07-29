@@ -26,10 +26,12 @@ class Card_Game : public Application {
     EUI_Element* init_lobby_ui(Card_Game& g);
     void resize_update();
 
+  protected:
+    void Start_Client() override;
+
   public:
     Card_Game(bool client) : Application("CARD GAME", client, SCREEN_WIDTH, SCREEN_HEIGHT) {};
 
-    void Init_Client() override;
     void Update(chrono::milliseconds s) override;
     void Update_UI(chrono::milliseconds s) override;
     void set_ui_screen(SCREEN screen);

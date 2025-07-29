@@ -26,9 +26,9 @@ class Application {
 
     void Application_Loop();
 
-private:
+protected:
     void Start_Headless();
-    void Start_Client();
+    virtual void Start_Client();
 
   public:
     Application(std::string name, bool client, uint16_t screen_width, uint16_t screen_height);
@@ -38,10 +38,9 @@ private:
     uint16_t screen_width;
     uint16_t screen_height;
 
-    // Required logical update function
+    /* Game update behavior like physics a game logic. Does not include any UI */
     virtual void Update(chrono::milliseconds) = 0;
-    // Optional client functions
-    virtual void Init_Client() {}
+    /* UI update where the buttons, text and game objects are rendered. */
     virtual void Update_UI(chrono::milliseconds) = 0;
 
     void Start_Server();
