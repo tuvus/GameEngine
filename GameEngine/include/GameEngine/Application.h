@@ -34,10 +34,10 @@ class Application {
     uint16_t screen_height;
 
     // Required logical update function
-    virtual void Update(chrono::milliseconds, Application&) = 0;
+    virtual void Update(chrono::milliseconds) = 0;
     // Optional client functions
     virtual void Init_Client() {}
-    virtual void Render(chrono::milliseconds, Application&) {};
+    virtual void Update_UI(chrono::milliseconds) = 0;
 
     void Start_Application();
     void Start_Headless();

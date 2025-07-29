@@ -1,27 +1,27 @@
 #include "CardGame.h"
 #include "Application.h"
-#include "Lobby.h"
+#include "Game_Scene.h"
+#include "Lobby_Scene.h"
+#include "Menu_Scene.h"
 #include "networking/Network.h"
 #include "rpc/client.h"
 
 #include <iostream>
 #include <raylib.h>
 
-void resize_update(Card_Game& g) {
-    if (g.curr_ctx.root) {
-        g.curr_ctx.root->dim = {(float) g.screen_width, (float) g.screen_height};
+void Card_Game::resize_update() {
+    if (curr_ctx.root) {
+        curr_ctx.root->dim = {(float) screen_width, (float) screen_height};
     }
 
-    g.curr_ctx.Perform_Layout();
-}
-
-void Card_Game::set_ui_screen(SCREEN screen) {
-    curr_ctx.root = ui_screens[screen];
     curr_ctx.Perform_Layout();
 }
 
-void draw_UI(Card_Game& g) {
-    g.curr_ctx.Render();
+void Card_Game::set_ui_screen(SCREEN new_screen) {
+    delete scene;
+    scene = sceens[new_screen]();
+    curr_ctx.root = scene->Get_Root();
+    curr_ctx.Perform_Layout();
 }
 
 EUI_Element* init_test1_ui() {
@@ -76,75 +76,27 @@ EUI_Element* init_test1_ui() {
     return root;
 }
 
-EUI_Element* Card_Game::init_menu_ui(Card_Game& g) {
-    auto* root = new EUI_VBox();
-    root->pos = {0, 0};
-    root->dim = {SCREEN_WIDTH, SCREEN_HEIGHT};
-    root->style.vertical_alignment = Alignment::Center;
-    root->style.horizontal_alignment = Alignment::Center;
-    root->gap = 20;
-
-    auto* title = new EUI_Text("Game Title!");
-    title->style.font_size = 40;
-    root->Add_Child(title);
-
-
-    auto* join_button = new EUI_Button("Join Game", [this, &g]() {
-        Start_Client();
-        g.screen = GAME;
-        g.set_ui_screen(LOBBY);
-    });
-    join_button->style.padding = {10, 20, 10, 20};
-    root->Add_Child(join_button);
-
-    auto* host_button = new EUI_Button("Host Game", [this, &g]() {
-        Start_Server();
-        g.screen = GAME;
-        g.set_ui_screen(LOBBY);
-    });
-    host_button->style.padding = {10, 20, 10, 20};
-    root->Add_Child(host_button);
-
-    return root;
-}
-
-EUI_Element* init_game_ui(Card_Game& g) {
-    auto* root = new EUI_HBox();
-    root->pos = {0, 0};
-    root->dim = {SCREEN_WIDTH, SCREEN_HEIGHT};
-    root->style.vertical_alignment = Alignment::Center;
-    root->style.horizontal_alignment = Alignment::Center;
-
-    auto* button = new EUI_Button("Menu", [&g]() {
-        g.screen = MENU;
-        g.set_ui_screen(MENU);
-    });
-    button->style.padding = {10, 20, 10, 20};
-    root->Add_Child(button);
-
-    return root;
-}
-
 void Card_Game::Init_Client() {
     SetWindowFocused();
 
-    resize_update(*this);
+    resize_update();
+    sceens.insert({MENU, [this]() -> Scene* { return new Menu_Scene(*this); }});
+    sceens.insert({LOBBY, [this]() -> Scene* { return new Lobby_Scene(*this); }});
+    sceens.insert({GAME, [this]() -> Scene* { return new Game_Scene(*this); }});
 
-    ui_screens.insert({MENU, init_menu_ui(*this)});
-    ui_screens.insert({LOBBY, new Lobby(*this)});
-    ui_screens.insert({GAME, init_game_ui(*this)});
-
-    screen = MENU;
     set_ui_screen(MENU);
 }
 
-void Card_Game::Update(chrono::milliseconds deltaTime, Application& a) {
+void Card_Game::Update(chrono::milliseconds deltaTime) {
+}
+
+void Card_Game::Update_UI(chrono::milliseconds deltaTime) {
     if (IsKeyPressed(KEY_F)) {
         ToggleFullscreen();
         screen_width = GetScreenWidth();
         screen_height = GetScreenHeight();
 
-        resize_update(*this);
+        resize_update();
     }
 
     if (IsKeyPressed(KEY_B)) {
@@ -152,39 +104,24 @@ void Card_Game::Update(chrono::milliseconds deltaTime, Application& a) {
         screen_width = GetScreenWidth();
         screen_height = GetScreenHeight();
 
-        resize_update(*this);
+        resize_update();
     }
 
     curr_ctx.Begin_Frame();
     curr_ctx.Update_Input();
     curr_ctx.Handle_Input();
     curr_ctx.End_Frame();
+    ClearBackground(RAYWHITE);
+
+
+    scene->Update_UI(deltaTime, curr_ctx);
 
     if (WindowShouldClose())
         Close_Application();
-}
-
-void draw_menu(Card_Game& g) {
-    draw_UI(g);
-}
-
-void draw_game(Card_Game& g) {
-    draw_UI(g);
-}
-
-void Card_Game::Render(chrono::milliseconds deltaTime, Application& a) {
-    ClearBackground(RAYWHITE);
-
-    switch (screen) {
-        case MENU:
-            draw_menu(*this);
-            break;
-        case GAME:
-            draw_game(*this);
-            break;
-    }
 
     EndDrawing();
+
+    curr_ctx.Render();
 }
 
 Card_Game::~Card_Game() = default;

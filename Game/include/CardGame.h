@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Application.h"
+#include "Scene.h"
 
 #include <chrono>
 #include <raylib.h>
@@ -23,18 +24,19 @@ class Card_Game : public Application {
   private:
     EUI_Element* init_menu_ui(Card_Game& g);
     EUI_Element* init_lobby_ui(Card_Game& g);
+    void resize_update();
 
   public:
     Card_Game(bool client) : Application("CARD GAME", client, SCREEN_WIDTH, SCREEN_HEIGHT) {};
 
     void Init_Client() override;
-    void Update(chrono::milliseconds s, Application&) override;
-    void Render(chrono::milliseconds s, Application&) override;
+    void Update(chrono::milliseconds s) override;
+    void Update_UI(chrono::milliseconds s) override;
     void set_ui_screen(SCREEN screen);
 
     ~Card_Game();
 
     EUI_Context curr_ctx = EUI_Context();
-    std::unordered_map<SCREEN, EUI_Element*> ui_screens;
-    SCREEN screen = MENU;
+    Scene* scene;
+    std::unordered_map<SCREEN, std::function<Scene*()>> sceens;
 };

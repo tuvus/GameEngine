@@ -81,11 +81,11 @@ void Application::Application_Loop()
         if (network)
             network->Network_Update();
 
-        Update(delta_time, *this);
+        Update(delta_time);
 
         if (client)
         {
-            Render(delta_time, *this);
+            Update_UI(delta_time);
         }
 
         this_thread::sleep_until(frame_start_time + 16ms);

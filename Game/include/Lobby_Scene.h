@@ -1,0 +1,12 @@
+#pragma once
+#include "CardGame.h"
+#include "Scene.h"
+
+using namespace std;
+
+class Lobby_Scene : public Scene {
+  public:
+    Lobby_Scene(Card_Game& card_game);
+    void Update_UI(std::chrono::milliseconds, EUI_Context context) override;
+    void Update(std::chrono::milliseconds) override;
+};

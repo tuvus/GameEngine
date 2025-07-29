@@ -24,6 +24,7 @@ set(Headers
         ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Rpc_Manager.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/ui/eui.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Rpc_Manager.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/Scene.h
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works

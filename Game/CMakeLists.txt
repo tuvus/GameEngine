@@ -6,12 +6,14 @@ set(CMAKE_TOOLCHAIN_FILE, "${CMAKE_SOURCE_DIR}/vcpkg.cmake")
 set(Sources
         src/CardGame.cpp
         src/main.cpp
-        src/Lobby.cpp
+        src/Lobby_Scene.cpp
 )
 
 set(Headers
         include/CardGame.h
-        include/Lobby.h
+        include/Lobby_Scene.h
+        include/Menu_Scene.h
+        include/Game_Scene.h
 )
 
 set(CMAKE_CXX_STANDARD 23)
