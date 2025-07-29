@@ -11,6 +11,11 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
     root->gap = 20;
     status_text = new EUI_Text("Connecting...");
     root->Add_Child(status_text);
+    start_button = new EUI_Button("Start Game", [this, &card_game]() {
+        card_game.Get_Network()->call_rpc("startgame");
+    });
+    root->Add_Child(start_button);
+    start_button->is_visible = false;
     auto* leave_button = new EUI_Button("Leave Room", [this, &card_game]() {
         card_game.Close_Network();
         card_game.set_ui_screen(MENU);
@@ -19,6 +24,13 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
     card_game.Get_Network()->bind_rpc("setplayercount", [this](int new_player_count) {
         player_count = new_player_count;
         return RPC_Manager::Rpc_Validator_Result::VALID;
+    });
+    card_game.Get_Network()->bind_rpc("startgame", [&card_game]() {
+        if (card_game.Get_Network()->Get_Network_State() != Network::Server_Running &&
+            card_game.Get_Network()->Get_Network_State() != Network::Client_Connected)
+            return RPC_Manager::Rpc_Validator_Result::INVALID;
+        card_game.set_ui_screen(GAME);
+        return RPC_Manager::VALID;
     });
 }
 
@@ -34,6 +46,7 @@ void Lobby_Scene::Update_UI(std::chrono::milliseconds, EUI_Context context) {
             if (player_count != card_game.Get_Network()->Get_Num_Connected_Clients() + 1)
                 card_game.Get_Network()->call_rpc(
                     "setplayercount", card_game.Get_Network()->Get_Num_Connected_Clients() + 1);
+            start_button->is_visible = true;
         case Network::Client_Connected:
             status_text->text = "Players: " + to_string(player_count);
             break;

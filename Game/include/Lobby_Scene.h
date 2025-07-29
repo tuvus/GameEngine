@@ -7,6 +7,7 @@ using namespace std;
 class Lobby_Scene : public Scene {
 private:
     EUI_Text* status_text;
+    EUI_Button* start_button;
     Card_Game& card_game;
     int player_count;
   public:
