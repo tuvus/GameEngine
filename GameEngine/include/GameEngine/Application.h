@@ -22,29 +22,32 @@ class Application {
     bool client;
     string application_name;
     ApplicationState application_state;
-    unique_ptr<Network> network;
+    shared_ptr<Network> network;
 
     void Application_Loop();
+
+protected:
+    void Start_Headless();
+    virtual void Start_Client();
 
   public:
     Application(std::string name, bool client, uint16_t screen_width, uint16_t screen_height);
     virtual ~Application() = default;
+    void Start_Application();
 
     uint16_t screen_width;
     uint16_t screen_height;
 
-    // Required logical update function
-    virtual void Update(chrono::milliseconds, Application&) = 0;
-    // Optional client functions
-    virtual void Init_Client() {}
-    virtual void Render(chrono::milliseconds, Application&) {};
+    /* Game update behavior like physics a game logic. Does not include any UI */
+    virtual void Update(chrono::milliseconds) = 0;
+    /* UI update where the buttons, text and game objects are rendered. */
+    virtual void Update_UI(chrono::milliseconds) = 0;
 
-    void Start_Application();
     void Start_Server();
-    void Start_Client();
+    void Connect_To_Server();
 
     string Get_Name();
-    Network* Get_Network();
+    shared_ptr<Network> Get_Network();
 
     void Close_Application();
     void Close_Network();

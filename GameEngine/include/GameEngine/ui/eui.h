@@ -1,10 +1,15 @@
+#pragma once
+#include "eui.h"
+
 #include <algorithm>
+#include <chrono>
 #include <functional>
 #include <optional>
 #include <raylib.h>
 #include <string>
 #include <vector>
 
+class Application;
 // TOP, RIGHT, BOTTOM, LEFT
 typedef struct Sides {
   public:

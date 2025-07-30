@@ -15,5 +15,8 @@
   }, {
     "name": "raylib",
     "version>=": "5.5"
-  } ]
+    }, {
+      "name" : "rpclib",
+      "version>=" : "2.3.0#2"
+    } ]
 }

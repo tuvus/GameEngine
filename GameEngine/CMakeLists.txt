@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(Sources
         src/Application.cpp
         src/networking/Network.cpp
+        src/networking/Rpc_Manager.cpp
         src/ui/context.cpp
         src/ui/element.cpp
         src/ui/container.cpp
@@ -20,7 +21,10 @@ set(Headers
         ${PROJECT_SOURCE_DIR}/include/GameEngine/Application.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/ApplicationFactory.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Network.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Rpc_Manager.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/ui/eui.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Rpc_Manager.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/Scene.h
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
@@ -30,7 +34,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_BINARY_DIR} ${PROJEC
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(raylib CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC raylib glfw GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
+find_package(rpclib CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC raylib glfw GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets rpclib::rpc)
 find_package(GameNetworkingSockets CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets)
 
