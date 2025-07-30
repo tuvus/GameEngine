@@ -7,10 +7,13 @@ set(CMAKE_CXX_STANDARD 23)
 set(Sources
         src/Application.cpp
         src/networking/Network.cpp
-        src/ui/button.cpp
-        src/ui/container.cpp
         src/ui/context.cpp
         src/ui/element.cpp
+        src/ui/container.cpp
+        src/ui/vbox.cpp
+        src/ui/hbox.cpp
+        src/ui/text.cpp
+        src/ui/button.cpp
 )
 
 set(Headers
