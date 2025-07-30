@@ -176,7 +176,7 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                 }
                 else
                 {
-                    debug_message = "Internal problem on the server with id: " + client->second.id;
+                    debug_message = "Internal problem on the server with id: " + to_string(client->second.id);
                 }
                 cout << debug_message << endl;
                 connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState,
