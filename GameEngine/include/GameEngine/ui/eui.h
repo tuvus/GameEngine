@@ -1,8 +1,5 @@
 #pragma once
-#include "eui.h"
 
-#include <algorithm>
-#include <chrono>
 #include <functional>
 #include <optional>
 #include <raylib.h>
@@ -39,10 +36,13 @@ class EUI_Input {
 
 class EUI_Style {
   public:
+    // Optional styles are inherited if not explicitly set
     std::optional<Color> background_color;
     std::optional<Color> text_color;
 
+    // Units are all px
     Sides margin, padding = {0};
+
     Position position = Position::Static;
 
     Color border_color = BLACK;
