@@ -16,6 +16,7 @@ Network::Network(bool server, std::function<void()> close_network_function)
 {
     network_instance = this;
     state = Setting_Up;
+    connection_events = make_unique<std::unordered_set<Network_Events_Receiver>>();
 
     SteamDatagramErrMsg err_msg;
     if (!GameNetworkingSockets_Init(nullptr, err_msg))
@@ -48,6 +49,10 @@ Network::Network(bool server, std::function<void()> close_network_function)
             cerr << "Failed to setup poll group listener on port " << addr_server.m_port << endl;
         cout << "Starting server, listening on port: " << addr_server.m_port << endl;
         state = Server_Running;
+        for (const Network_Events_Receiver& receiver : *connection_events)
+        {
+            const_cast<Network_Events_Receiver&>(receiver).On_Server_Start();
+        }
     }
     else
     {
@@ -74,6 +79,10 @@ Network::~Network()
         listen_socket = k_HSteamListenSocket_Invalid;
         connection_api->DestroyPollGroup(poll_group);
         poll_group = k_HSteamNetPollGroup_Invalid;
+        for (const Network_Events_Receiver& receiver : *connection_events)
+        {
+            const_cast<Network_Events_Receiver&>(receiver).On_Server_Stop();
+        }
     }
     GameNetworkingSockets_Kill();
 }
@@ -160,9 +169,16 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                 // Close the connection to them specifically
                 if (new_status->m_eOldState != k_ESteamNetworkingConnectionState_Connected)
                 {
+                    auto client = connection_to_clients.find(new_status->m_hConn);
+                    assert(client != connection_to_clients.end());
                     assert(new_status->m_eOldState == k_ESteamNetworkingConnectionState_Connecting);
                     connection_api->CloseConnection(new_status->m_hConn,
                                                     new_status->m_info.m_eState, nullptr, false);
+                    for (const Network_Events_Receiver& receiver : *connection_events)
+                    {
+                        const_cast<Network_Events_Receiver&>(receiver).On_Client_Disconnected(client->first);
+                    }
+                    connection_to_clients.erase(client);
                     break;
                 }
 
@@ -181,6 +197,10 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                 cout << debug_message << endl;
                 connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState,
                                                 debug_message.c_str(), false);
+                for (const Network_Events_Receiver& receiver : *connection_events)
+                {
+                    const_cast<Network_Events_Receiver&>(receiver).On_Client_Disconnected(client->first);
+                }
                 connection_to_clients.erase(client);
             }
             else
@@ -191,6 +211,10 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                     cout << "Leaving server" << endl;
                 connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState,
                                                 nullptr, false);
+                for (const Network_Events_Receiver& receiver : *connection_events)
+                {
+                    const_cast<Network_Events_Receiver&>(receiver).On_Disconnected();
+                }
                 state = Closing;
             }
         }
@@ -201,7 +225,7 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
             auto client = connection_to_clients.find(new_status->m_hConn);
             if (client != connection_to_clients.end())
             {
-                cerr << "Trying to conect a client that has already been connected!" << endl;
+                cerr << "Trying to connect a client that has already been connected!" << endl;
             }
             cout << "Connecting client " << new_status->m_info.m_szConnectionDescription << endl;
             if (connection_api->AcceptConnection(new_status->m_hConn) != k_EResultOK)
@@ -224,6 +248,10 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
             connection_to_clients[new_status->m_hConn] = Network_Client{new_client_id};
             connection_api->SetConnectionName(new_status->m_hConn,
                                               to_string(new_client_id).c_str());
+            for (const Network_Events_Receiver& receiver : *connection_events)
+            {
+                const_cast<Network_Events_Receiver&>(receiver).On_Client_Connected(new_client_id);
+            }
         }
         case k_ESteamNetworkingConnectionState_Connected:
         {
@@ -231,6 +259,10 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                 break;
             cout << "Client connected" << endl;
             state = Client_Connected;
+            for (const Network_Events_Receiver& receiver : *connection_events)
+            {
+                const_cast<Network_Events_Receiver&>(receiver).On_Connected();
+            }
         }
         default:
             break;

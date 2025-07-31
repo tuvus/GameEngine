@@ -5,9 +5,9 @@
 #include <string>
 #include <utility>
 #include <steam/isteamnetworkingsockets.h>
-#include <string>
 
 #include "Rpc_Manager.h"
+#include "Scene.h"
 
 struct Rpc_Message
 {
@@ -26,6 +26,16 @@ struct Rpc_Message
 
     // Tells msgpack how to serialize Rpc_Message
     MSGPACK_DEFINE(rpc_call)
+};
+
+class Network_Events_Receiver {
+public:
+    virtual void On_Connected() = 0;
+    virtual void On_Disconnected() = 0;
+    virtual void On_Server_Start() = 0;
+    virtual void On_Server_Stop() = 0;
+    virtual void On_Client_Connected(int) = 0;
+    virtual void On_Client_Disconnected(int) = 0;
 };
 
 class Network
@@ -83,6 +93,8 @@ public:
     void Send_Message_To_Client(HSteamNetConnection connection, const Rpc_Message& rpc_message);
     void Send_Message_To_Clients(const Rpc_Message& rpc_message);
     void Send_Message_To_Server(const Rpc_Message& rpc_message);
+
+    std::unique_ptr<std::unordered_set<Network_Events_Receiver>> connection_events;
 
     /**
      * Calls the function on the server.
