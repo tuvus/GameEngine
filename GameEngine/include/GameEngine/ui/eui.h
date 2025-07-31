@@ -1,5 +1,9 @@
 #pragma once
 
+/*
+ * EUI is a simple UI library for creating UI in a html/css-like way.
+ */
+
 #include <functional>
 #include <optional>
 #include <raylib.h>
@@ -44,6 +48,7 @@ class EUI_Style {
     Sides margin, padding = {0};
 
     Position position = Position::Static;
+    float top, right, bottom, left = 0;
 
     Color border_color = BLACK;
     float border_radius = 0;
@@ -142,7 +147,7 @@ class EUI_Container : public EUI_Element {
 
     float gap = 0;
 
-    std::vector<EUI_Element*>& Get_Children() const;
+    std::vector<EUI_Element*>& Get_Children();
     void Add_Child(EUI_Element* child);
 
     virtual void Layout(EUI_Context& ctx) override = 0;
