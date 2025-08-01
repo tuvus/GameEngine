@@ -43,15 +43,6 @@ public:
     virtual void On_Client_Disconnected(int) = 0;
 };
 
-class Network_Events_Receiver_Hash_Function {
-public:
-    // id is returned as hash function
-    size_t operator()(const Network_Events_Receiver* e) const
-    {
-        return reinterpret_cast<size_t>(e);
-    }
-};
-
 class Network
 {
 public:
@@ -110,7 +101,7 @@ public:
     void Send_Message_To_Server(const Rpc_Message& rpc_message);
 
     // Holds aset of subscribers to the networking events that can occur
-    std::unique_ptr<std::unordered_set<Network_Events_Receiver*, Network_Events_Receiver_Hash_Function>> connection_events;
+    std::unique_ptr<std::unordered_set<Network_Events_Receiver*>> connection_events;
 
     /**
      * Calls the function on the server.

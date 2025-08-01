@@ -16,7 +16,7 @@ Network::Network(bool server, std::function<void()> close_network_function)
 {
     network_instance = this;
     state = Setting_Up;
-    connection_events = make_unique<std::unordered_set<Network_Events_Receiver*, Network_Events_Receiver_Hash_Function>>();
+    connection_events = make_unique<std::unordered_set<Network_Events_Receiver*>>();
     rpc_manager = make_unique<RPC_Manager>();
 }
 
