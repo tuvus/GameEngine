@@ -386,4 +386,3 @@ void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char*
 }
 
 Network* Network::network_instance = nullptr;
-// size_t Network_Events_Receiver::next_id = 0;

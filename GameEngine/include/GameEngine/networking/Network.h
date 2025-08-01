@@ -109,6 +109,7 @@ public:
     void Send_Message_To_Clients(const Rpc_Message& rpc_message);
     void Send_Message_To_Server(const Rpc_Message& rpc_message);
 
+    // Holds aset of subscribers to the networking events that can occur
     std::unique_ptr<std::unordered_set<Network_Events_Receiver*, Network_Events_Receiver_Hash_Function>> connection_events;
 
     /**
