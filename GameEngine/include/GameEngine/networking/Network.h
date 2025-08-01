@@ -7,7 +7,6 @@
 #include <steam/isteamnetworkingsockets.h>
 
 #include "Rpc_Manager.h"
-#include "Scene.h"
 
 struct Rpc_Message
 {
@@ -29,13 +28,30 @@ struct Rpc_Message
 };
 
 class Network_Events_Receiver {
+private:
+
+    const size_t i2d = 1;
+    static size_t next_id;
+
 public:
+    Network_Events_Receiver() : id(next_id++) {}
+    virtual ~Network_Events_Receiver() = default;
     virtual void On_Connected() = 0;
     virtual void On_Disconnected() = 0;
     virtual void On_Server_Start() = 0;
     virtual void On_Server_Stop() = 0;
     virtual void On_Client_Connected(int) = 0;
     virtual void On_Client_Disconnected(int) = 0;
+    const size_t id;
+};
+
+class Network_Events_Receiver_Hash_Function {
+public:
+    // id is returned as hash function
+    size_t operator()(const Network_Events_Receiver& e) const
+    {
+        return e.id;
+    }
 };
 
 class Network
@@ -94,7 +110,7 @@ public:
     void Send_Message_To_Clients(const Rpc_Message& rpc_message);
     void Send_Message_To_Server(const Rpc_Message& rpc_message);
 
-    std::unique_ptr<std::unordered_set<Network_Events_Receiver>> connection_events;
+    std::unique_ptr<std::unordered_set<Network_Events_Receiver, Network_Events_Receiver_Hash_Function>> connection_events;
 
     /**
      * Calls the function on the server.

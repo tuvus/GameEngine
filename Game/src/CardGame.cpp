@@ -3,8 +3,6 @@
 #include "Game_Scene.h"
 #include "Lobby_Scene.h"
 #include "Menu_Scene.h"
-#include "networking/Network.h"
-#include "rpc/client.h"
 
 #include <iostream>
 #include <raylib.h>

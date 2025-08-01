@@ -16,7 +16,7 @@ Network::Network(bool server, std::function<void()> close_network_function)
 {
     network_instance = this;
     state = Setting_Up;
-    connection_events = make_unique<std::unordered_set<Network_Events_Receiver>>();
+    connection_events = make_unique<std::unordered_set<Network_Events_Receiver, Network_Events_Receiver_Hash_Function>>();
 
     SteamDatagramErrMsg err_msg;
     if (!GameNetworkingSockets_Init(nullptr, err_msg))
@@ -380,3 +380,4 @@ void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char*
 }
 
 Network* Network::network_instance = nullptr;
+size_t Network_Events_Receiver::next_id = 0;

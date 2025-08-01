@@ -1,6 +1,7 @@
 #pragma once
 #include "CardGame.h"
 #include "Scene.h"
+#include "networking/Network.h"
 
 using namespace std;
 
