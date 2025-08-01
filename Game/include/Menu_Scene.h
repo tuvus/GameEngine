@@ -20,6 +20,7 @@ public:
         auto* join_button = new EUI_Button("Join Game", [&card_game] {
             card_game.Connect_To_Server();
             card_game.set_ui_screen(LOBBY);
+            card_game.Get_Network()->Start_Network();
         });
         join_button->style.padding = {10, 20, 10, 20};
         root->Add_Child(join_button);
@@ -27,6 +28,7 @@ public:
         auto* host_button = new EUI_Button("Host Game", [&card_game] {
             card_game.Start_Server();
             card_game.set_ui_screen(LOBBY);
+            card_game.Get_Network()->Start_Network();
         });
         host_button->style.padding = {10, 20, 10, 20};
         root->Add_Child(host_button);

@@ -5,7 +5,6 @@
 #include <string>
 #include <utility>
 #include <steam/isteamnetworkingsockets.h>
-#include <string>
 
 #include "Rpc_Manager.h"
 
@@ -26,6 +25,22 @@ struct Rpc_Message
 
     // Tells msgpack how to serialize Rpc_Message
     MSGPACK_DEFINE(rpc_call)
+};
+
+class Network_Events_Receiver {
+public:
+    // Called on the client when the client is connected
+    virtual void On_Connected() = 0;
+    // Called on the client when the client is disconnected (not on the host)
+    virtual void On_Disconnected() = 0;
+    // Called on the server when the server is started
+    virtual void On_Server_Start() = 0;
+    // Called on the server when the server is stopped
+    virtual void On_Server_Stop() = 0;
+    // Called on the server when a client is connected
+    virtual void On_Client_Connected(int) = 0;
+    // Called on the server when a client is disconnected
+    virtual void On_Client_Disconnected(int) = 0;
 };
 
 class Network
@@ -75,6 +90,7 @@ public:
     void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
     Network(bool server, std::function<void()> close_network_function);
     ~Network();
+    void Start_Network();
     void Network_Update();
     Network_State Get_Network_State();
     int Get_Num_Connected_Clients() const;
@@ -83,6 +99,9 @@ public:
     void Send_Message_To_Client(HSteamNetConnection connection, const Rpc_Message& rpc_message);
     void Send_Message_To_Clients(const Rpc_Message& rpc_message);
     void Send_Message_To_Server(const Rpc_Message& rpc_message);
+
+    // Holds aset of subscribers to the networking events that can occur
+    std::unique_ptr<std::unordered_set<Network_Events_Receiver*>> connection_events;
 
     /**
      * Calls the function on the server.

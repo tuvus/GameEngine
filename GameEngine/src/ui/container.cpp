@@ -9,12 +9,14 @@ void EUI_Container::Add_Child(EUI_Element* child) {
 }
 
 void EUI_Container::Handle_Input(EUI_Context& ctx) {
-    if (!is_visible)
+    if (!is_visible || is_deleted)
         return;
 
     for (EUI_Element* child : children) {
-        if (child->is_visible)
+        if (child->is_visible) {
             child->Handle_Input(ctx);
+            if (is_deleted) return;
+        }
     }
 }
 

@@ -102,7 +102,7 @@ class EUI_Context {
 
 class EUI_Element {
   public:
-    virtual ~EUI_Element() = default;
+    virtual ~EUI_Element() { is_deleted = true; }
 
     std::string id;
 
@@ -115,6 +115,7 @@ class EUI_Element {
     bool is_hovered = false;
     bool is_focused = false;
     bool is_active = false;
+    bool is_deleted = false;
 
     EUI_Style style;
 

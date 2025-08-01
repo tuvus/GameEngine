@@ -3,7 +3,6 @@
 #include "Application.h"
 #include "ApplicationFactory.h"
 #include "CardGame.h"
-#include <raylib.h>
 
 class CardGameFactory : public ApplicationFactory {
   public:
