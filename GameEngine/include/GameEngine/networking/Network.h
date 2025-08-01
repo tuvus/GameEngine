@@ -100,6 +100,7 @@ public:
     void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
     Network(bool server, std::function<void()> close_network_function);
     ~Network();
+    void Start_Network();
     void Network_Update();
     Network_State Get_Network_State();
     int Get_Num_Connected_Clients() const;

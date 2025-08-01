@@ -37,11 +37,6 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
         return RPC_Manager::VALID;
     });
     card_game.Get_Network()->connection_events->emplace(static_cast<Network_Events_Receiver*>(this));
-    if (card_game.Get_Network()->Get_Network_State() ==Network::Client_Connected) {
-        On_Connected();
-    } else if (card_game.Get_Network()->Get_Network_State() == Network::Server_Running) {
-        On_Server_Start();
-    }
 }
 
 Lobby_Scene::~Lobby_Scene() {
@@ -55,6 +50,8 @@ void Lobby_Scene::Update(std::chrono::milliseconds) {
 }
 
 void Lobby_Scene::On_Connected() {
+    if (player_count == 0)
+        status_text->text = "Connected";
 }
 
 void Lobby_Scene::On_Disconnected() {

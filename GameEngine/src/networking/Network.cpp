@@ -17,7 +17,32 @@ Network::Network(bool server, std::function<void()> close_network_function)
     network_instance = this;
     state = Setting_Up;
     connection_events = make_unique<std::unordered_set<Network_Events_Receiver*, Network_Events_Receiver_Hash_Function>>();
+    rpc_manager = make_unique<RPC_Manager>();
+}
 
+Network::~Network()
+{
+    state = Closed;
+    if (server)
+    {
+        for (auto client : connection_to_clients)
+        {
+            connection_api->CloseConnection(client.first, 0, "Shutting down server", false);
+        }
+        for (const Network_Events_Receiver* receiver : *connection_events)
+        {
+            const_cast<Network_Events_Receiver*>(receiver)->On_Server_Stop();
+        }
+        connection_to_clients.clear();
+        connection_api->CloseListenSocket(listen_socket);
+        listen_socket = k_HSteamListenSocket_Invalid;
+        connection_api->DestroyPollGroup(poll_group);
+        poll_group = k_HSteamNetPollGroup_Invalid;
+    }
+    GameNetworkingSockets_Kill();
+}
+
+void Network::Start_Network() {
     SteamDatagramErrMsg err_msg;
     if (!GameNetworkingSockets_Init(nullptr, err_msg))
     {
@@ -35,8 +60,6 @@ Network::Network(bool server, std::function<void()> close_network_function)
 
     config_options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged,
                           (void*) On_Connect_Changed_Adapter);
-
-    rpc_manager = make_unique<RPC_Manager>();
 
     if (server)
     {
@@ -63,28 +86,6 @@ Network::Network(bool server, std::function<void()> close_network_function)
             cerr << "Failed to create connection to the host" << endl;
         state = Client_Connecting;
     }
-}
-
-Network::~Network()
-{
-    state = Closed;
-    if (server)
-    {
-        for (auto client : connection_to_clients)
-        {
-            connection_api->CloseConnection(client.first, 0, "Shutting down server", false);
-        }
-        for (const Network_Events_Receiver* receiver : *connection_events)
-        {
-            const_cast<Network_Events_Receiver*>(receiver)->On_Server_Stop();
-        }
-        connection_to_clients.clear();
-        connection_api->CloseListenSocket(listen_socket);
-        listen_socket = k_HSteamListenSocket_Invalid;
-        connection_api->DestroyPollGroup(poll_group);
-        poll_group = k_HSteamNetPollGroup_Invalid;
-    }
-    GameNetworkingSockets_Kill();
 }
 
 void Network::Network_Update()
