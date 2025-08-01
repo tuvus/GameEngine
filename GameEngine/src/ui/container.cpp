@@ -12,9 +12,11 @@ void EUI_Container::Handle_Input(EUI_Context& ctx) {
     if (!is_visible)
         return;
 
-    for (EUI_Element* child : children) {
-        if (child->is_visible)
-            child->Handle_Input(ctx);
+    // We have to make sure that we can handle concurrent modification
+    // Changing scenes for example will delete all UI elements
+    for (int i = 0; i < children.size(); ++i) {
+        if (children[i]->is_visible)
+            children[i]->Handle_Input(ctx);
     }
 }
 
