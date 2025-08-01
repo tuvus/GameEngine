@@ -16,7 +16,7 @@ Network::Network(bool server, std::function<void()> close_network_function)
 {
     network_instance = this;
     state = Setting_Up;
-    connection_events = make_unique<std::unordered_set<Network_Events_Receiver, Network_Events_Receiver_Hash_Function>>();
+    connection_events = make_unique<std::unordered_set<Network_Events_Receiver*, Network_Events_Receiver_Hash_Function>>();
 
     SteamDatagramErrMsg err_msg;
     if (!GameNetworkingSockets_Init(nullptr, err_msg))
@@ -49,9 +49,9 @@ Network::Network(bool server, std::function<void()> close_network_function)
             cerr << "Failed to setup poll group listener on port " << addr_server.m_port << endl;
         cout << "Starting server, listening on port: " << addr_server.m_port << endl;
         state = Server_Running;
-        for (const Network_Events_Receiver& receiver : *connection_events)
+        for (const Network_Events_Receiver* receiver : *connection_events)
         {
-            const_cast<Network_Events_Receiver&>(receiver).On_Server_Start();
+            const_cast<Network_Events_Receiver*>(receiver)->On_Server_Start();
         }
     }
     else
@@ -74,15 +74,15 @@ Network::~Network()
         {
             connection_api->CloseConnection(client.first, 0, "Shutting down server", false);
         }
+        for (const Network_Events_Receiver* receiver : *connection_events)
+        {
+            const_cast<Network_Events_Receiver*>(receiver)->On_Server_Stop();
+        }
         connection_to_clients.clear();
         connection_api->CloseListenSocket(listen_socket);
         listen_socket = k_HSteamListenSocket_Invalid;
         connection_api->DestroyPollGroup(poll_group);
         poll_group = k_HSteamNetPollGroup_Invalid;
-        for (const Network_Events_Receiver& receiver : *connection_events)
-        {
-            const_cast<Network_Events_Receiver&>(receiver).On_Server_Stop();
-        }
     }
     GameNetworkingSockets_Kill();
 }
@@ -174,9 +174,9 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                     assert(new_status->m_eOldState == k_ESteamNetworkingConnectionState_Connecting);
                     connection_api->CloseConnection(new_status->m_hConn,
                                                     new_status->m_info.m_eState, nullptr, false);
-                    for (const Network_Events_Receiver& receiver : *connection_events)
+                    for (const Network_Events_Receiver* receiver : *connection_events)
                     {
-                        const_cast<Network_Events_Receiver&>(receiver).On_Client_Disconnected(client->first);
+                        const_cast<Network_Events_Receiver*>(receiver)->On_Client_Disconnected(client->first);
                     }
                     connection_to_clients.erase(client);
                     break;
@@ -197,9 +197,9 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                 cout << debug_message << endl;
                 connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState,
                                                 debug_message.c_str(), false);
-                for (const Network_Events_Receiver& receiver : *connection_events)
+                for (const Network_Events_Receiver* receiver : *connection_events)
                 {
-                    const_cast<Network_Events_Receiver&>(receiver).On_Client_Disconnected(client->first);
+                    const_cast<Network_Events_Receiver*>(receiver)->On_Client_Disconnected(client->first);
                 }
                 connection_to_clients.erase(client);
             }
@@ -211,9 +211,14 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                     cout << "Leaving server" << endl;
                 connection_api->CloseConnection(new_status->m_hConn, new_status->m_info.m_eState,
                                                 nullptr, false);
-                for (const Network_Events_Receiver& receiver : *connection_events)
+                vector<Network_Events_Receiver*> receivers;
+                for (const Network_Events_Receiver* receiver : *connection_events)
                 {
-                    const_cast<Network_Events_Receiver&>(receiver).On_Disconnected();
+                    receivers.emplace_back(const_cast<Network_Events_Receiver*>(receiver));
+                }
+                for (Network_Events_Receiver* receiver : receivers)
+                {
+                    receiver->On_Disconnected();
                 }
                 state = Closing;
             }
@@ -248,9 +253,9 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
             connection_to_clients[new_status->m_hConn] = Network_Client{new_client_id};
             connection_api->SetConnectionName(new_status->m_hConn,
                                               to_string(new_client_id).c_str());
-            for (const Network_Events_Receiver& receiver : *connection_events)
+            for (const Network_Events_Receiver* receiver : *connection_events)
             {
-                const_cast<Network_Events_Receiver&>(receiver).On_Client_Connected(new_client_id);
+                const_cast<Network_Events_Receiver*>(receiver)->On_Client_Connected(new_client_id);
             }
         }
         case k_ESteamNetworkingConnectionState_Connected:
@@ -259,9 +264,9 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                 break;
             cout << "Client connected" << endl;
             state = Client_Connected;
-            for (const Network_Events_Receiver& receiver : *connection_events)
+            for (const Network_Events_Receiver* receiver : *connection_events)
             {
-                const_cast<Network_Events_Receiver&>(receiver).On_Connected();
+                const_cast<Network_Events_Receiver*>(receiver)->On_Connected();
             }
         }
         default:
@@ -380,4 +385,4 @@ void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char*
 }
 
 Network* Network::network_instance = nullptr;
-size_t Network_Events_Receiver::next_id = 0;
+// size_t Network_Events_Receiver::next_id = 0;

@@ -13,6 +13,7 @@ private:
     int player_count;
   public:
     Lobby_Scene(Card_Game& card_game);
+    ~Lobby_Scene() override;
     void Update_UI(std::chrono::milliseconds, EUI_Context context) override;
     void Update(std::chrono::milliseconds) override;
     void On_Connected() override;
