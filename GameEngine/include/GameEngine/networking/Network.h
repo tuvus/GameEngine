@@ -28,20 +28,19 @@ struct Rpc_Message
 };
 
 class Network_Events_Receiver {
-private:
-
-    // const size_t i2d = 1;
-    // static size_t next_id;
-
 public:
-    // Network_Events_Receiver() : id(next_id++) {}
+    // Called on the client when the client is connected
     virtual void On_Connected() = 0;
+    // Called on the client when the client is disconnected (not on the host)
     virtual void On_Disconnected() = 0;
+    // Called on the server when the server is started
     virtual void On_Server_Start() = 0;
+    // Called on the server when the server is stopped
     virtual void On_Server_Stop() = 0;
+    // Called on the server when a client is connected
     virtual void On_Client_Connected(int) = 0;
+    // Called on the server when a client is disconnected
     virtual void On_Client_Disconnected(int) = 0;
-    // const size_t id;
 };
 
 class Network_Events_Receiver_Hash_Function {
