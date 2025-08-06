@@ -3,8 +3,6 @@
 #include "Game_Scene.h"
 #include "Lobby_Scene.h"
 #include "Menu_Scene.h"
-#include "networking/Network.h"
-#include "rpc/client.h"
 
 #include <iostream>
 #include <raylib.h>
@@ -58,6 +56,7 @@ void Card_Game::Update_UI(chrono::milliseconds deltaTime) {
 
     if (IsKeyPressed(KEY_Q) && IsKeyDown(KEY_LEFT_CONTROL)) {
         Close_Application();
+        return;
     }
 
     curr_ctx.Begin_Frame();
@@ -68,12 +67,23 @@ void Card_Game::Update_UI(chrono::milliseconds deltaTime) {
 
     scene->Update_UI(deltaTime, curr_ctx);
 
-    if (WindowShouldClose())
+    if (WindowShouldClose()) {
         Close_Application();
+        return;
+    }
 
     EndDrawing();
 
     curr_ctx.Render();
 }
 
-Card_Game::~Card_Game() = default;
+Card_Game::~Card_Game() {
+    delete scene;
+    scene = nullptr;
+}
+
+void Card_Game::Close_Application() {
+    delete scene;
+    scene = nullptr;
+    Application::Close_Application();
+}

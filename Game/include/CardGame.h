@@ -36,7 +36,9 @@ class Card_Game : public Application {
     void Update_UI(chrono::milliseconds s) override;
     void set_ui_screen(SCREEN screen);
 
-    ~Card_Game();
+    ~Card_Game() override;
+
+    void Close_Application() override;
 
     EUI_Context curr_ctx = EUI_Context();
     Scene* scene;

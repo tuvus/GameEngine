@@ -1,10 +1,9 @@
 #pragma once
 
-#include "networking//Network.h"
+#include "networking/Network.h"
 #include "ui/eui.h"
 
 #include <chrono>
-#include <cstdint>
 
 using namespace std;
 
@@ -49,7 +48,7 @@ protected:
     string Get_Name();
     shared_ptr<Network> Get_Network();
 
-    void Close_Application();
+    virtual void Close_Application();
     void Close_Network();
 };
 
