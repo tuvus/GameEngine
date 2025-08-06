@@ -10,8 +10,6 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
 
     // gap between elements in container
     float total_gap = 0;
-    if (gap)
-        total_gap = gap * (children.size() - 1);
 
     // gap for align-stretch
     float interval = 0;
@@ -20,15 +18,24 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
     float default_spacing = 0;
     int num_containers = 0;
 
+    int num_layout_children = 0;
+
     // calculate total non-container content height
     for (EUI_Element* child : children) {
+        if (child->Get_Effective_Style(ctx).position == Position::Absolute) {
+            continue;
+        }
         if (child->Is_Container()) {
             num_containers++;
             continue;
         }
         child->Layout(ctx);
         total_leaf_width += child->preferred_size.x;
+        num_layout_children++;
     }
+
+    if (gap && num_layout_children)
+        total_gap = gap * (num_layout_children - 1);
 
     if (children.size())
         default_spacing =
@@ -36,6 +43,9 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
 
     // place containers
     for (EUI_Element* child : children) {
+        if (child->Get_Effective_Style(ctx).position == Position::Absolute) {
+            continue;
+        }
         if (child->Is_Container()) {
             child->pos = {cursor, pos.y + style.padding.top};
             child->dim = {default_spacing, dim.y - style.padding.top - style.padding.bottom};
@@ -69,7 +79,8 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
     for (int i = 0; i < children.size(); i++) {
         EUI_Element* child = children[i];
 
-        if (!child->Is_Container()) {
+        if (!child->Is_Container() &&
+            child->Get_Effective_Style(ctx).position != Position::Absolute) {
             // clamp to min/max
             float width = std::clamp(child->preferred_size.x, child->min_size.x, child->max_size.x);
             float height =
