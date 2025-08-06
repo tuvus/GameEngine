@@ -22,7 +22,7 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
 
     // calculate total non-container content height
     for (EUI_Element* child : children) {
-        if (child->Get_Effective_Style(ctx).position == Position::Absolute) {
+        if (child->style.position == Position::Absolute) {
             continue;
         }
         if (child->Is_Container()) {

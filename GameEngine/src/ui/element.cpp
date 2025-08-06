@@ -31,6 +31,12 @@ EUI_Style EUI_Element::Get_Effective_Style(const EUI_Context& ctx) const {
     effective.padding = style.padding;
     effective.margin = style.margin;
 
+    effective.position = style.position;
+    effective.top = style.top;
+    effective.right = style.right;
+    effective.bottom = style.bottom;
+    effective.left = style.left;
+
     effective.border_color = style.border_color;
     effective.border_radius = style.border_radius;
 

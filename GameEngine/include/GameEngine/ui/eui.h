@@ -48,6 +48,7 @@ class EUI_Style {
     Sides margin, padding = {0};
 
     Position position = Position::Static;
+    // For relative positioning, the top/right/bottom/left values are relative to the parent
     float top, right, bottom, left = 0;
 
     Color border_color = BLACK;

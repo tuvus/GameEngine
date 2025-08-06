@@ -1,5 +1,6 @@
 #include "ui/eui.h"
 #include <algorithm>
+#include <iostream>
 
 void EUI_VBox::Layout(EUI_Context& ctx) {
     Alignment main_axis_alignment = style.vertical_alignment;
@@ -22,7 +23,7 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
 
     // calculate total non-container content height
     for (EUI_Element* child : children) {
-        if (child->Get_Effective_Style(ctx).position == Position::Absolute) {
+        if (child->style.position == Position::Absolute) {
             continue;
         }
         if (child->Is_Container()) {
