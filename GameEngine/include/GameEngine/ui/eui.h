@@ -144,6 +144,8 @@ class EUI_Container : public EUI_Element {
     std::vector<EUI_Element*> children;
 
   public:
+    ~EUI_Container() override;
+
     Layout_Model layout_model;
 
     float gap = 0;

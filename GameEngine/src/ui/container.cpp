@@ -1,5 +1,11 @@
 #include "ui/eui.h"
 
+EUI_Container::~EUI_Container() {
+    for (EUI_Element* child : children) {
+        delete child;
+    }
+}
+
 void EUI_Container::Add_Child(EUI_Element* child) {
     if (!child)
         return;
