@@ -27,14 +27,14 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
     card_game.Get_Network()->bind_rpc("setplayercount", [this](int new_player_count) {
         player_count = new_player_count;
         status_text->text = "Players: " + to_string(player_count);
-        return RPC_Manager::Rpc_Validator_Result::VALID;
+        return RPC_Manager::Rpc_Validator_Result::VALID_CALL_ON_CLIENTS;
     });
     card_game.Get_Network()->bind_rpc("startgame", [&card_game]() {
         if (card_game.Get_Network()->Get_Network_State() != Network::Server_Running &&
             card_game.Get_Network()->Get_Network_State() != Network::Client_Connected)
             return RPC_Manager::Rpc_Validator_Result::INVALID;
         card_game.set_ui_screen(GAME);
-        return RPC_Manager::VALID;
+        return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
     card_game.Get_Network()->connection_events->emplace(static_cast<Network_Events_Receiver*>(this));
 }

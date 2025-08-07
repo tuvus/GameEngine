@@ -358,8 +358,11 @@ void Network::invoke_rpc(char* data, size_t size)
             cerr << "Dropping invalid rpc call!" << endl;
             return;
         }
-        auto rpc_call_data = Rpc_Message(data, size);
-        Send_Message_To_Clients(rpc_call_data);
+        if (result == RPC_Manager::VALID_CALL_ON_CLIENTS)
+        {
+            auto rpc_call_data = Rpc_Message(data, size);
+            Send_Message_To_Clients(rpc_call_data);
+        }
     }
     else
     {

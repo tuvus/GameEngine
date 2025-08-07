@@ -147,6 +147,22 @@ public:
         // Directly calling the dispatcher for now
         rpc_manager->dispatcher->bind(function_name, function);
     }
+
+    /**
+     * Sets up the RPC call only on the server.
+     * The function will only be called on the server and will not call on any non-host clients.
+     * Does not do anything if not currently on the server.
+     * @param function_name The name of the function being bound
+     * @param function The logic to run when the function is called
+     */
+    template <typename Function>
+    void bind_server_rpc(std::string const& function_name, Function function)
+    {
+        if (Is_Server()) {
+            // Directly calling the dispatcher for now
+            rpc_manager->dispatcher->bind(function_name, function);
+        }
+    }
 };
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg);
