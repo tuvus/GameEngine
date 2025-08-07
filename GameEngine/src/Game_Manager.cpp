@@ -2,9 +2,15 @@
 
 using namespace std;
 
-Game_Manager::Game_Manager(Application& application, Network& network)
+Game_Manager::Game_Manager(Application& application, Network& network, std::vector<std::pair<Client_ID, Player_ID>> client_player_ids)
     : application(application), network(network) {
-    player_steps = unordered_map<long,long>();
+    player_steps = unordered_map<Player_ID,long>();
+
+    for (const auto& client_player_id : client_player_ids) {
+        client_id_to_player_id.emplace(client_player_id.first, client_player_id.second);
+        player_id_to_client_id.emplace(client_player_id.second, client_player_id.first);
+    }
+
     network.bind_rpc("stepupdate", [this](const long new_step) { On_Recieve_Step_Update(new_step); });
     network.bind_rpc("minstepupdate", [this](const long player_id, const long min_step) {
         On_Recieve_Player_Step_Update(player_id, min_step);
@@ -21,7 +27,7 @@ void Game_Manager::On_Recieve_Step_Update(long new_step) {
     max_step = max(max_step, new_step);
 }
 
-void Game_Manager::On_Recieve_Player_Step_Update(long player_id, long min_step) {
+void Game_Manager::On_Recieve_Player_Step_Update(Player_ID player_id, long min_step) {
     player_steps[player_id] = max(player_steps[player_id], min_step);
     min_step = step;
     for (auto const& [id, player_step] : player_steps) {
@@ -51,4 +57,12 @@ void Game_Manager::Update() {
 
 long Game_Manager::Get_New_Id() {
     return next_id++;
+}
+
+long Game_Manager::Get_Current_Step() const {
+    return step;
+}
+
+Client_ID Game_Manager::Get_Client_ID(Player_ID player_id) {
+    return player_id_to_client_id[player_id];
 }

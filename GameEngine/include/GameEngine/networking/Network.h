@@ -27,6 +27,8 @@ struct Rpc_Message
     MSGPACK_DEFINE(rpc_call)
 };
 
+typedef uint32 Client_ID;
+
 class Network_Events_Receiver {
 public:
     // Called on the client when the client is connected
@@ -38,9 +40,9 @@ public:
     // Called on the server when the server is stopped
     virtual void On_Server_Stop() = 0;
     // Called on the server when a client is connected
-    virtual void On_Client_Connected(int) = 0;
+    virtual void On_Client_Connected(Client_ID) = 0;
     // Called on the server when a client is disconnected
-    virtual void On_Client_Disconnected(int) = 0;
+    virtual void On_Client_Disconnected(Client_ID) = 0;
 };
 
 class Network
@@ -57,19 +59,14 @@ public:
     };
 
 private:
-    struct Network_Client
-    {
-        int id;
-    };
-
     std::function<void()> close_network_function;
     bool server;
     Network_State state;
     HSteamListenSocket listen_socket;
     HSteamNetPollGroup poll_group;
-    HSteamNetConnection remote_host_connection;
+    Client_ID remote_host_connection;
     ISteamNetworkingSockets* connection_api;
-    std::map<HSteamNetConnection, Network_Client> connection_to_clients;
+    std::unordered_set<Client_ID> connected_clients;
 
     void Poll_Incoming_Messages();
     static void On_Connect_Changed_Adapter(SteamNetConnectionStatusChangedCallback_t* new_status);
@@ -92,7 +89,7 @@ public:
     ~Network();
     void Start_Network();
     void Network_Update();
-    Network_State Get_Network_State();
+    Network_State Get_Network_State() const;
     int Get_Num_Connected_Clients() const;
     bool Is_Server() const;
     std::string Get_Network_State_Str() const;
@@ -131,6 +128,34 @@ public:
             auto rpc_call_data = Rpc_Message(buffer->data(), buffer->size());
             Send_Message_To_Server(rpc_call_data);
         }
+        delete buffer;
+    }
+
+    /**
+     * Sends the rpc from the server to be called on the client specified.
+     * @param client_id The id of the client to send to
+     * @param function_name The name of the function being called
+     * @param args The arguments for the function call
+     */
+    template <typename... Args>
+    void call_rpc_on_client(Client_ID client_id, std::string const& function_name, Args... args)
+    {
+        if (!Is_Server) {
+            std::cerr << "Trying to call an rpc on another client while not on the server!" << std::endl;
+            return;
+        }
+
+        // TODO: Figure out how to let Rpc_Manager handle packing
+        // clmdep_msgpack::v1::sbuffer* buffer = rpc_manager->pack_rpc(function_name, std::forward<Args>(args)...);
+        auto call_obj = make_tuple(static_cast<uint8_t>(0), 1, function_name,
+                                   std::make_tuple(args...));
+
+        auto buffer = new clmdep_msgpack::v1::sbuffer;
+        clmdep_msgpack::v1::pack(*buffer, call_obj);
+
+        auto rpc_call_data = Rpc_Message(buffer->data(), buffer->size());
+        Send_Message_To_Client(client_id, rpc_call_data);
+
         delete buffer;
     }
 

@@ -24,7 +24,7 @@ public:
         button->style.padding = {10, 20, 10, 20};
         root->Add_Child(button);
         card_game.Get_Network()->connection_events->emplace(static_cast<Network_Events_Receiver*>(this));
-        game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network());
+        // game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network());
 
     }
 

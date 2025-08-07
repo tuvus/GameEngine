@@ -67,14 +67,14 @@ void Lobby_Scene::On_Server_Stop() {
     card_game.set_ui_screen(MENU);
 }
 
-void Lobby_Scene::On_Client_Connected(int) {
+void Lobby_Scene::On_Client_Connected(Client_ID) {
     player_count++;
     card_game.Get_Network()->call_rpc("setplayercount", player_count);
     if (player_count > 1)
         start_button->is_visible = true;
 }
 
-void Lobby_Scene::On_Client_Disconnected(int) {
+void Lobby_Scene::On_Client_Disconnected(Client_ID) {
     player_count--;
     card_game.Get_Network()->call_rpc("setplayercount", player_count);
     if (player_count <= 1)

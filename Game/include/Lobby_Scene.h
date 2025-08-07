@@ -20,7 +20,7 @@ private:
     void On_Disconnected() override;
     void On_Server_Start() override;
     void On_Server_Stop() override;
-    void On_Client_Connected(int) override;
-    void On_Client_Disconnected(int) override;
+    void On_Client_Connected(Client_ID) override;
+    void On_Client_Disconnected(Client_ID) override;
 
 };
