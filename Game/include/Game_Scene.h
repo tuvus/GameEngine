@@ -1,11 +1,13 @@
 #pragma once
 #include "CardGame.h"
+#include "Game_Manager.h"
 #include "Scene.h"
 #include "ui/eui.h"
 
 class Game_Scene : public Scene, Network_Events_Receiver {
 private:
     Card_Game& card_game;
+    std::unique_ptr<Game_Manager> game_manager;
 public:
     Game_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_game) {
         EUI_HBox* root = new EUI_HBox();
@@ -22,7 +24,9 @@ public:
         button->style.padding = {10, 20, 10, 20};
         root->Add_Child(button);
         card_game.Get_Network()->connection_events->emplace(static_cast<Network_Events_Receiver*>(this));
+        game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network());
     }
+
     ~Game_Scene() override {
         if (card_game.Get_Network() != nullptr)
             card_game.Get_Network()->connection_events->erase(static_cast<Network_Events_Receiver*>(this));
@@ -31,7 +35,10 @@ public:
     void Update_UI(std::chrono::milliseconds, EUI_Context context) override {
         root_elem->Render(context);
     }
-    void Update(std::chrono::milliseconds) override {}
+
+    void Update(std::chrono::milliseconds) override {
+        game_manager->Update();
+    }
 
     void On_Connected() override {
     }

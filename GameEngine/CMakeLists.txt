@@ -28,8 +28,8 @@ set(Headers
         ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Rpc_Manager.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/Scene.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/Game_Manager.h
-        include/GameEngine/Game_Object.h
-        include/GameEngine/emath.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/Game_Object.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/emath.h
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
