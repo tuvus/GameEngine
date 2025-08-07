@@ -5,10 +5,13 @@ using namespace std;
 Game_Manager::Game_Manager(Application& application, Network& network)
     : application(application), network(network) {
     player_steps = unordered_map<long,long>();
-    network.bind_rpc("stepupdate", [this](long new_step) { On_Recieve_Step_Update(new_step); });
-    network.bind_rpc("minstepupdate", [this](long player_id, long min_step) {
+    network.bind_rpc("stepupdate", [this](const long new_step) { On_Recieve_Step_Update(new_step); });
+    network.bind_rpc("minstepupdate", [this](const long player_id, const long min_step) {
         On_Recieve_Player_Step_Update(player_id, min_step);
     });
+    if (!network.Is_Server()) {
+        network.call_rpc("minstepupdate", step);
+    }
 }
 
 Game_Manager::~Game_Manager() {
@@ -27,6 +30,9 @@ void Game_Manager::On_Recieve_Player_Step_Update(long player_id, long min_step) 
 }
 
 void Game_Manager::Update() {
+    // If there are players still loading in the game then we will wait for them to load
+    if (min_step == -1) return;
+
     // If we are the server and the players have reached a close enough step
     // We can continue on and procede with the next step
     if (network.Is_Server() && step == max_step && min_step > step - 3) {
