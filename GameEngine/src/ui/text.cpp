@@ -27,6 +27,7 @@ void EUI_Text::Layout(EUI_Context& ctx) {
     preferred_size = {width, height};
 
     min_size = {text_width, text_height};
+    // TODO: what should this be...
     max_size = {9999, 9999};
 }
 
@@ -79,4 +80,15 @@ void EUI_Text::Render(EUI_Context& ctx) {
 
     DrawText(text.c_str(), text_pos.x, text_pos.y, style.font_size.value(),
              style.text_color.value());
+}
+
+std::string& EUI_Text::Get_Text() {
+    return this->text;
+}
+
+void EUI_Text::Set_Text(EUI_Context& ctx, const std::string& text) {
+    this->text = text;
+
+    // recalculate size
+    parent->Layout(ctx);
 }

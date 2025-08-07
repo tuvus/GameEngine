@@ -36,13 +36,13 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
     });
 }
 
-void Lobby_Scene::Update_UI(std::chrono::milliseconds, EUI_Context context) {
+void Lobby_Scene::Update_UI(std::chrono::milliseconds, EUI_Context ctx) {
     switch (card_game.Get_Network()->Get_Network_State()) {
         case Network::Setting_Up:
-            status_text->text = "Setting up server...";
+            status_text->Set_Text(ctx, "Setting up server...");
             break;
         case Network::Client_Connecting:
-            status_text->text = "Connecting to server...";
+            status_text->Set_Text(ctx, "Connecting to server...");
             break;
         case Network::Server_Running:
             if (player_count != card_game.Get_Network()->Get_Num_Connected_Clients() + 1)
@@ -50,13 +50,13 @@ void Lobby_Scene::Update_UI(std::chrono::milliseconds, EUI_Context context) {
                     "setplayercount", card_game.Get_Network()->Get_Num_Connected_Clients() + 1);
             start_button->is_visible = true;
         case Network::Client_Connected:
-            status_text->text = "Players: " + to_string(player_count);
+            status_text->Set_Text(ctx, "Players: " + to_string(player_count));
             break;
         case Network::Closing:
-            status_text->text = "Leaving";
+            status_text->Set_Text(ctx, "Leaving");
             break;
         case Network::Closed:
-            status_text->text = "Server closed";
+            status_text->Set_Text(ctx, "Disconnected");
             break;
     }
 }

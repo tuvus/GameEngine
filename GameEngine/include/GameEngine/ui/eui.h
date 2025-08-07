@@ -95,6 +95,7 @@ class EUI_Context {
         .text_vertical_alignment = Alignment::Start,
     };
 
+    // TODO: do something with this
     float global_scale = 1.0f;
     float dpi_factor = 1.0f;
 
@@ -175,15 +176,20 @@ class EUI_HBox : public EUI_Container {
 };
 
 class EUI_Text : public EUI_Element {
+  protected:
+    std::string text;
+
   public:
     EUI_Text(const std::string& text);
 
-    std::string text;
     Vector2 text_pos;
 
     void Layout(EUI_Context& ctx) override;
     void Handle_Input(EUI_Context& ctx) override;
     void Render(EUI_Context& ctx) override;
+
+    std::string& Get_Text();
+    void Set_Text(EUI_Context& ctx, const std::string& text);
 };
 
 class EUI_Button : public EUI_Text {
