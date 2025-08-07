@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "ui/eui.h"
 
 EUI_Text::EUI_Text(const std::string& text) : text(text) {
@@ -16,10 +18,12 @@ void EUI_Text::Layout(EUI_Context& ctx) {
     float text_width = MeasureText(text.c_str(), style.font_size.value());
     float text_height = style.font_size.value();
 
-    float width = text_width + style.font_spacing.value() * text.length() + style.padding.left +
-                  style.padding.right;
-    float height = text_height + style.padding.top + style.padding.bottom;
-
+    // calculate preferred size
+    float width = std::max(text_width + style.font_spacing.value() * text.length() +
+                               style.padding.left + style.padding.right,
+                           preferred_size.x);
+    float height =
+        std::max(text_height + style.padding.top + style.padding.bottom, preferred_size.y);
     preferred_size = {width, height};
 
     min_size = {text_width, text_height};
