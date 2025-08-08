@@ -1,7 +1,7 @@
 #pragma once
 #include "Application.h"
 
-typedef uint32 Player_ID;
+typedef long Player_ID;
 
 class Game_Manager {
   private:

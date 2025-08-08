@@ -1,6 +1,4 @@
 #include <cassert>
-#include <functional>
-#include <iostream>
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 
@@ -27,7 +25,7 @@ Network::~Network()
     {
         for (auto client_id : connected_clients)
         {
-            connection_api->CloseConnection(client_id, 0, "Shutting down server", false);
+            connection_api->CloseConnection(client_id.first, 0, "Shutting down server", false);
         }
         for (const Network_Events_Receiver* receiver : *connection_events)
         {
@@ -137,7 +135,7 @@ void Network::Poll_Incoming_Messages()
         {
             // cout << cstring_message << endl;
         }
-        Receive_Message(static_cast<char*>(incoming_message->m_pData), incoming_message->m_cbSize);
+        Receive_Message(incoming_message->GetConnection(), static_cast<char*>(incoming_message->m_pData), incoming_message->m_cbSize);
 
         incoming_message->Release();
     }
@@ -245,7 +243,7 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                                                 k_ESteamNetworkingConnectionState_ClosedByPeer,
                                                 "Couldn't add client to a poll group", false);
             }
-            connected_clients.emplace(client_id);
+            connected_clients.emplace(client_id, new Connection_State());
             connection_api->SetConnectionName(new_status->m_hConn,to_string(client_id).c_str());
             for (const Network_Events_Receiver* receiver : *connection_events)
             {
@@ -262,6 +260,7 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
             {
                 const_cast<Network_Events_Receiver*>(receiver)->On_Connected();
             }
+            connected_clients.emplace(client_id, 0);
         }
         default:
             break;
@@ -312,7 +311,13 @@ void Network::Send_Message_To_Client(const Client_ID connection,
 {
     clmdep_msgpack::sbuffer message_data;
     clmdep_msgpack::packer packer(message_data);
-    packer.pack(rpc_message);
+
+    // Only ordered rpc calls will have an ID
+    if (rpc_message.order_sensitive)
+        packer.pack(Rpc_Message(rpc_message, connected_clients[connection]->next_rpc_id++));
+    else
+        packer.pack(rpc_message);
+
     connection_api->SendMessageToConnection(connection, message_data.data(),
                                             static_cast<uint32>(message_data.size()),
                                             k_nSteamNetworkingSend_Reliable, nullptr);
@@ -322,7 +327,7 @@ void Network::Send_Message_To_Clients(const Rpc_Message& rpc_message)
 {
     for (const auto& client_id : connected_clients)
     {
-        Send_Message_To_Client(client_id, rpc_message);
+        Send_Message_To_Client(client_id.first, rpc_message);
     }
 }
 
@@ -332,16 +337,32 @@ void Network::Send_Message_To_Server(const Rpc_Message& rpc_message)
     Send_Message_To_Client(remote_host_connection, rpc_message);
 }
 
-void Network::Receive_Message(char* data, size_t size)
+void Network::Receive_Message(Client_ID from, char* data, size_t size)
 {
     clmdep_msgpack::object_handle result;
     clmdep_msgpack::unpack(result, data, size);
     auto rpc_message = result.get().as<Rpc_Message>();
-    invoke_rpc(rpc_message.rpc_call.data(), rpc_message.rpc_call.size());
+    if (rpc_message.order_sensitive && rpc_message.rpc_id > connected_clients[from]->next_rpc_id) {
+        // This rpc has arrived earlier than a previous rpc and should be called later once the previous ones arrive
+        // Make sure to copy the rpc to memory so that it isn't accidently deleted
+        Rpc_Message* store_rpc = new Rpc_Message(rpc_message);
+        connected_clients[from]->rpc_heap.push(store_rpc);
+    } else {
+        connected_clients[from]->next_rpc_id++;
+        invoke_rpc(rpc_message.order_sensitive, rpc_message.rpc_call.data(), rpc_message.rpc_call.size());
+
+        // Check if we have any other rpcs stored to call
+        while (connected_clients[from]->next_rpc_id == connected_clients[from]->rpc_heap.top()->rpc_id) {
+        connected_clients[from]->next_rpc_id++;
+            Rpc_Message* next_rpc_message = connected_clients[from]->rpc_heap.top();
+            invoke_rpc(next_rpc_message->order_sensitive, next_rpc_message->rpc_call.data(), next_rpc_message->rpc_call.size());
+            connected_clients[from]->rpc_heap.pop();
+        }
+    }
 
 }
 
-void Network::invoke_rpc(char* data, size_t size)
+void Network::invoke_rpc(bool order_sensitive, char* data, size_t size)
 {
     if (server)
     {
@@ -353,7 +374,7 @@ void Network::invoke_rpc(char* data, size_t size)
         }
         if (result == RPC_Manager::VALID_CALL_ON_CLIENTS)
         {
-            auto rpc_call_data = Rpc_Message(data, size);
+            auto rpc_call_data = Rpc_Message(order_sensitive, data, size);
             Send_Message_To_Clients(rpc_call_data);
         }
     }

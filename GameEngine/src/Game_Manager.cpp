@@ -4,7 +4,7 @@ using namespace std;
 
 Game_Manager::Game_Manager(Application& application, Network& network, std::vector<std::pair<Client_ID, Player_ID>> client_player_ids)
     : application(application), network(network) {
-    player_steps = unordered_map<Player_ID,long>();
+    player_steps = unordered_map<Player_ID, long>();
 
     for (const auto& client_player_id : client_player_ids) {
         client_id_to_player_id.emplace(client_player_id.first, client_player_id.second);
@@ -16,7 +16,7 @@ Game_Manager::Game_Manager(Application& application, Network& network, std::vect
         On_Recieve_Player_Step_Update(player_id, min_step);
     });
     if (!network.Is_Server()) {
-        network.call_rpc("minstepupdate", step);
+        network.call_rpc(false, "minstepupdate", step);
     }
 }
 
@@ -48,9 +48,9 @@ void Game_Manager::Update() {
 
         step++;
         if (network.Is_Server()) {
-            network.call_rpc("stepupdate", step);
+            network.call_rpc(false, "stepupdate", step);
         } else {
-            network.call_rpc("minstepupdate",  step);
+            network.call_rpc(false, "minstepupdate",  step);
         }
     }
 }

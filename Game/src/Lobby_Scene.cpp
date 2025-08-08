@@ -14,7 +14,7 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
         status_text->text = "Setting up server...";
     root->Add_Child(status_text);
     start_button = new EUI_Button(
-        "Start Game", [this, &card_game]() { card_game.Get_Network()->call_rpc("startgame"); });
+        "Start Game", [this, &card_game]() { card_game.Get_Network()->call_rpc(true, "startgame"); });
     start_button->style.padding = {10, 20, 10, 20};
     root->Add_Child(start_button);
     start_button->is_visible = false;
@@ -60,7 +60,7 @@ void Lobby_Scene::On_Disconnected() {
 
 void Lobby_Scene::On_Server_Start() {
     player_count = 1;
-    card_game.Get_Network()->call_rpc("setplayercount", player_count);
+    card_game.Get_Network()->call_rpc(true, "setplayercount", player_count);
 }
 
 void Lobby_Scene::On_Server_Stop() {
@@ -69,14 +69,14 @@ void Lobby_Scene::On_Server_Stop() {
 
 void Lobby_Scene::On_Client_Connected(Client_ID) {
     player_count++;
-    card_game.Get_Network()->call_rpc("setplayercount", player_count);
+    card_game.Get_Network()->call_rpc(true, "setplayercount", player_count);
     if (player_count > 1)
         start_button->is_visible = true;
 }
 
 void Lobby_Scene::On_Client_Disconnected(Client_ID) {
     player_count--;
-    card_game.Get_Network()->call_rpc("setplayercount", player_count);
+    card_game.Get_Network()->call_rpc(true, "setplayercount", player_count);
     if (player_count <= 1)
         start_button->is_visible = false;
 }
