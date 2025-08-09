@@ -65,10 +65,15 @@ class EUI_Style {
 };
 
 class EUI_Context {
+  private:
+    EUI_Element* root = nullptr;
+
   public:
     EUI_Context();
+    EUI_Context(EUI_Style default_style);
+    ~EUI_Context();
 
-    EUI_Input input;
+    EUI_Input input = {};
 
     EUI_Element* hovered = nullptr;
     EUI_Element* active = nullptr;
@@ -97,18 +102,15 @@ class EUI_Context {
     float global_scale = 1.0f;
     float dpi_factor = 1.0f;
 
+    EUI_Element* Get_Root() const { return root; }
+    void Set_Root(EUI_Element* new_root);
+
     void Begin_Frame();
     void End_Frame();
     void Update_Input();
     void Perform_Layout();
     void Handle_Input();
     void Render();
-
-    EUI_Element* Get_Root() const { return root; }
-    void Set_Root(EUI_Element* new_root);
-
-  private:
-    EUI_Element* root = nullptr;
 };
 
 class EUI_Element {
@@ -117,8 +119,8 @@ class EUI_Element {
 
     std::string id;
 
+    EUI_Context* ctx = nullptr;
     EUI_Element* parent = nullptr;
-    EUI_Context* context = nullptr;
 
     Vector2 pos, dim = {0};
     Vector2 min_size, max_size, preferred_size;
@@ -132,16 +134,17 @@ class EUI_Element {
     EUI_Style style;
 
     // Getters for inheritable properties (optionals)
-    Color Get_Text_Color(const EUI_Context& ctx) const;
-    Font Get_Font(const EUI_Context& ctx) const;
-    float Get_Font_Size(const EUI_Context& ctx) const;
-    float Get_Font_Spacing(const EUI_Context& ctx) const;
-    EUI_Style Get_Effective_Style(const EUI_Context& ctx) const;
+    Color Get_Text_Color() const;
+    Font Get_Font() const;
+    float Get_Font_Size() const;
+    float Get_Font_Spacing() const;
+    EUI_Style Get_Effective_Style() const;
 
     virtual void Set_Context(EUI_Context& ctx);
-    virtual void Layout(EUI_Context& ctx) = 0;
-    virtual void Handle_Input(EUI_Context& ctx) = 0;
-    virtual void Render(EUI_Context& ctx) = 0;
+
+    virtual void Layout() = 0;
+    virtual void Handle_Input() = 0;
+    virtual void Render() = 0;
 
     virtual bool Is_Container() const { return false; };
 };
@@ -162,9 +165,9 @@ class EUI_Container : public EUI_Element {
     void Add_Child(EUI_Element* child);
 
     void Set_Context(EUI_Context& ctx) override;
-    virtual void Layout(EUI_Context& ctx) override = 0;
-    void Handle_Input(EUI_Context& ctx) override;
-    void Render(EUI_Context& ctx) override;
+    virtual void Layout() override = 0;
+    void Handle_Input() override;
+    void Render() override;
 
     bool Is_Container() const override { return true; }
 };
@@ -173,14 +176,14 @@ class EUI_VBox : public EUI_Container {
   public:
     EUI_VBox() : EUI_Container(Layout_Model::Vertical) {}
 
-    void Layout(EUI_Context& ctx) override;
+    void Layout() override;
 };
 
 class EUI_HBox : public EUI_Container {
   public:
     EUI_HBox() : EUI_Container(Layout_Model::Horizontal) {}
 
-    void Layout(EUI_Context& ctx) override;
+    void Layout() override;
 };
 
 class EUI_Text : public EUI_Element {
@@ -192,9 +195,9 @@ class EUI_Text : public EUI_Element {
 
     Vector2 text_pos;
 
-    void Layout(EUI_Context& ctx) override;
-    void Handle_Input(EUI_Context& ctx) override;
-    void Render(EUI_Context& ctx) override;
+    void Layout() override;
+    void Handle_Input() override;
+    void Render() override;
 
     std::string& Get_Text();
     void Set_Text(const std::string& text);
@@ -206,5 +209,5 @@ class EUI_Button : public EUI_Text {
 
     std::function<void()> on_click;
 
-    void Handle_Input(EUI_Context& ctx) override;
+    void Handle_Input() override;
 };

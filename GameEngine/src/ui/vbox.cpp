@@ -1,7 +1,7 @@
 #include "ui/eui.h"
 #include <algorithm>
 
-void EUI_VBox::Layout(EUI_Context& ctx) {
+void EUI_VBox::Layout() {
     Alignment main_axis_alignment = style.vertical_alignment;
 
     float cursor = pos.y + style.padding.top;
@@ -29,7 +29,7 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
             num_containers++;
             continue;
         }
-        child->Layout(ctx);
+        child->Layout();
         total_leaf_height += child->preferred_size.y;
         num_layout_children++;
     }
@@ -43,14 +43,14 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
 
     // place containers
     for (EUI_Element* child : children) {
-        if (child->Get_Effective_Style(ctx).position == Position::Absolute) {
+        if (child->Get_Effective_Style().position == Position::Absolute) {
             continue;
         }
         if (child->Is_Container()) {
             child->pos = {pos.x + style.padding.left, cursor};
             child->dim = {dim.x - style.padding.left - style.padding.right, default_spacing};
             child->preferred_size = child->dim;
-            child->Layout(ctx);
+            child->Layout();
         }
         total_content_height += child->preferred_size.y;
         cursor += child->preferred_size.y;
@@ -76,8 +76,7 @@ void EUI_VBox::Layout(EUI_Context& ctx) {
     for (int i = 0; i < children.size(); i++) {
         EUI_Element* child = children[i];
 
-        if (!child->Is_Container() &&
-            child->Get_Effective_Style(ctx).position != Position::Absolute) {
+        if (!child->Is_Container() && child->Get_Effective_Style().position != Position::Absolute) {
             // clamp to min/max
             float width = std::clamp(child->preferred_size.x, child->min_size.x, child->max_size.x);
             float height =

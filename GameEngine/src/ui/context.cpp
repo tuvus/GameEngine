@@ -2,7 +2,13 @@
 
 /* EUI_Context Implementations */
 EUI_Context::EUI_Context() {
-    input = {};
+}
+EUI_Context::EUI_Context(EUI_Style default_style) {
+    default_style = default_style;
+}
+
+EUI_Context::~EUI_Context() {
+    delete root;
 }
 
 void EUI_Context::Set_Root(EUI_Element* new_root) {
@@ -29,13 +35,13 @@ void EUI_Context::End_Frame() {
 }
 void EUI_Context::Perform_Layout() {
     if (root)
-        root->Layout(*this);
+        root->Layout();
 }
 void EUI_Context::Handle_Input() {
     if (root)
-        root->Handle_Input(*this);
+        root->Handle_Input();
 }
 void EUI_Context::Render() {
     if (root)
-        root->Render(*this);
+        root->Render();
 }

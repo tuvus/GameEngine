@@ -10,7 +10,9 @@ class Scene {
   public:
     Scene(Application& app) : application(app) {}
     virtual ~Scene() { delete root_elem; }
-    virtual void Update_UI(std::chrono::milliseconds, EUI_Context) = 0;
+
+    virtual void Update_UI(std::chrono::milliseconds) = 0;
     virtual void Update(std::chrono::milliseconds) = 0;
+
     EUI_Element* Get_Root() { return root_elem; }
 };

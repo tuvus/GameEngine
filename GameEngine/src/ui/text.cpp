@@ -12,8 +12,8 @@ EUI_Text::EUI_Text(const std::string& text) : text(text) {
     style.text_vertical_alignment = Alignment::Start;
 }
 
-void EUI_Text::Layout(EUI_Context& ctx) {
-    EUI_Style style = Get_Effective_Style(ctx);
+void EUI_Text::Layout() {
+    EUI_Style style = Get_Effective_Style();
 
     float text_width = MeasureText(text.c_str(), style.font_size.value());
     float text_height = style.font_size.value();
@@ -31,15 +31,15 @@ void EUI_Text::Layout(EUI_Context& ctx) {
     max_size = {9999, 9999};
 }
 
-void EUI_Text::Handle_Input(EUI_Context& ctx) {
+void EUI_Text::Handle_Input() {
     // no op for now
 }
 
-void EUI_Text::Render(EUI_Context& ctx) {
+void EUI_Text::Render() {
     if (!is_visible)
         return;
 
-    const auto style = Get_Effective_Style(ctx);
+    const auto style = Get_Effective_Style();
 
     // Background
     if (style.background_color.has_value())
@@ -90,6 +90,6 @@ void EUI_Text::Set_Text(const std::string& text) {
     this->text = text;
 
     // recalculate size
-    if (context && parent)
-        parent->Layout(*context);
+    if (ctx && parent)
+        parent->Layout();
 }

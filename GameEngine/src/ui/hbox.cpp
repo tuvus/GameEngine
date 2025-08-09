@@ -1,7 +1,7 @@
 #include "ui/eui.h"
 #include <algorithm>
 
-void EUI_HBox::Layout(EUI_Context& ctx) {
+void EUI_HBox::Layout() {
     Alignment main_axis_alignment = style.horizontal_alignment;
 
     float cursor = pos.x + style.padding.left;
@@ -29,7 +29,7 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
             num_containers++;
             continue;
         }
-        child->Layout(ctx);
+        child->Layout();
         total_leaf_width += child->preferred_size.x;
         num_layout_children++;
     }
@@ -43,14 +43,14 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
 
     // place containers
     for (EUI_Element* child : children) {
-        if (child->Get_Effective_Style(ctx).position == Position::Absolute) {
+        if (child->Get_Effective_Style().position == Position::Absolute) {
             continue;
         }
         if (child->Is_Container()) {
             child->pos = {cursor, pos.y + style.padding.top};
             child->dim = {default_spacing, dim.y - style.padding.top - style.padding.bottom};
             child->preferred_size = child->dim;
-            child->Layout(ctx);
+            child->Layout();
         }
         total_content_width += child->preferred_size.x;
         cursor += child->preferred_size.x;
@@ -79,8 +79,7 @@ void EUI_HBox::Layout(EUI_Context& ctx) {
     for (int i = 0; i < children.size(); i++) {
         EUI_Element* child = children[i];
 
-        if (!child->Is_Container() &&
-            child->Get_Effective_Style(ctx).position != Position::Absolute) {
+        if (!child->Is_Container() && child->Get_Effective_Style().position != Position::Absolute) {
             // clamp to min/max
             float width = std::clamp(child->preferred_size.x, child->min_size.x, child->max_size.x);
             float height =

@@ -12,36 +12,36 @@ void EUI_Container::Add_Child(EUI_Element* child) {
 
     child->parent = this;
     children.push_back(child);
-    if (context) {
-        child->Set_Context(*context);
+    if (ctx) {
+        child->Set_Context(*ctx);
     }
 }
 
 void EUI_Container::Set_Context(EUI_Context& ctx) {
-    context = &ctx;
+    this->ctx = &ctx;
     for (auto* child : children) {
         child->Set_Context(ctx);
     }
 }
 
-void EUI_Container::Handle_Input(EUI_Context& ctx) {
+void EUI_Container::Handle_Input() {
     if (!is_visible || is_deleted)
         return;
 
     for (EUI_Element* child : children) {
         if (child->is_visible) {
-            child->Handle_Input(ctx);
+            child->Handle_Input();
             if (is_deleted)
                 return;
         }
     }
 }
 
-void EUI_Container::Render(EUI_Context& ctx) {
+void EUI_Container::Render() {
     if (!is_visible)
         return;
 
-    const auto style = Get_Effective_Style(ctx);
+    const auto style = Get_Effective_Style();
 
     if (style.background_color.has_value())
         DrawRectangleRec({pos.x, pos.y, dim.x, dim.y}, style.background_color.value());
@@ -52,6 +52,6 @@ void EUI_Container::Render(EUI_Context& ctx) {
     // Render children
     for (EUI_Element* child : children) {
         if (child->is_visible)
-            child->Render(ctx);
+            child->Render();
     }
 }
