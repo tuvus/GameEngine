@@ -68,8 +68,6 @@ class EUI_Context {
   public:
     EUI_Context();
 
-    EUI_Element* root;
-
     EUI_Input input;
 
     EUI_Element* hovered = nullptr;
@@ -105,15 +103,22 @@ class EUI_Context {
     void Perform_Layout();
     void Handle_Input();
     void Render();
+
+    EUI_Element* Get_Root() const { return root; }
+    void Set_Root(EUI_Element* new_root);
+
+  private:
+    EUI_Element* root = nullptr;
 };
 
 class EUI_Element {
   public:
-    virtual ~EUI_Element() = default;
+    virtual ~EUI_Element() { is_deleted = true; }
 
     std::string id;
 
     EUI_Element* parent = nullptr;
+    EUI_Context* context = nullptr;
 
     Vector2 pos, dim = {0};
     Vector2 min_size, max_size, preferred_size;
@@ -122,6 +127,7 @@ class EUI_Element {
     bool is_hovered = false;
     bool is_focused = false;
     bool is_active = false;
+    bool is_deleted = false;
 
     EUI_Style style;
 
@@ -132,6 +138,7 @@ class EUI_Element {
     float Get_Font_Spacing(const EUI_Context& ctx) const;
     EUI_Style Get_Effective_Style(const EUI_Context& ctx) const;
 
+    virtual void Set_Context(EUI_Context& ctx);
     virtual void Layout(EUI_Context& ctx) = 0;
     virtual void Handle_Input(EUI_Context& ctx) = 0;
     virtual void Render(EUI_Context& ctx) = 0;
@@ -154,6 +161,7 @@ class EUI_Container : public EUI_Element {
     std::vector<EUI_Element*>& Get_Children();
     void Add_Child(EUI_Element* child);
 
+    void Set_Context(EUI_Context& ctx) override;
     virtual void Layout(EUI_Context& ctx) override = 0;
     void Handle_Input(EUI_Context& ctx) override;
     void Render(EUI_Context& ctx) override;
@@ -189,7 +197,7 @@ class EUI_Text : public EUI_Element {
     void Render(EUI_Context& ctx) override;
 
     std::string& Get_Text();
-    void Set_Text(EUI_Context& ctx, const std::string& text);
+    void Set_Text(const std::string& text);
 };
 
 class EUI_Button : public EUI_Text {

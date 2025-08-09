@@ -86,9 +86,10 @@ std::string& EUI_Text::Get_Text() {
     return this->text;
 }
 
-void EUI_Text::Set_Text(EUI_Context& ctx, const std::string& text) {
+void EUI_Text::Set_Text(const std::string& text) {
     this->text = text;
 
     // recalculate size
-    parent->Layout(ctx);
+    if (context && parent)
+        parent->Layout(*context);
 }
