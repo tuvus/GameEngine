@@ -1,8 +1,6 @@
 #include "ui/eui.h"
 
 /* EUI_Context Implementations */
-EUI_Context::EUI_Context() {
-}
 EUI_Context::EUI_Context(EUI_Style default_style) {
     default_style = default_style;
 }

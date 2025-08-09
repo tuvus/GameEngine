@@ -69,7 +69,7 @@ class EUI_Context {
     EUI_Element* root = nullptr;
 
   public:
-    EUI_Context();
+    EUI_Context() {};
     EUI_Context(EUI_Style default_style);
     ~EUI_Context();
 
