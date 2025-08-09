@@ -1,6 +1,5 @@
 #include "ui/eui.h"
 #include <algorithm>
-#include <iostream>
 
 void EUI_VBox::Layout(EUI_Context& ctx) {
     Alignment main_axis_alignment = style.vertical_alignment;
