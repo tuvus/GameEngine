@@ -1,5 +1,9 @@
 #pragma once
 
+/*
+ * EUI is a simple UI library for creating UI in a html/css-like way.
+ */
+
 #include <functional>
 #include <optional>
 #include <raylib.h>
@@ -44,6 +48,8 @@ class EUI_Style {
     Sides margin, padding = {0};
 
     Position position = Position::Static;
+    // For relative positioning, the top/right/bottom/left values are relative to the parent
+    float top, right, bottom, left = 0;
 
     Color border_color = BLACK;
     float border_radius = 0;
@@ -61,8 +67,6 @@ class EUI_Style {
 class EUI_Context {
   public:
     EUI_Context();
-
-    EUI_Element* root;
 
     EUI_Input input;
 
@@ -89,6 +93,7 @@ class EUI_Context {
         .text_vertical_alignment = Alignment::Start,
     };
 
+    // TODO: do something with this
     float global_scale = 1.0f;
     float dpi_factor = 1.0f;
 
@@ -98,6 +103,12 @@ class EUI_Context {
     void Perform_Layout();
     void Handle_Input();
     void Render();
+
+    EUI_Element* Get_Root() const { return root; }
+    void Set_Root(EUI_Element* new_root);
+
+  private:
+    EUI_Element* root = nullptr;
 };
 
 class EUI_Element {
@@ -107,6 +118,7 @@ class EUI_Element {
     std::string id;
 
     EUI_Element* parent = nullptr;
+    EUI_Context* context = nullptr;
 
     Vector2 pos, dim = {0};
     Vector2 min_size, max_size, preferred_size;
@@ -126,6 +138,7 @@ class EUI_Element {
     float Get_Font_Spacing(const EUI_Context& ctx) const;
     EUI_Style Get_Effective_Style(const EUI_Context& ctx) const;
 
+    virtual void Set_Context(EUI_Context& ctx);
     virtual void Layout(EUI_Context& ctx) = 0;
     virtual void Handle_Input(EUI_Context& ctx) = 0;
     virtual void Render(EUI_Context& ctx) = 0;
@@ -139,13 +152,16 @@ class EUI_Container : public EUI_Element {
     std::vector<EUI_Element*> children;
 
   public:
+    ~EUI_Container() override;
+
     Layout_Model layout_model;
 
     float gap = 0;
 
-    std::vector<EUI_Element*>& Get_Children() const;
+    std::vector<EUI_Element*>& Get_Children();
     void Add_Child(EUI_Element* child);
 
+    void Set_Context(EUI_Context& ctx) override;
     virtual void Layout(EUI_Context& ctx) override = 0;
     void Handle_Input(EUI_Context& ctx) override;
     void Render(EUI_Context& ctx) override;
@@ -168,15 +184,20 @@ class EUI_HBox : public EUI_Container {
 };
 
 class EUI_Text : public EUI_Element {
+  protected:
+    std::string text;
+
   public:
     EUI_Text(const std::string& text);
 
-    std::string text;
     Vector2 text_pos;
 
     void Layout(EUI_Context& ctx) override;
     void Handle_Input(EUI_Context& ctx) override;
     void Render(EUI_Context& ctx) override;
+
+    std::string& Get_Text();
+    void Set_Text(const std::string& text);
 };
 
 class EUI_Button : public EUI_Text {

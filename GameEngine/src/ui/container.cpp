@@ -1,11 +1,27 @@
 #include "ui/eui.h"
 
+EUI_Container::~EUI_Container() {
+    for (EUI_Element* child : children) {
+        delete child;
+    }
+}
+
 void EUI_Container::Add_Child(EUI_Element* child) {
     if (!child)
         return;
 
     child->parent = this;
     children.push_back(child);
+    if (context) {
+        child->Set_Context(*context);
+    }
+}
+
+void EUI_Container::Set_Context(EUI_Context& ctx) {
+    context = &ctx;
+    for (auto* child : children) {
+        child->Set_Context(ctx);
+    }
 }
 
 void EUI_Container::Handle_Input(EUI_Context& ctx) {
@@ -15,7 +31,8 @@ void EUI_Container::Handle_Input(EUI_Context& ctx) {
     for (EUI_Element* child : children) {
         if (child->is_visible) {
             child->Handle_Input(ctx);
-            if (is_deleted) return;
+            if (is_deleted)
+                return;
         }
     }
 }

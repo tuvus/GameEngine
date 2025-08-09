@@ -8,6 +8,10 @@
     return ctx.default_style.prop.value();
 
 /* EUI_Element Implementations */
+void EUI_Element::Set_Context(EUI_Context& ctx) {
+    context = &ctx;
+}
+
 Color EUI_Element::Get_Text_Color(const EUI_Context& ctx) const {
     RETURN_STYLE_PROP(text_color, Get_Text_Color);
 }
@@ -31,6 +35,12 @@ EUI_Style EUI_Element::Get_Effective_Style(const EUI_Context& ctx) const {
     effective.padding = style.padding;
     effective.margin = style.margin;
 
+    effective.position = style.position;
+    effective.top = style.top;
+    effective.right = style.right;
+    effective.bottom = style.bottom;
+    effective.left = style.left;
+
     effective.border_color = style.border_color;
     effective.border_radius = style.border_radius;
 
@@ -45,3 +55,4 @@ EUI_Style EUI_Element::Get_Effective_Style(const EUI_Context& ctx) const {
 
     return effective;
 }
+

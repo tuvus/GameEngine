@@ -5,6 +5,13 @@ EUI_Context::EUI_Context() {
     input = {};
 }
 
+void EUI_Context::Set_Root(EUI_Element* new_root) {
+    root = new_root;
+    if (root) {
+        root->Set_Context(*this);
+    }
+}
+
 void EUI_Context::Update_Input() {
     input = {0};
     input.mouse_position = GetMousePosition();
