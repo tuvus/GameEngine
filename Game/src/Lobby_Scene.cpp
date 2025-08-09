@@ -11,7 +11,7 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
     root->gap = 20;
     status_text = new EUI_Text("Connecting...");
     if (card_game.Get_Network()->Is_Server())
-        status_text->Set_Text(card_game.curr_ctx, "Setting up server...");
+        status_text->Set_Text("Setting up server...");
     root->Add_Child(status_text);
     start_button = new EUI_Button(
         "Start Game", [this, &card_game]() { card_game.Get_Network()->call_rpc("startgame"); });
@@ -26,7 +26,7 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
     root->Add_Child(leave_button);
     card_game.Get_Network()->bind_rpc("setplayercount", [this, &card_game](int new_player_count) {
         player_count = new_player_count;
-        status_text->Set_Text(card_game.curr_ctx, "Players: " + to_string(player_count));
+        status_text->Set_Text("Players: " + to_string(player_count));
         return RPC_Manager::Rpc_Validator_Result::VALID;
     });
     card_game.Get_Network()->bind_rpc("startgame", [&card_game]() {
@@ -44,7 +44,8 @@ Lobby_Scene::~Lobby_Scene() {
     card_game.Get_Network()->connection_events->erase(static_cast<Network_Events_Receiver*>(this));
 }
 
-void Lobby_Scene::Update_UI(std::chrono::milliseconds, EUI_Context context) {
+void Lobby_Scene::Update_UI(std::chrono::milliseconds) {
+    root_elem->Render();
 }
 
 void Lobby_Scene::Update(std::chrono::milliseconds) {
@@ -52,7 +53,7 @@ void Lobby_Scene::Update(std::chrono::milliseconds) {
 
 void Lobby_Scene::On_Connected() {
     if (player_count == 0)
-        status_text->Set_Text(card_game.curr_ctx, "Connected");
+        status_text->Set_Text("Connected");
 }
 
 void Lobby_Scene::On_Disconnected() {

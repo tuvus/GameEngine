@@ -3,7 +3,7 @@
 #include "Scene.h"
 
 class Menu_Scene : public Scene {
-public:
+  public:
     Menu_Scene(Card_Game& card_game) : Scene(card_game) {
         EUI_VBox* root = new EUI_VBox();
         root_elem = root;
@@ -33,6 +33,6 @@ public:
         host_button->style.padding = {10, 20, 10, 20};
         root->Add_Child(host_button);
     }
-    void Update_UI(chrono::milliseconds, EUI_Context context) override {}
+    void Update_UI(chrono::milliseconds) override { root_elem->Render(); }
     void Update(chrono::milliseconds) override {}
 };
