@@ -1,9 +1,9 @@
 #pragma once
 
+#include <chrono>
+
 #include "networking/Network.h"
 #include "ui/eui.h"
-
-#include <chrono>
 
 using namespace std;
 
@@ -36,7 +36,7 @@ class Application {
     uint16_t screen_width;
     uint16_t screen_height;
 
-    EUI_Context* ctx = new EUI_Context();
+    EUI_Context* eui_ctx = new EUI_Context();
 
     /* Game update behavior like physics a game logic. Does not include any UI */
     virtual void Update(chrono::milliseconds) = 0;
