@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <utility>
+#include <steam/isteamnetworkingsockets.h>
 
 #include "Rpc_Manager.h"
 

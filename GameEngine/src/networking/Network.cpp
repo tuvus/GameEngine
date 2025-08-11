@@ -260,7 +260,7 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
             {
                 const_cast<Network_Events_Receiver*>(receiver)->On_Connected();
             }
-            connected_clients.emplace(client_id, 0);
+            connected_clients.emplace(client_id, new Connection_State());
         }
         default:
             break;

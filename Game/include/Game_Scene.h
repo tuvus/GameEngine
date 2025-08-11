@@ -57,9 +57,9 @@ public:
         card_game.Close_Network();
     }
 
-    void On_Client_Connected(Player_ID) override {
+    void On_Client_Connected(Client_ID) override {
     }
 
-    void On_Client_Disconnected(Player_ID) override {
+    void On_Client_Disconnected(Client_ID) override {
     }
 };
