@@ -32,6 +32,7 @@ struct Rpc_Message {
     MSGPACK_DEFINE(rpc_id, order_sensitive, rpc_call);
 };
 
+typedef unsigned int uint32;
 typedef uint32 Client_ID;
 
 class Network_Events_Receiver {
