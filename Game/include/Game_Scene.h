@@ -9,7 +9,6 @@ private:
     Card_Game& card_game;
     std::unique_ptr<Game_Manager> game_manager;
 public:
-    std::unique_ptr<Game_Manager> game_manager;
     Game_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_game) {
         EUI_HBox* root = new EUI_HBox();
         root_elem = root;

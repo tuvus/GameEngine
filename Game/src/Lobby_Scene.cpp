@@ -41,7 +41,8 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
 }
 
 Lobby_Scene::~Lobby_Scene() {
-    card_game.Get_Network()->connection_events->erase(static_cast<Network_Events_Receiver*>(this));
+    if (card_game.Get_Network() != nullptr)
+        card_game.Get_Network()->connection_events->erase(static_cast<Network_Events_Receiver*>(this));
 }
 
 void Lobby_Scene::Update_UI(std::chrono::milliseconds) {

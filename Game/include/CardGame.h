@@ -30,7 +30,9 @@ class Card_Game : public Application {
     void Start_Client() override;
 
   public:
-    Card_Game(bool client) : Application("CARD GAME", client, SCREEN_WIDTH, SCREEN_HEIGHT) {};
+    Card_Game(bool client) : Application("CARD GAME", client, SCREEN_WIDTH, SCREEN_HEIGHT) {
+        scene = nullptr;
+    }
 
     void Update(chrono::milliseconds s) override;
     void Update_UI(chrono::milliseconds s) override;
