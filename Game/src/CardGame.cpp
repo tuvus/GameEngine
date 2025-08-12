@@ -1,7 +1,5 @@
-#include <raylib.h>
-
-#include "Application.h"
 #include "CardGame.h"
+#include "Application.h"
 #include "Game_Scene.h"
 #include "Lobby_Scene.h"
 #include "Menu_Scene.h"
@@ -13,14 +11,14 @@ void Card_Game::resize_update() {
     }
 
     // TODO: should we panic if ctx is null?
-    if (eui_ctx)
-        eui_ctx->Perform_Layout();
+    eui_ctx->Perform_Layout();
 }
 
 void Card_Game::set_ui_screen(SCREEN new_screen) {
-    delete scene;
+    /*delete scene;*/
     scene = sceens[new_screen]();
     // will panic if eui_ctx is null, shouldn't ever happen so let it crash
+    // TODO: this should probably be in the engine
     eui_ctx->Set_Root(scene->Get_Root());
     eui_ctx->Perform_Layout();
 }
