@@ -69,7 +69,7 @@ void Lobby_Scene::On_Server_Stop() {
 
 void Lobby_Scene::On_Client_Connected(Client_ID) {
     player_count++;
-    card_game.Get_Network()->call_rpc(true, "setplayercount", player_count);
+    card_game.Get_Network()->call_rpc(false, "setplayercount", player_count);
     if (player_count > 1)
         start_button->is_visible = true;
 }

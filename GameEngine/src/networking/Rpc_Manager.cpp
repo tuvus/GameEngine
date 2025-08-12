@@ -13,7 +13,7 @@ RPC_Manager::RPC_Manager() : dispatcher(std::make_shared<rpc::detail::dispatcher
 
 }
 
-clmdep_msgpack::v1::object unpack(char* data, size_t length) {
+clmdep_msgpack::v1::object rpc_unpack(char* data, size_t length) {
     clmdep_msgpack::v1::object_handle result;
     // Pass the msgpack::object_handle
     unpack(result, data, length);
@@ -27,12 +27,12 @@ void RPC_Manager::call_rpc(std::string const& function_name, tuple<Elements...> 
 
     auto buffer = new clmdep_msgpack::v1::sbuffer;
     clmdep_msgpack::v1::pack(*buffer, call_obj);
-    dispatcher->dispatch(unpack(buffer->data(), buffer->size()));
+    dispatcher->dispatch(rpc_unpack(buffer->data(), buffer->size()));
     delete buffer;
 }
 
 RPC_Manager::Rpc_Validator_Result RPC_Manager::call_data_rpc(char* data, size_t length) const {
-    auto response = dispatcher->dispatch(unpack(data, length));
+    auto response = dispatcher->dispatch(rpc_unpack(data, length));
     auto result = response.get_result()->get();
     if (result.type != clmdep_msgpack::type::POSITIVE_INTEGER) return INVALID;
     return static_cast<Rpc_Validator_Result>(result.as<int>());

@@ -12,6 +12,7 @@ const uint16 DEFAULT_SERVER_PORT = 27020;
 Network::Network(bool server, std::function<void()> close_network_function)
     : close_network_function(close_network_function), server(server)
 {
+    pthread_mutex_init(&newly_connected_client_mutex, 0);
     network_instance = this;
     state = Setting_Up;
     connection_events = make_unique<std::unordered_set<Network_Events_Receiver*>>();
@@ -103,6 +104,22 @@ void Network::Poll_Incoming_Messages()
 {
     if (state == Closing || state == Closed)
         return;
+
+    pthread_mutex_lock(&newly_connected_client_mutex);
+    for (Client_ID client_id : newly_connected_clients) {
+        // Call all rpcs that we have previously received but coulden't process
+        for (int i = 0; i < pre_connected_messages.size(); i++) {
+            if (get<0>(pre_connected_messages[i]) != client_id) continue;
+            Rpc_Message* d = get<1>(pre_connected_messages[i]);
+            Receive_Message(client_id, d);
+            pre_connected_messages.erase(pre_connected_messages.begin() + i);
+            delete d;
+            i--;
+        }
+    }
+    newly_connected_clients.clear();
+    pthread_mutex_unlock(&newly_connected_client_mutex);
+
     while (true)
     {
         ISteamNetworkingMessage* incoming_message = nullptr;
@@ -136,7 +153,6 @@ void Network::Poll_Incoming_Messages()
             // cout << cstring_message << endl;
         }
         Receive_Message(incoming_message->GetConnection(), static_cast<char*>(incoming_message->m_pData), incoming_message->m_cbSize);
-
         incoming_message->Release();
     }
 }
@@ -261,6 +277,9 @@ void Network::On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallba
                 const_cast<Network_Events_Receiver*>(receiver)->On_Connected();
             }
             connected_clients.emplace(client_id, new Connection_State());
+            pthread_mutex_lock(&newly_connected_client_mutex);
+            newly_connected_clients.emplace_back(client_id);
+            pthread_mutex_unlock(&newly_connected_client_mutex);
         }
         default:
             break;
@@ -341,26 +360,36 @@ void Network::Receive_Message(Client_ID from, char* data, size_t size)
 {
     clmdep_msgpack::object_handle result;
     clmdep_msgpack::unpack(result, data, size);
-    auto rpc_message = result.get().as<Rpc_Message>();
-    if (rpc_message.order_sensitive && rpc_message.rpc_id > connected_clients[from]->next_rpc_id) {
+    auto tmp = result.get().as<Rpc_Message>();
+    auto* rpc = new Rpc_Message(result.get().as<Rpc_Message>());
+    if (!connected_clients.contains(from)) {
+        pre_connected_messages.emplace_back(make_tuple(from, rpc));
+        return;
+    }
+    Receive_Message(from, rpc);
+}
+
+void Network::Receive_Message(Client_ID from, Rpc_Message* rpc) {
+    if (!rpc->order_sensitive) {
+        invoke_rpc(rpc->order_sensitive, rpc->rpc_call.data(), rpc->rpc_call.size());
+    }if (rpc->rpc_id > connected_clients[from]->next_rpc_id) {
         // This rpc has arrived earlier than a previous rpc and should be called later once the previous ones arrive
         // Make sure to copy the rpc to memory so that it isn't accidently deleted
-        Rpc_Message* store_rpc = new Rpc_Message(rpc_message);
-        connected_clients[from]->rpc_heap.push(store_rpc);
+        connected_clients[from]->rpc_heap.push(rpc);
     } else {
         connected_clients[from]->next_rpc_id++;
-        invoke_rpc(rpc_message.order_sensitive, rpc_message.rpc_call.data(), rpc_message.rpc_call.size());
+        invoke_rpc(rpc->order_sensitive, rpc->rpc_call.data(), rpc->rpc_call.size());
 
         // Check if we have any other rpcs stored to call
-        while (connected_clients[from]->next_rpc_id == connected_clients[from]->rpc_heap.top()->rpc_id) {
-        connected_clients[from]->next_rpc_id++;
+        while (!connected_clients[from]->rpc_heap.empty() && connected_clients[from]->next_rpc_id == connected_clients [from]->rpc_heap.top()->rpc_id) {
+            connected_clients[from]->next_rpc_id++;
             Rpc_Message* next_rpc_message = connected_clients[from]->rpc_heap.top();
             invoke_rpc(next_rpc_message->order_sensitive, next_rpc_message->rpc_call.data(), next_rpc_message->rpc_call.size());
             connected_clients[from]->rpc_heap.pop();
         }
     }
-
 }
+
 
 void Network::invoke_rpc(bool order_sensitive, char* data, size_t size)
 {
@@ -380,10 +409,12 @@ void Network::invoke_rpc(bool order_sensitive, char* data, size_t size)
     }
     else
     {
+        auto result = rpc_manager->call_data_rpc(data, size);
         // The rpc call must be valid by this point
-        if (rpc_manager->call_data_rpc(data, size) != RPC_Manager::VALID)
+        if (result != RPC_Manager::VALID && result != RPC_Manager::VALID_CALL_ON_CLIENTS)
         {
-            cerr << "Client received an invalid rpc call! This is probably due to a desync!" <<
+            string rpc_name = data + 4;
+            cerr << "Client received an invalid rpc call " << rpc_name << "! This is probably due to a desync!" <<
                 endl;
         }
     }

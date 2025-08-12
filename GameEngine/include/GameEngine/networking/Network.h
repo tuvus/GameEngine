@@ -12,6 +12,7 @@
 #include <queue>
 
 struct Rpc_Message {
+    // Information about msgpack here: https://github.com/msgpack/msgpack-c/wiki/v2_0_cpp_packer
     long rpc_id;
     bool order_sensitive;
     std::vector<char> rpc_call;
@@ -26,8 +27,12 @@ struct Rpc_Message {
     explicit Rpc_Message(bool order_sensitive, std::vector<char> rpc_call)
         : rpc_id(-1), order_sensitive(order_sensitive), rpc_call(std::move(rpc_call)) {}
 
-    Rpc_Message(const Rpc_Message& copy, long msg_id)
-        : rpc_id(msg_id), order_sensitive(copy.order_sensitive), rpc_call(copy.rpc_call) {}
+    Rpc_Message(const Rpc_Message& copy, long msg_id) : rpc_id(msg_id),
+        order_sensitive(copy.order_sensitive) {
+        rpc_call = std::vector<char>();
+        // We need to do a deep copy and copy the data as well so that the old one can be deleted
+        std::copy(copy.rpc_call.begin(), copy.rpc_call.end(), back_inserter(rpc_call));
+    }
 
     // Tells msgpack how to serialize Rpc_Message
     MSGPACK_DEFINE(rpc_id, order_sensitive, rpc_call);
@@ -85,6 +90,12 @@ class Network {
     ISteamNetworkingSockets* connection_api;
     // Connected clients and the next rpc id to send to them
     std::unordered_map<Client_ID, Connection_State*> connected_clients;
+    // The client may connect to the server after it receives an rpc call from the server
+    // This results in the connected_clients not being initialized correctly
+    // In this case store the messages in this list and execute them once connected
+    std::vector<std::tuple<Client_ID, Rpc_Message*>> pre_connected_messages;
+    std::vector<Client_ID> newly_connected_clients;
+    pthread_mutex_t newly_connected_client_mutex;
 
     void Poll_Incoming_Messages();
     static void On_Connect_Changed_Adapter(SteamNetConnectionStatusChangedCallback_t* new_status);
@@ -92,6 +103,7 @@ class Network {
     std::unique_ptr<RPC_Manager> rpc_manager;
 
     void Receive_Message(Client_ID from, char* data, size_t size);
+    void Receive_Message(Client_ID from, Rpc_Message* rpc);
 
     /**
      * Actually calls the rpc on the server or client.
