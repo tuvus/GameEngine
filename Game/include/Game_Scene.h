@@ -5,10 +5,11 @@
 #include "ui/eui.h"
 
 class Game_Scene : public Scene, Network_Events_Receiver {
-private:
+  private:
     Card_Game& card_game;
     std::unique_ptr<Game_Manager> game_manager;
-public:
+
+  public:
     Game_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_game) {
         EUI_HBox* root = new EUI_HBox();
         root_elem = root;
@@ -36,9 +37,7 @@ public:
     }
 
     void Update_UI(chrono::milliseconds) override { root_elem->Render(); }
-    void Update(std::chrono::milliseconds) override {
-        game_manager->Update();
-    }
+    void Update(std::chrono::milliseconds) override { game_manager->Update(); }
 
     void On_Connected() override {}
 

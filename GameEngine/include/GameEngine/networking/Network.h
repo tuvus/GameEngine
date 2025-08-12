@@ -3,9 +3,9 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <steam/isteamnetworkingsockets.h>
 #include <string>
 #include <utility>
-#include <steam/isteamnetworkingsockets.h>
 
 #include "Rpc_Manager.h"
 
@@ -27,8 +27,8 @@ struct Rpc_Message {
     explicit Rpc_Message(bool order_sensitive, std::vector<char> rpc_call)
         : rpc_id(-1), order_sensitive(order_sensitive), rpc_call(std::move(rpc_call)) {}
 
-    Rpc_Message(const Rpc_Message& copy, long msg_id) : rpc_id(msg_id),
-        order_sensitive(copy.order_sensitive) {
+    Rpc_Message(const Rpc_Message& copy, long msg_id)
+        : rpc_id(msg_id), order_sensitive(copy.order_sensitive) {
         rpc_call = std::vector<char>();
         // We need to do a deep copy and copy the data as well so that the old one can be deleted
         std::copy(copy.rpc_call.begin(), copy.rpc_call.end(), back_inserter(rpc_call));

@@ -8,7 +8,6 @@
 using namespace std;
 const uint16 DEFAULT_SERVER_PORT = 27020;
 
-
 Network::Network(bool server, std::function<void()> close_network_function)
     : close_network_function(close_network_function), server(server) {
     pthread_mutex_init(&newly_connected_client_mutex, 0);
