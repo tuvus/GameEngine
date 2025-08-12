@@ -1,5 +1,9 @@
 #pragma once
 
+/*
+ * EUI is a simple UI library for creating UI in a html/css-like way.
+ */
+
 #include <functional>
 #include <optional>
 #include <raylib.h>
@@ -44,6 +48,8 @@ class EUI_Style {
     Sides margin, padding = {0};
 
     Position position = Position::Static;
+    // For relative positioning, the top/right/bottom/left values are relative to the parent
+    float top, right, bottom, left = 0;
 
     Color border_color = BLACK;
     float border_radius = 0;
@@ -59,12 +65,15 @@ class EUI_Style {
 };
 
 class EUI_Context {
+  private:
+    EUI_Element* root = nullptr;
+
   public:
-    EUI_Context();
+    EUI_Context() {};
+    EUI_Context(EUI_Style default_style);
+    ~EUI_Context();
 
-    EUI_Element* root;
-
-    EUI_Input input;
+    EUI_Input input = {};
 
     EUI_Element* hovered = nullptr;
     EUI_Element* active = nullptr;
@@ -89,8 +98,12 @@ class EUI_Context {
         .text_vertical_alignment = Alignment::Start,
     };
 
+    // TODO: do something with this
     float global_scale = 1.0f;
     float dpi_factor = 1.0f;
+
+    EUI_Element* Get_Root() const { return root; }
+    void Set_Root(EUI_Element* new_root);
 
     void Begin_Frame();
     void End_Frame();
@@ -106,6 +119,7 @@ class EUI_Element {
 
     std::string id;
 
+    EUI_Context* ctx = nullptr;
     EUI_Element* parent = nullptr;
 
     Vector2 pos, dim = {0};
@@ -120,15 +134,17 @@ class EUI_Element {
     EUI_Style style;
 
     // Getters for inheritable properties (optionals)
-    Color Get_Text_Color(const EUI_Context& ctx) const;
-    Font Get_Font(const EUI_Context& ctx) const;
-    float Get_Font_Size(const EUI_Context& ctx) const;
-    float Get_Font_Spacing(const EUI_Context& ctx) const;
-    EUI_Style Get_Effective_Style(const EUI_Context& ctx) const;
+    Color Get_Text_Color() const;
+    Font Get_Font() const;
+    float Get_Font_Size() const;
+    float Get_Font_Spacing() const;
+    EUI_Style Get_Effective_Style() const;
 
-    virtual void Layout(EUI_Context& ctx) = 0;
-    virtual void Handle_Input(EUI_Context& ctx) = 0;
-    virtual void Render(EUI_Context& ctx) = 0;
+    virtual void Set_Context(EUI_Context& ctx);
+
+    virtual void Layout() = 0;
+    virtual void Handle_Input() = 0;
+    virtual void Render() = 0;
 
     virtual bool Is_Container() const { return false; };
 };
@@ -139,16 +155,19 @@ class EUI_Container : public EUI_Element {
     std::vector<EUI_Element*> children;
 
   public:
+    ~EUI_Container() override;
+
     Layout_Model layout_model;
 
     float gap = 0;
 
-    std::vector<EUI_Element*>& Get_Children() const;
+    std::vector<EUI_Element*>& Get_Children();
     void Add_Child(EUI_Element* child);
 
-    virtual void Layout(EUI_Context& ctx) override = 0;
-    void Handle_Input(EUI_Context& ctx) override;
-    void Render(EUI_Context& ctx) override;
+    void Set_Context(EUI_Context& ctx) override;
+    virtual void Layout() override = 0;
+    void Handle_Input() override;
+    void Render() override;
 
     bool Is_Container() const override { return true; }
 };
@@ -157,26 +176,31 @@ class EUI_VBox : public EUI_Container {
   public:
     EUI_VBox() : EUI_Container(Layout_Model::Vertical) {}
 
-    void Layout(EUI_Context& ctx) override;
+    void Layout() override;
 };
 
 class EUI_HBox : public EUI_Container {
   public:
     EUI_HBox() : EUI_Container(Layout_Model::Horizontal) {}
 
-    void Layout(EUI_Context& ctx) override;
+    void Layout() override;
 };
 
 class EUI_Text : public EUI_Element {
+  protected:
+    std::string text;
+
   public:
     EUI_Text(const std::string& text);
 
-    std::string text;
     Vector2 text_pos;
 
-    void Layout(EUI_Context& ctx) override;
-    void Handle_Input(EUI_Context& ctx) override;
-    void Render(EUI_Context& ctx) override;
+    void Layout() override;
+    void Handle_Input() override;
+    void Render() override;
+
+    std::string& Get_Text();
+    void Set_Text(const std::string& text);
 };
 
 class EUI_Button : public EUI_Text {
@@ -185,5 +209,5 @@ class EUI_Button : public EUI_Text {
 
     std::function<void()> on_click;
 
-    void Handle_Input(EUI_Context& ctx) override;
+    void Handle_Input() override;
 };

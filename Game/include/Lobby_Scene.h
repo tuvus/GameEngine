@@ -6,15 +6,16 @@
 using namespace std;
 
 class Lobby_Scene : public Scene, Network_Events_Receiver {
-private:
+  private:
     EUI_Text* status_text;
     EUI_Button* start_button;
     Card_Game& card_game;
     int player_count;
+
   public:
     Lobby_Scene(Card_Game& card_game);
     ~Lobby_Scene() override;
-    void Update_UI(std::chrono::milliseconds, EUI_Context context) override;
+    void Update_UI(std::chrono::milliseconds) override;
     void Update(std::chrono::milliseconds) override;
     void On_Connected() override;
     void On_Disconnected() override;
@@ -22,5 +23,4 @@ private:
     void On_Server_Stop() override;
     void On_Client_Connected(int) override;
     void On_Client_Disconnected(int) override;
-
 };

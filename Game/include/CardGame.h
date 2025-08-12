@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "Scene.h"
+#include "ui/eui.h"
 
 #include <chrono>
 #include <raylib.h>
@@ -22,8 +23,6 @@ typedef struct Tile {
 
 class Card_Game : public Application {
   private:
-    EUI_Element* init_menu_ui(Card_Game& g);
-    EUI_Element* init_lobby_ui(Card_Game& g);
     void resize_update();
 
   protected:
@@ -40,7 +39,6 @@ class Card_Game : public Application {
 
     void Close_Application() override;
 
-    EUI_Context curr_ctx = EUI_Context();
     Scene* scene;
     std::unordered_map<SCREEN, std::function<Scene*()>> sceens;
 };

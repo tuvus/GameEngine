@@ -11,6 +11,12 @@ buildgame: ## Builds the game
 run: buildgame ## build and run the game
 	cd Game && make run && cd ..
 
+debug: ## Builds the game with debug flags and address sanitizer
+	cd Game && make debug && cd ..
+
+run-debug: debug ## build and run the game in debug mode
+	cd Game && make run && cd ..
+
 test: ## Runs the GameEngine tests
 	cd GameEngine && make test && cd ..
 

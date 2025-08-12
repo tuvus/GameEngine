@@ -1,9 +1,9 @@
 #pragma once
 
+#include <chrono>
+
 #include "networking/Network.h"
 #include "ui/eui.h"
-
-#include <chrono>
 
 using namespace std;
 
@@ -25,23 +25,25 @@ class Application {
 
     void Application_Loop();
 
-protected:
+  protected:
     void Start_Headless();
     virtual void Start_Client();
 
   public:
     Application(std::string name, bool client, uint16_t screen_width, uint16_t screen_height);
     virtual ~Application() = default;
-    void Start_Application();
 
     uint16_t screen_width;
     uint16_t screen_height;
+
+    EUI_Context* eui_ctx = new EUI_Context();
 
     /* Game update behavior like physics a game logic. Does not include any UI */
     virtual void Update(chrono::milliseconds) = 0;
     /* UI update where the buttons, text and game objects are rendered. */
     virtual void Update_UI(chrono::milliseconds) = 0;
 
+    void Start_Application();
     void Start_Server();
     void Connect_To_Server();
 
