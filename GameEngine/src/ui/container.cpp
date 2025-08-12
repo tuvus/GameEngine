@@ -38,3 +38,10 @@ void EUI_Container::Render(EUI_Context& ctx) {
             child->Render(ctx);
     }
 }
+
+void EUI_Container::Delete() {
+    for (EUI_Element* child : children) {
+        child->Delete();
+    }
+}
+

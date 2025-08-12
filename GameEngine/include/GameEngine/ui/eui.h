@@ -102,7 +102,7 @@ class EUI_Context {
 
 class EUI_Element {
   public:
-    virtual ~EUI_Element() { is_deleted = true; }
+    virtual ~EUI_Element() {  }
 
     std::string id;
 
@@ -129,6 +129,7 @@ class EUI_Element {
     virtual void Layout(EUI_Context& ctx) = 0;
     virtual void Handle_Input(EUI_Context& ctx) = 0;
     virtual void Render(EUI_Context& ctx) = 0;
+    virtual void Delete() { is_deleted = true; }
 
     virtual bool Is_Container() const { return false; };
 };
@@ -149,6 +150,7 @@ class EUI_Container : public EUI_Element {
     virtual void Layout(EUI_Context& ctx) override = 0;
     void Handle_Input(EUI_Context& ctx) override;
     void Render(EUI_Context& ctx) override;
+    void Delete() override;
 
     bool Is_Container() const override { return true; }
 };

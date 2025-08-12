@@ -24,6 +24,7 @@ class Card_Game : public Application {
   private:
     EUI_Element* init_menu_ui(Card_Game& g);
     EUI_Element* init_lobby_ui(Card_Game& g);
+    vector<Scene*> to_delete;
     void resize_update();
 
   protected:

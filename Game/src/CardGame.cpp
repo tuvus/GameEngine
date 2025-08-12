@@ -16,7 +16,7 @@ void Card_Game::resize_update() {
 }
 
 void Card_Game::set_ui_screen(SCREEN new_screen) {
-    delete scene;
+    to_delete.emplace_back(scene);
     scene = sceens[new_screen]();
     curr_ctx.root = scene->Get_Root();
     curr_ctx.Perform_Layout();
@@ -75,6 +75,11 @@ void Card_Game::Update_UI(chrono::milliseconds deltaTime) {
     EndDrawing();
 
     curr_ctx.Render();
+
+    for (auto scene_to_delete : to_delete) {
+        delete scene_to_delete;
+    }
+    to_delete.clear();
 }
 
 Card_Game::~Card_Game() {
