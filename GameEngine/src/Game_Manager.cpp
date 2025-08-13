@@ -2,7 +2,8 @@
 
 using namespace std;
 
-Game_Manager::Game_Manager(Application& application, Network& network, std::vector<std::pair<Client_ID, Player_ID>> client_player_ids)
+Game_Manager::Game_Manager(Application& application, Network& network,
+                           std::vector<std::pair<Client_ID, Player_ID>> client_player_ids)
     : application(application), network(network) {
     player_steps = unordered_map<Player_ID, long>();
 
@@ -11,7 +12,8 @@ Game_Manager::Game_Manager(Application& application, Network& network, std::vect
         player_id_to_client_id.emplace(client_player_id.second, client_player_id.first);
     }
 
-    network.bind_rpc("stepupdate", [this](const long new_step) { On_Recieve_Step_Update(new_step); });
+    network.bind_rpc("stepupdate",
+                     [this](const long new_step) { On_Recieve_Step_Update(new_step); });
     network.bind_rpc("minstepupdate", [this](const long player_id, const long min_step) {
         On_Recieve_Player_Step_Update(player_id, min_step);
     });
@@ -37,7 +39,8 @@ void Game_Manager::On_Recieve_Player_Step_Update(Player_ID player_id, long min_s
 
 void Game_Manager::Update() {
     // If there are players still loading in the game then we will wait for them to load
-    if (min_step == -1) return;
+    if (min_step == -1)
+        return;
 
     // If we are the server and the players have reached a close enough step
     // We can continue on and procede with the next step
@@ -50,7 +53,7 @@ void Game_Manager::Update() {
         if (network.Is_Server()) {
             network.call_rpc(false, "stepupdate", step);
         } else {
-            network.call_rpc(false, "minstepupdate",  step);
+            network.call_rpc(false, "minstepupdate", step);
         }
     }
 }

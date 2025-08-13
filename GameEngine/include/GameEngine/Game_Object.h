@@ -5,16 +5,15 @@
 class Game_Manager;
 
 class Game_Object {
-private:
+  private:
     const long id;
     Vector2 pos;
     float rot;
     Game_Manager& game_manager;
 
-public:
+  public:
     Game_Object(Game_Manager& game_manager, Vector2 pos, float rot);
     virtual ~Game_Object();
     virtual void Update() = 0;
     long Get_Id() const;
-
 };
