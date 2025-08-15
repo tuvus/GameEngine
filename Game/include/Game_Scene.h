@@ -27,13 +27,17 @@ class Game_Scene : public Scene, Network_Events_Receiver {
         root->Add_Child(button);
         card_game.Get_Network()->connection_events->emplace(
             static_cast<Network_Events_Receiver*>(this));
-        // game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network());
     }
 
     ~Game_Scene() override {
         if (card_game.Get_Network() != nullptr)
             card_game.Get_Network()->connection_events->erase(
                 static_cast<Network_Events_Receiver*>(this));
+    }
+
+    void Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_players) {
+        game_manager =
+            std::make_unique<Game_Manager>(card_game, *card_game.Get_Network(), clients_players);
     }
 
     void Update_UI(chrono::milliseconds) override { root_elem->Render(); }

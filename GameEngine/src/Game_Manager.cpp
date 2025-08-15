@@ -3,11 +3,11 @@
 using namespace std;
 
 Game_Manager::Game_Manager(Application& application, Network& network,
-                           std::vector<std::pair<Client_ID, Player_ID>> client_player_ids)
+                           unordered_map<Client_ID, Player_ID>* client_player_ids)
     : application(application), network(network) {
     player_steps = unordered_map<Player_ID, long>();
 
-    for (const auto& client_player_id : client_player_ids) {
+    for (const auto& client_player_id : *client_player_ids) {
         client_id_to_player_id.emplace(client_player_id.first, client_player_id.second);
         player_id_to_client_id.emplace(client_player_id.second, client_player_id.first);
     }
