@@ -7,7 +7,7 @@ debug:
 	cmake --build build
 
 run:
-	./build/Game
+	./build/game
 
 clean:
 	rm -rf build/
