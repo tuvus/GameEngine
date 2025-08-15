@@ -1,7 +1,7 @@
-#include "networking/Rpc_Manager.h"
-
 #include "rpc/client.h"
 #include <iostream>
+
+#include "networking/rpc_manager.h"
 
 using namespace std;
 

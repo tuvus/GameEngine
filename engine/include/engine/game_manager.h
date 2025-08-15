@@ -1,5 +1,5 @@
 #pragma once
-#include "Application.h"
+#include "application.h"
 
 typedef long Player_ID;
 

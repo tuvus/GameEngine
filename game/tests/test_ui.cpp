@@ -1,7 +1,7 @@
-#include "Application.h"
-#include "CardGame.h"
-#include "build/vcpkg_installed/arm64-osx/include/raylib.h"
 #include <raylib.h>
+
+#include "application.h"
+#include "card_game.h"
 
 void resize_update(Card_Game& g) {
     if (g.curr_ctx.root) {

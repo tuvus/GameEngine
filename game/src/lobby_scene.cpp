@@ -1,4 +1,4 @@
-#include "Lobby_Scene.h"
+#include "lobby_scene.h"
 
 Lobby_Scene::Lobby_Scene(Card_Game& card_game)
     : Scene(card_game), card_game(card_game), player_count(0) {

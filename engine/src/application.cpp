@@ -1,9 +1,9 @@
-#include "Application.h"
-#include "ApplicationFactory.h"
-
 #include <iostream>
 #include <raylib.h>
 #include <thread>
+
+#include "application.h"
+#include "application_factory.h"
 
 void Create_Application(unique_ptr<ApplicationFactory> application_factory, bool client) {
     const auto application = application_factory->Create_Application(client);

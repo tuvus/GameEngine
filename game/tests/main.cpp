@@ -1,9 +1,9 @@
 #include <memory>
-
-#include "Application.h"
-#include "ApplicationFactory.h"
-#include "CardGame.h"
 #include <raylib.h>
+
+#include "application.h"
+#include "application_factory.h"
+#include "card_game.h"
 
 class CardGameFactory : public ApplicationFactory {
   public:

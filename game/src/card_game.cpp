@@ -1,8 +1,8 @@
-#include "CardGame.h"
-#include "Application.h"
-#include "Game_Scene.h"
-#include "Lobby_Scene.h"
-#include "Menu_Scene.h"
+#include "card_game.h"
+#include "application.h"
+#include "game_scene.h"
+#include "lobby_scene.h"
+#include "menu_scene.h"
 
 void Card_Game::resize_update() {
     auto root = scene->Get_Root();

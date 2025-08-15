@@ -1,5 +1,4 @@
 #include "ui/eui.h"
-#include <raylib.h>
 
 EUI_Button::EUI_Button(const std::string& text, std::function<void()> on_click)
     : EUI_Text(text), on_click(on_click) {

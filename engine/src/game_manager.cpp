@@ -1,4 +1,4 @@
-#include "Game_Manager.h"
+#include "game_manager.h"
 
 using namespace std;
 

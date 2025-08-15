@@ -1,6 +1,8 @@
 #pragma once
-#include "ui/eui.h"
+
 #include <chrono>
+
+#include "ui/eui.h"
 
 class Scene {
   protected:

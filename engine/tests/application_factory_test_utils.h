@@ -1,17 +1,18 @@
 #pragma once
+
 #include <functional>
 
-#include "ApplicationFactory.h"
-#include "ApplicationWindow.h"
+#include "application_factory.h"
+#include "application_window.h"
 
 class TestWindow : public ApplicationWindow {
-private:
+  private:
     function<void(std::chrono::milliseconds, ApplicationWindow&)> render_function;
 
-public:
+  public:
     TestWindow(Application& application,
-        function<void(std::chrono::milliseconds, ApplicationWindow&)> render_function): ApplicationWindow(application),
-        render_function(render_function) {}
+               function<void(std::chrono::milliseconds, ApplicationWindow&)> render_function)
+        : ApplicationWindow(application), render_function(render_function) {}
 
     void Render(std::chrono::milliseconds delta_time) override {
         render_function(delta_time, *this);
@@ -19,14 +20,14 @@ public:
 };
 
 class TestFactory : public ApplicationFactory {
-private:
+  private:
     function<void(std::chrono::milliseconds, ApplicationWindow&)> render_function;
     function<void(std::chrono::milliseconds, Application&)> update_function;
 
-public:
+  public:
     TestFactory(function<void(std::chrono::milliseconds, ApplicationWindow&)> render_function,
-        function<void(std::chrono::milliseconds, Application&)> update_function): render_function(render_function),
-        update_function(update_function) {}
+                function<void(std::chrono::milliseconds, Application&)> update_function)
+        : render_function(render_function), update_function(update_function) {}
 
     string Get_Name() override { return "TestGame"; }
 

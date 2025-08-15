@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-#include "networking/Network.h"
+#include "networking/network.h"
 #include "ui/eui.h"
 
 using namespace std;

@@ -1,7 +1,8 @@
 #pragma once
-#include "CardGame.h"
-#include "Game_Manager.h"
-#include "Scene.h"
+
+#include "card_game.h"
+#include "game_manager.h"
+#include "scene.h"
 #include "ui/eui.h"
 
 class Game_Scene : public Scene, Network_Events_Receiver {

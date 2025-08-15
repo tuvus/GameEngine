@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Application.h"
-#include "Scene.h"
-#include "ui/eui.h"
-
 #include <chrono>
 #include <raylib.h>
+
+#include "application.h"
+#include "scene.h"
+#include "ui/eui.h"
 
 using namespace std;
 
