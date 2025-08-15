@@ -21,7 +21,7 @@ add_executable(Game ${Sources} ${Headers})
 
 #set(DONT_RUN_GAME_ENGINE_TESTS TRUE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
-add_subdirectory(${CMAKE_SOURCE_DIR}/../engine ${CMAKE_CURRENT_BINARY_DIR}/engine)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../engine ${CMAKE_CURRENT_BINARY_DIR}/euclid)
 target_link_libraries(Game PUBLIC euclid)
 target_include_directories(Game PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
