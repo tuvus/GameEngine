@@ -2,8 +2,8 @@
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 
-#include "networking/Network.h"
-#include "networking/Rpc_Manager.h"
+#include "networking/network.h"
+#include "networking/rpc_manager.h"
 
 using namespace std;
 const uint16 DEFAULT_SERVER_PORT = 27020;
