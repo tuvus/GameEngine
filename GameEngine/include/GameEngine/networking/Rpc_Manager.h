@@ -7,6 +7,7 @@ public:
     enum Rpc_Validator_Result {
         INVALID,
         VALID,
+        VALID_CALL_ON_CLIENTS,
     };
 
 public:

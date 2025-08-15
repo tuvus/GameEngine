@@ -1,27 +1,35 @@
 {
-  "name" : "game",
-  "version-string" : "1.0.0",
-  "builtin-baseline" : "4b6c50d962cc20aaa3ef457f8ba683b586263cfb",
-  "dependencies" : [ {
-    "name" : "gtest",
-    "version>=" : "1.15.2"
-  }, {
-    "name" : "vcpkg-cmake-config",
-    "version>=" : "2024-05-23"
-  }, {
-    "name" : "vcpkg-cmake",
-    "version>=" : "2024-04-23"
-  }, {
-    "name" : "glfw3",
-    "version>=" : "3.4#1"
-  }, {
-    "name" : "gamenetworkingsockets",
-    "version>=" : "1.4.1#1"
-  }, {
-    "name": "raylib",
-    "version>=": "5.5"
-  }, {
-    "name" : "rpclib",
-    "version>=" : "2.3.0#2"
-  } ]
+  "name": "game",
+  "version-string": "1.0.0",
+  "builtin-baseline": "4b6c50d962cc20aaa3ef457f8ba683b586263cfb",
+  "dependencies": [
+    {
+      "name": "gtest",
+      "version>=": "1.15.2"
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "version>=": "2024-05-23"
+    },
+    {
+      "name": "vcpkg-cmake",
+      "version>=": "2024-04-23"
+    },
+    {
+      "name": "glfw3",
+      "version>=": "3.4#1"
+    },
+    {
+      "name": "gamenetworkingsockets",
+      "version>=": "1.4.1#1"
+    },
+    {
+      "name": "raylib",
+      "version>=": "5.5"
+    },
+    {
+      "name": "rpclib",
+      "version>=": "2.3.0#2"
+    }
+  ]
 }

@@ -1,22 +1,27 @@
 {
-  "name" : "gameengine",
-  "version-string" : "0.1.0",
-  "builtin-baseline" : "6de717b75b8326f6d004984f14ae5bbbd86c928d",
-  "dependencies" : [
-  {
-    "name" : "gtest",
-    "version>=" : "1.15.2"
-  }, {
-    "name" : "glfw3",
-    "version>=" : "3.4#1"
-  }, {
-    "name" : "gamenetworkingsockets",
-    "version>=" : "1.4.1#1"
-  }, {
-    "name": "raylib",
-    "version>=": "5.5"
-    }, {
-      "name" : "rpclib",
-      "version>=" : "2.3.0#2"
-    } ]
+  "name": "gameengine",
+  "version-string": "0.1.0",
+  "builtin-baseline": "6de717b75b8326f6d004984f14ae5bbbd86c928d",
+  "dependencies": [
+    {
+      "name": "gtest",
+      "version>=": "1.15.2"
+    },
+    {
+      "name": "glfw3",
+      "version>=": "3.4#1"
+    },
+    {
+      "name": "gamenetworkingsockets",
+      "version>=": "1.4.1#1"
+    },
+    {
+      "name": "raylib",
+      "version>=": "5.5"
+    },
+    {
+      "name": "rpclib",
+      "version>=": "2.3.0#2"
+    }
+  ]
 }

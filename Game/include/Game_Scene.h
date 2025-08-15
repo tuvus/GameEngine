@@ -1,11 +1,13 @@
 #pragma once
 #include "CardGame.h"
+#include "Game_Manager.h"
 #include "Scene.h"
 #include "ui/eui.h"
 
 class Game_Scene : public Scene, Network_Events_Receiver {
   private:
     Card_Game& card_game;
+    std::unique_ptr<Game_Manager> game_manager;
 
   public:
     Game_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_game) {
@@ -25,7 +27,9 @@ class Game_Scene : public Scene, Network_Events_Receiver {
         root->Add_Child(button);
         card_game.Get_Network()->connection_events->emplace(
             static_cast<Network_Events_Receiver*>(this));
+        // game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network());
     }
+
     ~Game_Scene() override {
         if (card_game.Get_Network() != nullptr)
             card_game.Get_Network()->connection_events->erase(
@@ -33,7 +37,7 @@ class Game_Scene : public Scene, Network_Events_Receiver {
     }
 
     void Update_UI(chrono::milliseconds) override { root_elem->Render(); }
-    void Update(std::chrono::milliseconds) override {}
+    void Update(std::chrono::milliseconds) override { game_manager->Update(); }
 
     void On_Connected() override {}
 
@@ -49,7 +53,7 @@ class Game_Scene : public Scene, Network_Events_Receiver {
         card_game.Close_Network();
     }
 
-    void On_Client_Connected(int) override {}
+    void On_Client_Connected(Client_ID) override {}
 
-    void On_Client_Disconnected(int) override {}
+    void On_Client_Disconnected(Client_ID) override {}
 };

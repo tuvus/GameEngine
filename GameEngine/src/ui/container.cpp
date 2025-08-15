@@ -55,3 +55,9 @@ void EUI_Container::Render() {
             child->Render();
     }
 }
+
+void EUI_Container::Delete() {
+    for (EUI_Element* child : children) {
+        child->Delete();
+    }
+}

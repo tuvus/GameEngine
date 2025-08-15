@@ -15,7 +15,8 @@ void Card_Game::resize_update() {
 }
 
 void Card_Game::set_ui_screen(SCREEN new_screen) {
-    /*delete scene;*/
+    if (scene != nullptr)
+        to_delete.emplace_back(scene);
     scene = sceens[new_screen]();
     // will panic if eui_ctx is null, shouldn't ever happen so let it crash
     // TODO: this should probably be in the engine
@@ -76,6 +77,13 @@ void Card_Game::Update_UI(chrono::milliseconds deltaTime) {
     scene->Update_UI(deltaTime);
 
     EndDrawing();
+
+    eui_ctx->Render();
+
+    for (auto scene_to_delete : to_delete) {
+        delete scene_to_delete;
+    }
+    to_delete.clear();
 }
 
 Card_Game::~Card_Game() {

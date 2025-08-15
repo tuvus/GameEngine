@@ -115,7 +115,7 @@ class EUI_Context {
 
 class EUI_Element {
   public:
-    virtual ~EUI_Element() { is_deleted = true; }
+    virtual ~EUI_Element() {  }
 
     std::string id;
 
@@ -141,6 +141,7 @@ class EUI_Element {
     EUI_Style Get_Effective_Style() const;
 
     virtual void Set_Context(EUI_Context& ctx);
+    virtual void Delete() { is_deleted = true; }
 
     virtual void Layout() = 0;
     virtual void Handle_Input() = 0;
@@ -165,6 +166,8 @@ class EUI_Container : public EUI_Element {
     void Add_Child(EUI_Element* child);
 
     void Set_Context(EUI_Context& ctx) override;
+    void Delete() override;
+
     virtual void Layout() override = 0;
     void Handle_Input() override;
     void Render() override;

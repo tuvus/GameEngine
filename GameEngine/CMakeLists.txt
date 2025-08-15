@@ -15,6 +15,8 @@ set(Sources
         src/ui/hbox.cpp
         src/ui/text.cpp
         src/ui/button.cpp
+        src/Game_Manager.cpp
+        src/Game_Object.cpp
 )
 
 set(Headers
@@ -25,6 +27,9 @@ set(Headers
         ${PROJECT_SOURCE_DIR}/include/GameEngine/ui/eui.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/networking/Rpc_Manager.h
         ${PROJECT_SOURCE_DIR}/include/GameEngine/Scene.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/Game_Manager.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/Game_Object.h
+        ${PROJECT_SOURCE_DIR}/include/GameEngine/emath.h
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
@@ -45,8 +50,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE GameNetworkingSockets::static Game
 
 # Copy compile_commands.json after build config
 add_custom_command(
-  TARGET ${PROJECT_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_BINARY_DIR}/compile_commands.json"
-    "${CMAKE_SOURCE_DIR}/compile_commands.json"
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_BINARY_DIR}/compile_commands.json"
+        "${CMAKE_SOURCE_DIR}/compile_commands.json"
 )
