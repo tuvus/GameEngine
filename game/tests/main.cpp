@@ -1,0 +1,18 @@
+#include <memory>
+#include <raylib.h>
+
+#include "application.h"
+#include "application_factory.h"
+#include "card_game.h"
+
+class CardGameFactory : public ApplicationFactory {
+  public:
+    std::unique_ptr<Application> Create_Application(bool client) override {
+        return std::make_unique<Card_Game>(client);
+    }
+};
+
+int main() {
+    auto factory = make_unique<CardGameFactory>();
+    Create_Application(std::move(factory), true);
+}
