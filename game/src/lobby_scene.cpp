@@ -98,7 +98,7 @@ void Lobby_Scene::On_Client_Connected(Client_ID client_id) {
     card_game.Get_Network()->call_rpc(true, "addplayer", client_id, player_id_count++);
     for (const auto& client : *client_id_to_player_id) {
         if (client.first == client_id)
-            return;
+            continue;
         card_game.Get_Network()->call_rpc_on_client(client_id, true, "addplayer", client_id,
                                                     player_id_count++);
     }

@@ -21,9 +21,9 @@ class Game_Manager {
     /* Used on the server to store what steps */
     std::unordered_map<Player_ID, long> player_steps;
     /* Called on clients from the server to set the max step */
-    void On_Recieve_Step_Update(long max_step);
+    void On_Receive_Step_Update(long max_step);
     /* Called on the server from the client to inform the server on its current step */
-    void On_Recieve_Player_Step_Update(Player_ID player_id, long min_step);
+    void On_Receive_Player_Step_Update(Player_ID player_id, long min_step);
     long next_id;
 
   public:

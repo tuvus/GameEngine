@@ -12,24 +12,28 @@ Game_Manager::Game_Manager(Application& application, Network& network,
         player_id_to_client_id.emplace(client_player_id.second, client_player_id.first);
     }
 
-    network.bind_rpc("stepupdate",
-                     [this](const long new_step) { On_Recieve_Step_Update(new_step); });
-    network.bind_rpc("minstepupdate", [this](const long player_id, const long min_step) {
-        On_Recieve_Player_Step_Update(player_id, min_step);
+    network.bind_rpc("stepupdate", [this](const long new_step) {
+        On_Receive_Step_Update(new_step);
+        return RPC_Manager::VALID;
     });
+    if (network.Is_Server())
+        network.bind_rpc("minstepupdate", [this](const long player_id, const long min_step) {
+            On_Receive_Player_Step_Update(player_id, min_step);
+            return RPC_Manager::VALID;
+        });
     if (!network.Is_Server()) {
-        network.call_rpc(false, "minstepupdate", step);
+        network.call_rpc(false, "minstepupdate", player_id, step);
     }
 }
 
 Game_Manager::~Game_Manager() {
 }
 
-void Game_Manager::On_Recieve_Step_Update(long new_step) {
+void Game_Manager::On_Receive_Step_Update(long new_step) {
     max_step = max(max_step, new_step);
 }
 
-void Game_Manager::On_Recieve_Player_Step_Update(Player_ID player_id, long min_step) {
+void Game_Manager::On_Receive_Player_Step_Update(Player_ID player_id, long min_step) {
     player_steps[player_id] = max(player_steps[player_id], min_step);
     min_step = step;
     for (auto const& [id, player_step] : player_steps) {
@@ -53,7 +57,7 @@ void Game_Manager::Update() {
         if (network.Is_Server()) {
             network.call_rpc(false, "stepupdate", step);
         } else {
-            network.call_rpc(false, "minstepupdate", step);
+            network.call_rpc(false, "minstepupdate", player_id, step);
         }
     }
 }

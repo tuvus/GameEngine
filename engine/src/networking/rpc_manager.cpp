@@ -4,12 +4,7 @@
 #include "networking/rpc_manager.h"
 
 using namespace std;
-RPC_Manager::RPC_Manager() : dispatcher(std::make_shared<rpc::detail::dispatcher>()) {
-
-    // bind_rpc("test", [](int asdf){cout << "THE TEST WORKED!" << asdf << endl;});
-    // bind_rpc("test", [this](){cout << "THE TEST WORKED!" << endl;});
-    // call_rpc("test");
-}
+RPC_Manager::RPC_Manager() : dispatcher(std::make_shared<rpc::detail::dispatcher>()) {}
 
 
 template <typename... Elements>
