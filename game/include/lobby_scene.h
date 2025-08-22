@@ -16,6 +16,7 @@ class Lobby_Scene : public Scene, Network_Events_Receiver {
     // Used on the server to generate player ids
     int player_id_count;
     unordered_map<Client_ID, Player_ID>* client_id_to_player_id;
+    Player_ID player_id;
     void Start_Game();
 
   public:

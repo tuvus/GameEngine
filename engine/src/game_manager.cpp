@@ -3,8 +3,9 @@
 using namespace std;
 
 Game_Manager::Game_Manager(Application& application, Network& network,
-                           unordered_map<Client_ID, Player_ID>* client_player_ids)
-    : application(application), network(network) {
+                           unordered_map<Client_ID, Player_ID>* client_player_ids,
+                           Player_ID player_id)
+    : application(application), network(network), player_id(player_id) {
     player_steps = unordered_map<Player_ID, long>();
 
     for (const auto& client_player_id : *client_player_ids) {
@@ -14,7 +15,7 @@ Game_Manager::Game_Manager(Application& application, Network& network,
 
     network.bind_rpc("stepupdate", [this](const long new_step) {
         On_Receive_Step_Update(new_step);
-        return RPC_Manager::VALID;
+        return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
     if (network.Is_Server())
         network.bind_rpc("minstepupdate", [this](const long player_id, const long min_step) {
@@ -33,8 +34,8 @@ void Game_Manager::On_Receive_Step_Update(long new_step) {
     max_step = max(max_step, new_step);
 }
 
-void Game_Manager::On_Receive_Player_Step_Update(Player_ID player_id, long min_step) {
-    player_steps[player_id] = max(player_steps[player_id], min_step);
+void Game_Manager::On_Receive_Player_Step_Update(Player_ID player_id, long player_min_step) {
+    player_steps[player_id] = max(player_steps[player_id], player_min_step);
     min_step = step;
     for (auto const& [id, player_step] : player_steps) {
         min_step = min(min_step, player_step);

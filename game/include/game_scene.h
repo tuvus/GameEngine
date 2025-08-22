@@ -9,6 +9,7 @@ class Game_Scene : public Scene, Network_Events_Receiver {
   private:
     Card_Game& card_game;
     std::unique_ptr<Game_Manager> game_manager;
+    EUI_Text* step_text;
 
   public:
     Game_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_game) {
@@ -20,6 +21,8 @@ class Game_Scene : public Scene, Network_Events_Receiver {
         root->style.vertical_alignment = Alignment::Center;
         root->style.horizontal_alignment = Alignment::Center;
 
+        step_text = new EUI_Text("Steps: 0");
+        root->Add_Child(step_text);
         auto* button = new EUI_Button("Menu", [&card_game] {
             card_game.Close_Network();
             card_game.set_ui_screen(MENU);
@@ -36,12 +39,16 @@ class Game_Scene : public Scene, Network_Events_Receiver {
                 static_cast<Network_Events_Receiver*>(this));
     }
 
-    void Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_players) {
+    void Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_players, Player_ID player_id) {
         game_manager =
-            std::make_unique<Game_Manager>(card_game, *card_game.Get_Network(), clients_players);
+            std::make_unique<Game_Manager>(card_game, *card_game.Get_Network(), clients_players, player_id);
     }
 
-    void Update_UI(chrono::milliseconds) override { root_elem->Render(); }
+    void Update_UI(chrono::milliseconds) override {
+        root_elem->Render();
+        step_text->Set_Text("Steps: " + to_string(game_manager->Get_Current_Step()));
+    }
+
     void Update(std::chrono::milliseconds) override { game_manager->Update(); }
 
     void On_Connected() override {}

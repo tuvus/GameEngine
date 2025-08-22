@@ -27,7 +27,7 @@ class Game_Manager {
     long next_id;
 
   public:
-    Game_Manager(Application&, Network&, unordered_map<Client_ID, Player_ID>*);
+    Game_Manager(Application&, Network&, unordered_map<Client_ID, Player_ID>*, Player_ID);
     ~Game_Manager();
     void Update();
     long Get_New_Id();
