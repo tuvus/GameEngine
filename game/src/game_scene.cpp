@@ -37,6 +37,10 @@ void Game_Scene::Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_player
 }
 
 void Game_Scene::Update_UI(chrono::milliseconds) {
+    Texture arrow = LoadTextureFromImage(LoadImage("resources/Arrow.png"));
+    for (const auto* obj : game_manager->Get_All_Objects()) {
+        DrawTexture(arrow, obj->pos.x, obj->pos.y, WHITE);
+    }
     root_elem->Render();
     step_text->Set_Text("Steps: " + to_string(game_manager->Get_Current_Step()));
 }

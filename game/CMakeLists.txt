@@ -34,3 +34,6 @@ add_custom_command(
         "${CMAKE_BINARY_DIR}/compile_commands.json"
         "${CMAKE_SOURCE_DIR}/compile_commands.json"
 )
+
+# Copy the resources directory to the build
+file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})

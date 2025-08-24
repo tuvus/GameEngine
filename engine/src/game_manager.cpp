@@ -84,3 +84,7 @@ long Game_Manager::Get_Current_Step() const {
 Client_ID Game_Manager::Get_Client_ID(Player_ID player_id) {
     return player_id_to_client_id[player_id];
 }
+
+vector<Game_Object*> Game_Manager::Get_All_Objects() {
+    return vector(objects.begin(), objects.end());
+}
