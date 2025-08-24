@@ -14,6 +14,8 @@ set(Headers
         include/lobby_scene.h
         include/menu_scene.h
         include/game_scene.h
+        src/game_scene.cpp
+        include/test_object.h
 )
 
 set(CMAKE_CXX_STANDARD 23)

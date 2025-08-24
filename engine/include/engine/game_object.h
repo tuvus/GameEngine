@@ -5,7 +5,7 @@
 class Game_Manager;
 
 class Game_Object {
-  private:
+  protected:
     const long id;
     Vector2 pos;
     float rot;

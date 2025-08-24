@@ -7,6 +7,7 @@ Game_Manager::Game_Manager(Application& application, Network& network,
                            Player_ID player_id)
     : application(application), network(network), player_id(player_id) {
     player_steps = unordered_map<Player_ID, long>();
+    objects = unordered_set<Game_Object*>();
 
     for (const auto& client_player_id : *client_player_ids) {
         client_id_to_player_id.emplace(client_player_id.first, client_player_id.second);
@@ -48,19 +49,28 @@ void Game_Manager::Update() {
         return;
 
     // If we are the server and the players have reached a close enough step
-    // We can continue on and procede with the next step
+    // We can continue on and proceed with the next step
     if (network.Is_Server() && step == max_step && min_step > step - 3) {
         max_step++;
     }
     if (step < max_step) {
-
+        for (const Game_Object* object : objects) {
+            const_cast<Game_Object*>(object)->Update();
+        }
         step++;
         if (network.Is_Server()) {
             network.call_rpc(false, "stepupdate", step);
+            if (player_steps.empty()) {
+                min_step = step;
+            }
         } else {
             network.call_rpc(false, "minstepupdate", player_id, step);
         }
     }
+}
+
+void Game_Manager::Add_Object(Game_Object* object) {
+    objects.emplace(object);
 }
 
 long Game_Manager::Get_New_Id() {
