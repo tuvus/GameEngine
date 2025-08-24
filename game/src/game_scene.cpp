@@ -34,7 +34,7 @@ void Game_Scene::Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_player
     game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network(),
                                                   clients_players, player_id);
     vector<Vector2> positions = vector<Vector2>();
-    positions.emplace_back(rand() % card_game.screen_width, card_game.screen_height);
+    positions.emplace_back(rand() % card_game.screen_width, card_game.screen_height - 10);
 
     while (positions[positions.size() - 1].y > 400) {
         Vector2 prev_pos = positions[positions.size() - 1];
@@ -51,8 +51,9 @@ void Game_Scene::Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_player
 void Game_Scene::Update_UI(chrono::milliseconds) {
     Texture arrow = LoadTextureFromImage(LoadImage("resources/Arrow.png"));
     for (const auto* obj : game_manager->Get_All_Objects()) {
-        DrawTextureEx(arrow, obj->pos - Vector2(arrow.width / 2, arrow.height / 2), obj->rot, 1,
-                      WHITE);
+        DrawTexturePro(arrow, {0, 0, (float) arrow.width, (float) arrow.height},
+                       {obj->pos.x, obj->pos.y, (float) arrow.width, (float) arrow.height},
+                       Vector2(arrow.width / 2, arrow.height / 2), obj->rot, WHITE);
     }
     root_elem->Render();
     step_text->Set_Text("Steps: " + to_string(game_manager->Get_Current_Step()));

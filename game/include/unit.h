@@ -17,7 +17,7 @@ class Unit : public Game_Object {
 
     void Update() override {
         if (section == path->positions.size()) {
-            pos = path->positions[section - 1];
+            pos = path->positions[section];
             return;
         }
 
@@ -28,7 +28,7 @@ class Unit : public Game_Object {
             section++;
         }
         if (section == path->positions.size()) {
-            pos = path->positions[section - 1];
+            pos = path->positions[section];
             return;
         }
         pos = Vector2Lerp(path->positions[section], path->positions[section + 1], lerp);
