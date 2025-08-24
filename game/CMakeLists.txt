@@ -7,6 +7,7 @@ set(Sources
         src/card_game.cpp
         src/main.cpp
         src/lobby_scene.cpp
+        src/game_scene.cpp
 )
 
 set(Headers
@@ -14,8 +15,8 @@ set(Headers
         include/lobby_scene.h
         include/menu_scene.h
         include/game_scene.h
-        src/game_scene.cpp
-        include/test_object.h
+        include/unit.h
+        include/path.h
 )
 
 set(CMAKE_CXX_STANDARD 23)

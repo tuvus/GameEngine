@@ -1,6 +1,6 @@
 #include "game_scene.h"
 
-#include "test_object.h"
+#include "unit.h"
 
 Game_Scene::Game_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_game) {
     EUI_HBox* root = new EUI_HBox();
@@ -33,13 +33,26 @@ void Game_Scene::Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_player
                              Player_ID player_id) {
     game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network(),
                                                   clients_players, player_id);
-    game_manager->Add_Object(new Test_Object(*game_manager, Vector2(0, 0), 0));
+    vector<Vector2> positions = vector<Vector2>();
+    positions.emplace_back(rand() % card_game.screen_width, card_game.screen_height);
+
+    while (positions[positions.size() - 1].y > 400) {
+        Vector2 prev_pos = positions[positions.size() - 1];
+        int new_x = max(
+            min((int) prev_pos.x + rand() % 200 - 100, static_cast<int>(card_game.screen_width)),
+            0);
+        positions.emplace_back(new_x, prev_pos.y - (20 + rand() % 20));
+    }
+
+    path = new Path(positions);
+    game_manager->Add_Object(new Unit(*game_manager, path, 1));
 }
 
 void Game_Scene::Update_UI(chrono::milliseconds) {
     Texture arrow = LoadTextureFromImage(LoadImage("resources/Arrow.png"));
     for (const auto* obj : game_manager->Get_All_Objects()) {
-        DrawTexture(arrow, obj->pos.x, obj->pos.y, WHITE);
+        DrawTextureEx(arrow, obj->pos - Vector2(arrow.width / 2, arrow.height / 2), obj->rot, 1,
+                      WHITE);
     }
     root_elem->Render();
     step_text->Set_Text("Steps: " + to_string(game_manager->Get_Current_Step()));

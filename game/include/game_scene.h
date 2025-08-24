@@ -2,6 +2,7 @@
 
 #include "card_game.h"
 #include "game_manager.h"
+#include "path.h"
 #include "scene.h"
 #include "ui/eui.h"
 
@@ -10,6 +11,7 @@ class Game_Scene : public Scene, Network_Events_Receiver {
     Card_Game& card_game;
     std::unique_ptr<Game_Manager> game_manager;
     EUI_Text* step_text;
+    Path* path;
 
   public:
     Game_Scene(Card_Game& card_game);
