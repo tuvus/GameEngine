@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
-project(game VERSION 0.1.0)
+
+set(PROJECT_NAME game)
+project(${PROJECT_NAME} VERSION 0.1.0)
+set(CMAKE_CXX_STANDARD 23)
 
 set(CMAKE_TOOLCHAIN_FILE, "${CMAKE_SOURCE_DIR}/vcpkg.cmake")
 
@@ -19,22 +22,15 @@ set(Headers
         include/path.h
 )
 
-set(CMAKE_CXX_STANDARD 23)
 add_executable(game ${Sources} ${Headers})
 
 #set(DONT_RUN_game_ENGINE_TESTS TRUE)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
-add_subdirectory(${CMAKE_SOURCE_DIR}/../engine ${CMAKE_CURRENT_BINARY_DIR}/euclid)
-target_link_libraries(game PUBLIC euclid)
-target_include_directories(game PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
-# Copy compile_commands.json after build config
-add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_BINARY_DIR}/compile_commands.json"
-        "${CMAKE_SOURCE_DIR}/compile_commands.json"
-)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../engine ${CMAKE_CURRENT_BINARY_DIR}/euclid)
+target_link_libraries(${PROJECT_NAME} PUBLIC euclid)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 # Copy the resources directory to the build
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})
