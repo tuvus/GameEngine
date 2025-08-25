@@ -40,6 +40,7 @@ class Game_Manager {
     void Add_Object(Game_Object* object);
     long Get_New_Id();
     long Get_Current_Step() const;
+    Player* Get_Player(Player_ID);
     vector<Game_Object*> Get_All_Objects();
 
     std::minstd_rand random;

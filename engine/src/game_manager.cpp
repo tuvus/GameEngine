@@ -88,6 +88,11 @@ long Game_Manager::Get_Current_Step() const {
     return step;
 }
 
+Player* Game_Manager::Get_Player(Player_ID player_id) {
+    return *ranges::find_if(players,
+                            [player_id](Player* player) { return player->player_id == player_id; });
+}
+
 vector<Game_Object*> Game_Manager::Get_All_Objects() {
     return vector(objects.begin(), objects.end());
 }
