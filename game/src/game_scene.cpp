@@ -36,7 +36,7 @@ void Game_Scene::Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_player
     vector<Vector2> positions = vector<Vector2>();
     positions.emplace_back(rand() % card_game.screen_width, card_game.screen_height - 10);
 
-    while (positions[positions.size() - 1].y > 400) {
+    while (positions[positions.size() - 1].y > 80) {
         Vector2 prev_pos = positions[positions.size() - 1];
         int new_x = max(
             min((int) prev_pos.x + rand() % 200 - 100, static_cast<int>(card_game.screen_width)),
@@ -49,6 +49,15 @@ void Game_Scene::Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_player
 }
 
 void Game_Scene::Update_UI(chrono::milliseconds) {
+    // Visualize path
+    Vector2 past_pos = Vector2One() * -1;
+    for (const auto& pos : path->positions) {
+        if (past_pos != Vector2One() * -1)
+            DrawLineEx(past_pos, pos, 5, BLACK);
+        past_pos = pos;
+    }
+
+    // Draw arrows
     Texture arrow = LoadTextureFromImage(LoadImage("resources/Arrow.png"));
     for (const auto* obj : game_manager->Get_All_Objects()) {
         DrawTexturePro(arrow, {0, 0, (float) arrow.width, (float) arrow.height},

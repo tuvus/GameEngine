@@ -16,7 +16,7 @@ class Unit : public Game_Object {
           section(0), lerp(0), speed(speed) {}
 
     void Update() override {
-        if (section == path->positions.size()) {
+        if (section + 1 == path->positions.size()) {
             pos = path->positions[section];
             return;
         }
@@ -27,7 +27,7 @@ class Unit : public Game_Object {
             lerp--;
             section++;
         }
-        if (section == path->positions.size()) {
+        if (section + 1 == path->positions.size()) {
             pos = path->positions[section];
             return;
         }
