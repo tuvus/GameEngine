@@ -29,6 +29,7 @@ class Game_Manager {
     long next_id;
 
     unordered_set<Game_Object*> objects;
+    vector<Game_Object*> objects_to_delete;
 
   public:
     Player* local_player;
@@ -38,6 +39,7 @@ class Game_Manager {
     ~Game_Manager();
     void Update();
     void Add_Object(Game_Object* object);
+    void Delete_Object(Game_Object* object);
     long Get_New_Id();
     long Get_Current_Step() const;
     Player* Get_Player(Player_ID);

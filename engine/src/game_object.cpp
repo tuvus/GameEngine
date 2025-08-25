@@ -7,6 +7,10 @@ Game_Object::Game_Object(Game_Manager& game_manager, Texture texture, const Vect
       game_manager(game_manager) {
 }
 
+void Game_Object::Delete_Object() {
+    game_manager.Delete_Object(this);
+}
+
 Game_Object::~Game_Object() {
 }
 

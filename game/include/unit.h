@@ -18,6 +18,7 @@ class Unit : public Game_Object {
     void Update() override {
         if (section + 1 == path->positions.size()) {
             pos = path->positions[section];
+            Delete_Object();
             return;
         }
 
@@ -29,6 +30,7 @@ class Unit : public Game_Object {
         }
         if (section + 1 == path->positions.size()) {
             pos = path->positions[section];
+            Delete_Object();
             return;
         }
         pos = Vector2Lerp(path->positions[section], path->positions[section + 1], lerp);

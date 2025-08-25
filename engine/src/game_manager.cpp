@@ -64,6 +64,12 @@ void Game_Manager::Update() {
         for (const Game_Object* object : objects) {
             const_cast<Game_Object*>(object)->Update();
         }
+
+        for (const Game_Object* object : objects_to_delete) {
+            objects.erase(const_cast<Game_Object*>(object));
+            delete const_cast<Game_Object*>(object);
+        }
+        objects_to_delete.clear();
         step++;
         if (network.Is_Server()) {
             network.call_rpc(false, "stepupdate", step);
@@ -78,6 +84,10 @@ void Game_Manager::Update() {
 
 void Game_Manager::Add_Object(Game_Object* object) {
     objects.emplace(object);
+}
+
+void Game_Manager::Delete_Object(Game_Object* object) {
+    objects_to_delete.push_back(object);
 }
 
 long Game_Manager::Get_New_Id() {
