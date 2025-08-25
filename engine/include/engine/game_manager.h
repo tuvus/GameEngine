@@ -4,6 +4,7 @@
 
 #include <random>
 
+class Player;
 typedef long Player_ID;
 typedef long Obj_ID;
 
@@ -12,9 +13,6 @@ class Game_Manager {
     Application& application;
     Network& network;
 
-    Player_ID player_id;
-    unordered_map<Client_ID, Player_ID> client_id_to_player_id;
-    unordered_map<Player_ID, Client_ID> player_id_to_client_id;
     /* The current count of the step */
     long step = 0;
     /* The maximum step that we are allowed to simulate to */
@@ -33,14 +31,15 @@ class Game_Manager {
     unordered_set<Game_Object*> objects;
 
   public:
-    Game_Manager(Application&, Network&, unordered_map<Client_ID, Player_ID>*, Player_ID,
-                 long seed);
+    Player* local_player;
+    vector<Player*> players;
+
+    Game_Manager(Application&, Network&, vector<Player*>, Player*, long seed);
     ~Game_Manager();
     void Update();
     void Add_Object(Game_Object* object);
     long Get_New_Id();
     long Get_Current_Step() const;
-    Client_ID Get_Client_ID(Player_ID);
     vector<Game_Object*> Get_All_Objects();
 
     std::minstd_rand random;

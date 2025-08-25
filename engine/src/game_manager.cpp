@@ -1,19 +1,19 @@
 #include "game_manager.h"
 
+#include "player.h"
+
+#include <utility>
+
 using namespace std;
 
-Game_Manager::Game_Manager(Application& application, Network& network,
-                           unordered_map<Client_ID, Player_ID>* client_player_ids,
-                           Player_ID player_id, long seed)
-    : application(application), network(network), player_id(player_id) {
+Game_Manager::Game_Manager(Application& application, Network& network, vector<Player*> players,
+                           Player* local_player, long seed)
+    : application(application), network(network), players(std::move(players)),
+      local_player(local_player) {
     player_steps = unordered_map<Player_ID, long>();
     objects = unordered_set<Game_Object*>();
     random = std::minstd_rand(seed);
 
-    for (const auto& client_player_id : *client_player_ids) {
-        client_id_to_player_id.emplace(client_player_id.first, client_player_id.second);
-        player_id_to_client_id.emplace(client_player_id.second, client_player_id.first);
-    }
     if (!network.Is_Server()) {
         network.bind_rpc("setrandseed", [this](const long new_step) {
             On_Receive_Step_Update(new_step);
@@ -31,7 +31,7 @@ Game_Manager::Game_Manager(Application& application, Network& network,
             return RPC_Manager::VALID;
         });
     if (!network.Is_Server()) {
-        network.call_rpc(false, "minstepupdate", player_id, step);
+        network.call_rpc(false, "minstepupdate", local_player->player_id, step);
     }
 }
 
@@ -71,7 +71,7 @@ void Game_Manager::Update() {
                 min_step = step;
             }
         } else {
-            network.call_rpc(false, "minstepupdate", player_id, step);
+            network.call_rpc(false, "minstepupdate", local_player->player_id, step);
         }
     }
 }
@@ -86,10 +86,6 @@ long Game_Manager::Get_New_Id() {
 
 long Game_Manager::Get_Current_Step() const {
     return step;
-}
-
-Client_ID Game_Manager::Get_Client_ID(Player_ID player_id) {
-    return player_id_to_client_id[player_id];
 }
 
 vector<Game_Object*> Game_Manager::Get_All_Objects() {

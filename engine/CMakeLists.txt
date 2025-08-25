@@ -30,6 +30,7 @@ set(Headers
         ${PROJECT_SOURCE_DIR}/include/engine/game_manager.h
         ${PROJECT_SOURCE_DIR}/include/engine/game_object.h
         ${PROJECT_SOURCE_DIR}/include/engine/emath.h
+        ${PROJECT_SOURCE_DIR}/include/engine/player.h
 )
 
 add_library(${PROJECT_NAME} STATIC ${Sources} ${Headers})

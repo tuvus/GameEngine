@@ -1,5 +1,6 @@
 #include "game_scene.h"
 
+#include "card_player.h"
 #include "unit.h"
 
 Game_Scene::Game_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_game) {
@@ -7,7 +8,7 @@ Game_Scene::Game_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_
     root_elem = root;
 
     root->pos = {0, 0};
-    root->dim = {SCREEN_WIDTH, SCREEN_HEIGHT};
+    root->dim = {(float) card_game.screen_width, (float) card_game.screen_height};
     root->style.vertical_alignment = Alignment::Center;
     root->style.horizontal_alignment = Alignment::Center;
 
@@ -29,10 +30,9 @@ Game_Scene::~Game_Scene() {
             static_cast<Network_Events_Receiver*>(this));
 }
 
-void Game_Scene::Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_players,
-                             Player_ID player_id, long seed) {
-    game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network(),
-                                                  clients_players, player_id, seed);
+void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long seed) {
+    game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network(), players,
+                                                  local_player, seed);
     vector<Vector2> positions = vector<Vector2>();
     static uniform_int_distribution<int> start_dist(0, INT_MAX);
     positions.emplace_back(start_dist(game_manager->random) % card_game.screen_width,
@@ -52,10 +52,14 @@ void Game_Scene::Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_player
     game_manager->Add_Object(
         new Unit(*game_manager, LoadTextureFromImage(LoadImage("resources/Arrow.png")), path, 1));
 
-    game_ui_manager = make_unique<Game_UI_Manager>(*game_manager);
+    game_ui_manager = make_unique<Game_UI_Manager>(card_game, *game_manager);
+    if (static_cast<Card_Player*>(game_manager->local_player)->team == 1) {
+        game_ui_manager->camera.rotation = 180;
+    }
 }
 
 void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
+    BeginMode2D(game_ui_manager->camera);
     // Visualize path
     Vector2 past_pos = Vector2One() * -1;
     for (const auto& pos : path->positions) {
@@ -63,6 +67,7 @@ void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
             DrawLineEx(past_pos, pos, 5, BLACK);
         past_pos = pos;
     }
+    EndMode2D();
 
     // Draw arrows
     game_ui_manager->Update_UI(delta_time);
