@@ -1,7 +1,8 @@
 #include "lobby_scene.h"
+#include "game_scene.h"
 
 Lobby_Scene::Lobby_Scene(Card_Game& card_game)
-    : Scene(card_game), card_game(card_game), player_count(0) {
+    : Scene(card_game), card_game(card_game), player_id_count(0), player_count(0) {
     auto* root = new EUI_VBox();
     root_elem = root;
     root->pos = {0, 0};
@@ -14,37 +15,62 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
         status_text->Set_Text("Setting up server...");
     root->Add_Child(status_text);
     start_button = new EUI_Button("Start Game", [this, &card_game]() {
-        card_game.Get_Network()->call_rpc(true, "startgame");
+        card_game.Get_Network()->call_rpc(true, "startgame",
+                                          chrono::duration_cast<chrono::milliseconds>(
+                                              chrono::system_clock::now().time_since_epoch())
+                                              .count());
     });
     start_button->style.padding = {10, 20, 10, 20};
     root->Add_Child(start_button);
-    start_button->is_visible = false;
+    start_button->is_visible = card_game.Get_Network()->Is_Server();
     auto* leave_button = new EUI_Button("Leave Room", [this, &card_game]() {
         card_game.Close_Network();
         card_game.set_ui_screen(MENU);
     });
     leave_button->style.padding = {10, 20, 10, 20};
     root->Add_Child(leave_button);
-    card_game.Get_Network()->bind_rpc("setplayercount", [this, &card_game](int new_player_count) {
+    card_game.Get_Network()->bind_rpc("setplayercount", [this](int new_player_count) {
         player_count = new_player_count;
         status_text->Set_Text("Players: " + to_string(player_count));
         return RPC_Manager::Rpc_Validator_Result::VALID_CALL_ON_CLIENTS;
     });
-    card_game.Get_Network()->bind_rpc("startgame", [&card_game]() {
+    card_game.Get_Network()->bind_rpc(
+        "addplayer", [this](Client_ID client_id, Player_ID player_id) {
+            client_id_to_player_id->emplace(client_id, player_id);
+            return RPC_Manager::Rpc_Validator_Result::VALID_CALL_ON_CLIENTS;
+        });
+    card_game.Get_Network()->bind_rpc("setplayerid", [this](Player_ID player_id) {
+        this->player_id = player_id;
+        return RPC_Manager::Rpc_Validator_Result::VALID;
+    });
+    card_game.Get_Network()->bind_rpc("removeplayer", [this](Client_ID client_id) {
+        if (client_id_to_player_id->contains(client_id))
+            return RPC_Manager::INVALID;
+        client_id_to_player_id->erase(client_id);
+        return RPC_Manager::Rpc_Validator_Result::VALID_CALL_ON_CLIENTS;
+    });
+    card_game.Get_Network()->bind_rpc("startgame", [this, &card_game](long seed) {
         if (card_game.Get_Network()->Get_Network_State() != Network::Server_Running &&
             card_game.Get_Network()->Get_Network_State() != Network::Client_Connected)
             return RPC_Manager::Rpc_Validator_Result::INVALID;
-        card_game.set_ui_screen(GAME);
+        Start_Game(seed);
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
     card_game.Get_Network()->connection_events->emplace(
         static_cast<Network_Events_Receiver*>(this));
+    client_id_to_player_id = new unordered_map<Client_ID, Player_ID>();
 }
 
 Lobby_Scene::~Lobby_Scene() {
     if (card_game.Get_Network() != nullptr)
         card_game.Get_Network()->connection_events->erase(
             static_cast<Network_Events_Receiver*>(this));
+}
+
+void Lobby_Scene::Start_Game(long seed) {
+    card_game.set_ui_screen(GAME);
+    Game_Scene* game_scene = static_cast<Game_Scene*>(card_game.scene);
+    game_scene->Setup_Scene(client_id_to_player_id, player_id, seed);
 }
 
 void Lobby_Scene::Update_UI(std::chrono::milliseconds) {
@@ -66,22 +92,31 @@ void Lobby_Scene::On_Disconnected() {
 void Lobby_Scene::On_Server_Start() {
     player_count = 1;
     card_game.Get_Network()->call_rpc(true, "setplayercount", player_count);
+    player_id = 0;
+    card_game.Get_Network()->call_rpc(true, "addplayer", 0, player_id_count++);
 }
 
 void Lobby_Scene::On_Server_Stop() {
     card_game.set_ui_screen(MENU);
 }
 
-void Lobby_Scene::On_Client_Connected(Client_ID) {
+void Lobby_Scene::On_Client_Connected(Client_ID client_id) {
     player_count++;
-    card_game.Get_Network()->call_rpc(false, "setplayercount", player_count);
-    if (player_count > 1)
-        start_button->is_visible = true;
+    Player_ID new_player_id = player_id_count++;
+    card_game.Get_Network()->call_rpc(true, "setplayercount", player_count);
+    card_game.Get_Network()->call_rpc_on_client(client_id, true, "setplayerid", new_player_id);
+    card_game.Get_Network()->call_rpc(true, "addplayer", client_id, new_player_id);
+    for (const auto& client : *client_id_to_player_id) {
+        if (client.first == client_id)
+            continue;
+        card_game.Get_Network()->call_rpc_on_client(client_id, true, "addplayer", client_id,
+                                                    new_player_id);
+    }
 }
 
-void Lobby_Scene::On_Client_Disconnected(Client_ID) {
+void Lobby_Scene::On_Client_Disconnected(Client_ID client_id) {
+    client_id_to_player_id->erase(client_id);
     player_count--;
     card_game.Get_Network()->call_rpc(true, "setplayercount", player_count);
-    if (player_count <= 1)
-        start_button->is_visible = false;
+    card_game.Get_Network()->call_rpc(true, "removeplayer", client_id);
 }

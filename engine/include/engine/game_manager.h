@@ -1,7 +1,11 @@
 #pragma once
 #include "application.h"
+#include "game_object.h"
+
+#include <random>
 
 typedef long Player_ID;
+typedef long Obj_ID;
 
 class Game_Manager {
   private:
@@ -15,22 +19,29 @@ class Game_Manager {
     long step = 0;
     /* The maximum step that we are allowed to simulate to */
     long max_step = 0;
-    /* The lowest step that a cilent is on.
+    /* The lowest step that a client is on.
      * Used by the server to determine if it should continue or wait. */
     long min_step = 0;
     /* Used on the server to store what steps */
     std::unordered_map<Player_ID, long> player_steps;
     /* Called on clients from the server to set the max step */
-    void On_Recieve_Step_Update(long max_step);
+    void On_Receive_Step_Update(long max_step);
     /* Called on the server from the client to inform the server on its current step */
-    void On_Recieve_Player_Step_Update(Player_ID player_id, long min_step);
+    void On_Receive_Player_Step_Update(Player_ID player_id, long min_step);
     long next_id;
 
+    unordered_set<Game_Object*> objects;
+
   public:
-    Game_Manager(Application&, Network&, std::vector<std::pair<Client_ID, Player_ID>>);
+    Game_Manager(Application&, Network&, unordered_map<Client_ID, Player_ID>*, Player_ID,
+                 long seed);
     ~Game_Manager();
     void Update();
+    void Add_Object(Game_Object* object);
     long Get_New_Id();
     long Get_Current_Step() const;
     Client_ID Get_Client_ID(Player_ID);
+    vector<Game_Object*> Get_All_Objects();
+
+    std::minstd_rand random;
 };
