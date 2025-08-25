@@ -2,6 +2,8 @@
 #include "application.h"
 #include "game_object.h"
 
+#include <random>
+
 typedef long Player_ID;
 typedef long Obj_ID;
 
@@ -31,7 +33,8 @@ class Game_Manager {
     unordered_set<Game_Object*> objects;
 
   public:
-    Game_Manager(Application&, Network&, unordered_map<Client_ID, Player_ID>*, Player_ID);
+    Game_Manager(Application&, Network&, unordered_map<Client_ID, Player_ID>*, Player_ID,
+                 long seed);
     ~Game_Manager();
     void Update();
     void Add_Object(Game_Object* object);
@@ -39,4 +42,6 @@ class Game_Manager {
     long Get_Current_Step() const;
     Client_ID Get_Client_ID(Player_ID);
     vector<Game_Object*> Get_All_Objects();
+
+    std::minstd_rand random;
 };

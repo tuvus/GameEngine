@@ -17,7 +17,8 @@ class Game_Scene : public Scene, Network_Events_Receiver {
     Game_Scene(Card_Game& card_game);
 
     ~Game_Scene() override;
-    void Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_players, Player_ID player_id);
+    void Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_players, Player_ID player_id,
+                     long seed);
 
     void Update_UI(chrono::milliseconds) override;
     void Update(std::chrono::milliseconds) override { game_manager->Update(); }

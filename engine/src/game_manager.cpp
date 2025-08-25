@@ -4,14 +4,21 @@ using namespace std;
 
 Game_Manager::Game_Manager(Application& application, Network& network,
                            unordered_map<Client_ID, Player_ID>* client_player_ids,
-                           Player_ID player_id)
+                           Player_ID player_id, long seed)
     : application(application), network(network), player_id(player_id) {
     player_steps = unordered_map<Player_ID, long>();
     objects = unordered_set<Game_Object*>();
+    random = std::minstd_rand(seed);
 
     for (const auto& client_player_id : *client_player_ids) {
         client_id_to_player_id.emplace(client_player_id.first, client_player_id.second);
         player_id_to_client_id.emplace(client_player_id.second, client_player_id.first);
+    }
+    if (!network.Is_Server()) {
+        network.bind_rpc("setrandseed", [this](const long new_step) {
+            On_Receive_Step_Update(new_step);
+            return RPC_Manager::VALID_CALL_ON_CLIENTS;
+        });
     }
 
     network.bind_rpc("stepupdate", [this](const long new_step) {

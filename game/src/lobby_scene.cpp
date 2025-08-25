@@ -15,7 +15,10 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
         status_text->Set_Text("Setting up server...");
     root->Add_Child(status_text);
     start_button = new EUI_Button("Start Game", [this, &card_game]() {
-        card_game.Get_Network()->call_rpc(true, "startgame");
+        card_game.Get_Network()->call_rpc(true, "startgame",
+                                          chrono::duration_cast<chrono::milliseconds>(
+                                              chrono::system_clock::now().time_since_epoch())
+                                              .count());
     });
     start_button->style.padding = {10, 20, 10, 20};
     root->Add_Child(start_button);
@@ -46,11 +49,11 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
         client_id_to_player_id->erase(client_id);
         return RPC_Manager::Rpc_Validator_Result::VALID_CALL_ON_CLIENTS;
     });
-    card_game.Get_Network()->bind_rpc("startgame", [this, &card_game]() {
+    card_game.Get_Network()->bind_rpc("startgame", [this, &card_game](long seed) {
         if (card_game.Get_Network()->Get_Network_State() != Network::Server_Running &&
             card_game.Get_Network()->Get_Network_State() != Network::Client_Connected)
             return RPC_Manager::Rpc_Validator_Result::INVALID;
-        Start_Game();
+        Start_Game(seed);
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
     card_game.Get_Network()->connection_events->emplace(
@@ -64,10 +67,10 @@ Lobby_Scene::~Lobby_Scene() {
             static_cast<Network_Events_Receiver*>(this));
 }
 
-void Lobby_Scene::Start_Game() {
+void Lobby_Scene::Start_Game(long seed) {
     card_game.set_ui_screen(GAME);
     Game_Scene* game_scene = static_cast<Game_Scene*>(card_game.scene);
-    game_scene->Setup_Scene(client_id_to_player_id, player_id);
+    game_scene->Setup_Scene(client_id_to_player_id, player_id, seed);
 }
 
 void Lobby_Scene::Update_UI(std::chrono::milliseconds) {

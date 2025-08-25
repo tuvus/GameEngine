@@ -17,7 +17,7 @@ class Lobby_Scene : public Scene, Network_Events_Receiver {
     int player_id_count;
     unordered_map<Client_ID, Player_ID>* client_id_to_player_id;
     Player_ID player_id;
-    void Start_Game();
+    void Start_Game(long seed);
 
   public:
     Lobby_Scene(Card_Game& card_game);

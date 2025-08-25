@@ -30,18 +30,22 @@ Game_Scene::~Game_Scene() {
 }
 
 void Game_Scene::Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_players,
-                             Player_ID player_id) {
+                             Player_ID player_id, long seed) {
     game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network(),
-                                                  clients_players, player_id);
+                                                  clients_players, player_id, seed);
     vector<Vector2> positions = vector<Vector2>();
-    positions.emplace_back(rand() % card_game.screen_width, card_game.screen_height - 10);
+    static uniform_int_distribution<int> start_dist(0, INT_MAX);
+    positions.emplace_back(start_dist(game_manager->random) % card_game.screen_width,
+                           card_game.screen_height - 10);
 
     while (positions[positions.size() - 1].y > 80) {
         Vector2 prev_pos = positions[positions.size() - 1];
-        int new_x = max(
-            min((int) prev_pos.x + rand() % 200 - 100, static_cast<int>(card_game.screen_width)),
-            0);
-        positions.emplace_back(new_x, prev_pos.y - (20 + rand() % 20));
+        static uniform_int_distribution<int> move_dist(-100, 100);
+        int new_x = max(min((int) prev_pos.x + move_dist(game_manager->random),
+                            static_cast<int>(card_game.screen_width)),
+                        0);
+        static uniform_int_distribution<int> forward_dist(20, 40);
+        positions.emplace_back(new_x, prev_pos.y - forward_dist(game_manager->random));
     }
 
     path = new Path(positions);
@@ -58,6 +62,7 @@ void Game_Scene::Update_UI(chrono::milliseconds) {
     }
 
     // Draw arrows
+    // This will probably be moved into the game engine in the future
     Texture arrow = LoadTextureFromImage(LoadImage("resources/Arrow.png"));
     for (const auto* obj : game_manager->Get_All_Objects()) {
         DrawTexturePro(arrow, {0, 0, (float) arrow.width, (float) arrow.height},
