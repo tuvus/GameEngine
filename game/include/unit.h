@@ -11,9 +11,9 @@ class Unit : public Game_Object {
     float lerp;
     float speed;
 
-    Unit(Game_Manager& game_manager, Path* path, float speed)
-        : Game_Object(game_manager, path->positions[0], path->Get_Rotation_On_Path(0)), path(path),
-          section(0), lerp(0), speed(speed) {}
+    Unit(Game_Manager& game_manager, Texture texture, Path* path, float speed)
+        : Game_Object(game_manager, texture, path->positions[0], path->Get_Rotation_On_Path(0)),
+          path(path), section(0), lerp(0), speed(speed) {}
 
     void Update() override {
         if (section + 1 == path->positions.size()) {

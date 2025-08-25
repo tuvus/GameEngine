@@ -49,10 +49,13 @@ void Game_Scene::Setup_Scene(unordered_map<Client_ID, Player_ID>* clients_player
     }
 
     path = new Path(positions);
-    game_manager->Add_Object(new Unit(*game_manager, path, 1));
+    game_manager->Add_Object(
+        new Unit(*game_manager, LoadTextureFromImage(LoadImage("resources/Arrow.png")), path, 1));
+
+    game_ui_manager = make_unique<Game_UI_Manager>(*game_manager);
 }
 
-void Game_Scene::Update_UI(chrono::milliseconds) {
+void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
     // Visualize path
     Vector2 past_pos = Vector2One() * -1;
     for (const auto& pos : path->positions) {
@@ -62,15 +65,14 @@ void Game_Scene::Update_UI(chrono::milliseconds) {
     }
 
     // Draw arrows
-    // This will probably be moved into the game engine in the future
-    Texture arrow = LoadTextureFromImage(LoadImage("resources/Arrow.png"));
-    for (const auto* obj : game_manager->Get_All_Objects()) {
-        DrawTexturePro(arrow, {0, 0, (float) arrow.width, (float) arrow.height},
-                       {obj->pos.x, obj->pos.y, (float) arrow.width, (float) arrow.height},
-                       Vector2(arrow.width / 2, arrow.height / 2), obj->rot, WHITE);
-    }
+    game_ui_manager->Update_UI(delta_time);
+
     root_elem->Render();
     step_text->Set_Text("Steps: " + to_string(game_manager->Get_Current_Step()));
+}
+
+void Game_Scene::Update(std::chrono::milliseconds) {
+    game_manager->Update();
 }
 
 void Game_Scene::On_Disconnected() {

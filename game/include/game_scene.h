@@ -2,6 +2,7 @@
 
 #include "card_game.h"
 #include "game_manager.h"
+#include "game_ui_manager.h"
 #include "path.h"
 #include "scene.h"
 #include "ui/eui.h"
@@ -10,6 +11,7 @@ class Game_Scene : public Scene, Network_Events_Receiver {
   private:
     Card_Game& card_game;
     std::unique_ptr<Game_Manager> game_manager;
+    std::unique_ptr<Game_UI_Manager> game_ui_manager;
     EUI_Text* step_text;
     Path* path;
 
@@ -21,7 +23,7 @@ class Game_Scene : public Scene, Network_Events_Receiver {
                      long seed);
 
     void Update_UI(chrono::milliseconds) override;
-    void Update(std::chrono::milliseconds) override { game_manager->Update(); }
+    void Update(std::chrono::milliseconds) override;
 
     void On_Connected() override {}
 

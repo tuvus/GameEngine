@@ -20,6 +20,7 @@ set(Headers
         include/game_scene.h
         include/unit.h
         include/path.h
+        ../engine/include/engine/game_ui_manager.h
 )
 
 add_executable(game ${Sources} ${Headers})
