@@ -22,8 +22,8 @@ Game_Scene::Game_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_
     button->style.padding = {10, 20, 10, 20};
     root->Add_Child(button);
     auto* spawn_unit = new EUI_Button("Spawn Unit", [this] {
-        this->card_game.Get_Network()->call_rpc(true, "spawnunit",
-                                                this->game_manager->local_player->player_id);
+        this->card_game.Get_Network()->call_game_rpc("spawnunit",
+                                                     this->game_manager->local_player->player_id);
     });
     root->Add_Child(spawn_unit);
     card_game.Get_Network()->connection_events->emplace(
@@ -42,7 +42,7 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
     vector<Vector2> positions = vector<Vector2>();
     static uniform_int_distribution<int> start_dist(0, INT_MAX);
     positions.emplace_back(start_dist(game_manager->random) % (card_game.screen_width - 200) + 100,
-                           card_game.screen_height - 10);
+                           card_game.screen_height - 80);
 
     while (positions[positions.size() - 1].y > 80) {
         Vector2 prev_pos = positions[positions.size() - 1];

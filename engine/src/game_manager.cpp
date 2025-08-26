@@ -61,6 +61,8 @@ void Game_Manager::Update() {
         max_step++;
     }
     if (step < max_step) {
+        application.Get_Network()->Process_Step_Rpcs(step);
+
         for (const Game_Object* object : objects) {
             const_cast<Game_Object*>(object)->Update();
         }
@@ -72,7 +74,7 @@ void Game_Manager::Update() {
         objects_to_delete.clear();
         step++;
         if (network.Is_Server()) {
-            network.call_rpc(false, "stepupdate", step);
+            network.call_rpc(true, "stepupdate", step);
             if (player_steps.empty()) {
                 min_step = step;
             }
