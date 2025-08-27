@@ -40,8 +40,8 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
     game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network(), players,
                                                   local_player, seed);
     vector<Vector2> positions = vector<Vector2>();
-    static uniform_int_distribution<int> start_dist(0, INT_MAX);
-    positions.emplace_back(start_dist(game_manager->random) % (card_game.screen_width - 200) + 100,
+    static uniform_int_distribution<int> start_dist(-200, 200);
+    positions.emplace_back(start_dist(game_manager->random) + card_game.screen_width / 2,
                            card_game.screen_height - 80);
 
     while (positions[positions.size() - 1].y > 80) {
@@ -68,7 +68,8 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
         Player* player = game_manager->Get_Player(player_id);
         game_manager->Add_Object(
             new Unit(*game_manager, LoadTextureFromImage(LoadImage("resources/Arrow.png")),
-                     static_cast<Card_Player*>(player)->team == 0 ? f_path : r_path, 1));
+                     static_cast<Card_Player*>(player)->team == 0 ? f_path : r_path, 1,
+                     static_cast<Card_Player*>(player)->team));
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
 }
@@ -79,7 +80,8 @@ void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
     Vector2 past_pos = Vector2One() * -1;
     for (const auto& pos : f_path->positions) {
         if (past_pos != Vector2One() * -1)
-            DrawLineEx(past_pos, pos, 5, BLACK);
+            DrawLineEx(past_pos, pos, 40, DARKGRAY);
+        DrawCircle(pos.x, pos.y, 20, DARKGRAY);
         past_pos = pos;
     }
     EndMode2D();

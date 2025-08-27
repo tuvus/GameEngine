@@ -10,10 +10,11 @@ class Unit : public Game_Object {
     // 0 means the start position and 1 means the end position of the segment on the path
     float lerp;
     float speed;
+    int team;
 
-    Unit(Game_Manager& game_manager, Texture texture, Path* path, float speed)
+    Unit(Game_Manager& game_manager, Texture texture, Path* path, float speed, int team)
         : Game_Object(game_manager, texture, path->positions[0], path->Get_Rotation_On_Path(0)),
-          path(path), section(0), lerp(0), speed(speed) {}
+          path(path), section(0), lerp(0), speed(speed), team(team) {}
 
     void Update() override {
         if (section + 1 == path->positions.size()) {
