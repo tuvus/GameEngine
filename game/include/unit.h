@@ -13,8 +13,10 @@ class Unit : public Game_Object {
     int team;
     bool spawned;
 
-    Unit(Game_Manager& game_manager, Texture texture, Path* path, float speed, int team)
-        : Game_Object(game_manager, texture, path->positions[0], path->Get_Rotation_On_Path(0)),
+    Unit(Game_Manager& game_manager, Texture texture, Path* path, float speed, int team,
+         float scale)
+        : Game_Object(game_manager, texture, path->positions[0], path->Get_Rotation_On_Path(0),
+                      scale),
           path(path), section(0), lerp(0), speed(speed), team(team) {
         spawned = true;
     }

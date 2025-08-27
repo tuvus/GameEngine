@@ -2,9 +2,9 @@
 #include "game_manager.h"
 
 Game_Object::Game_Object(Game_Manager& game_manager, Texture texture, const Vector2 pos,
-                         const float rot)
+                         const float rot, float scale)
     : texture(texture), id(game_manager.Get_New_Id()), pos(pos), rot(rot),
-      game_manager(game_manager) {
+      game_manager(game_manager), scale(scale) {
 }
 
 void Game_Object::Delete_Object() {

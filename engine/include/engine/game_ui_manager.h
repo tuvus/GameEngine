@@ -27,8 +27,10 @@ class Game_UI_Manager {
         for (const auto* obj : game_manager.Get_All_Objects()) {
             DrawTexturePro(
                 obj->texture, {0, 0, (float) obj->texture.width, (float) obj->texture.height},
-                {obj->pos.x, obj->pos.y, (float) obj->texture.width, (float) obj->texture.height},
-                Vector2(obj->texture.width / 2, obj->texture.height / 2), obj->rot, WHITE);
+                {obj->pos.x, obj->pos.y, obj->texture.width * obj->scale,
+                 obj->texture.height * obj->scale},
+                Vector2(obj->texture.width * obj->scale / 2, obj->texture.height * obj->scale / 2),
+                obj->rot, WHITE);
         }
         EndMode2D();
     }

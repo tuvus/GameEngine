@@ -11,8 +11,9 @@ class Game_Object {
     float rot;
     Game_Manager& game_manager;
     Texture2D texture;
+    float scale;
 
-    Game_Object(Game_Manager& game_manager, Texture2D texture, Vector2 pos, float rot);
+    Game_Object(Game_Manager& game_manager, Texture2D texture, Vector2 pos, float rot, float scale);
     void Delete_Object();
     virtual ~Game_Object();
     virtual void Update() = 0;

@@ -6,10 +6,10 @@ class Tower : public Game_Object {
     int team;
     bool spawned;
 
-    Tower(Game_Manager& game_manager, Texture2D texture, Vector2 pos, int team)
-        : Game_Object(game_manager, texture, pos, 0), team(team) {
+    Tower(Game_Manager& game_manager, Texture2D texture, Vector2 pos, int team, float scale)
+        : Game_Object(game_manager, texture, pos, 0, scale), team(team) {
         spawned = true;
     }
 
-    void Update() override {}
+    void Update() override { rot++; }
 };

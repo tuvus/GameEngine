@@ -73,14 +73,14 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
         game_manager->Add_Object(
             new Unit(*game_manager, LoadTextureFromImage(LoadImage("resources/Arrow.png")),
                      static_cast<Card_Player*>(player)->team == 0 ? f_path : r_path, 1,
-                     static_cast<Card_Player*>(player)->team));
+                     static_cast<Card_Player*>(player)->team, .4f));
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
     card_game.Get_Network()->bind_rpc("spawntower", [this](Player_ID player_id, float x, float y) {
         Player* player = game_manager->Get_Player(player_id);
-        game_manager->Add_Object(new Tower(*game_manager,
-                                           LoadTextureFromImage(LoadImage("resources/Tower.png")),
-                                           Vector2(x, y), static_cast<Card_Player*>(player)->team));
+        game_manager->Add_Object(
+            new Tower(*game_manager, LoadTextureFromImage(LoadImage("resources/Tower.png")),
+                      Vector2(x, y), static_cast<Card_Player*>(player)->team, .4f));
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
 }
