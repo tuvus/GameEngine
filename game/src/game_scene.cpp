@@ -76,6 +76,9 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
     card_game.Get_Network()->bind_rpc("spawntower", [this](Player_ID player_id, float x, float y) {
+        if (!Can_Place_Tower(Vector2(x, y), 50))
+            return RPC_Manager::INVALID;
+
         Card_Player* player = static_cast<Card_Player*>(game_manager->Get_Player(player_id));
         game_manager->Add_Object(
             new Tower(*game_manager, LoadTextureFromImage(LoadImage("resources/Tower.png")),
@@ -101,19 +104,36 @@ void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
 
     if (placing_tower) {
         auto mouse_pos = card_game.eui_ctx->input.mouse_position;
-        DrawCircle(mouse_pos.x, mouse_pos.y, 30,
+        auto world_pos = GetScreenToWorld2D(mouse_pos, game_ui_manager->camera);
+        if (Can_Place_Tower(world_pos, 50))
+            DrawCircle(mouse_pos.x, mouse_pos.y, 75, ColorAlpha(LIGHTGRAY, .3f));
+        DrawCircle(mouse_pos.x, mouse_pos.y, 20,
                    static_cast<Card_Player*>(game_manager->local_player)->team ? RED : BLUE);
+
         if (card_game.eui_ctx->input.left_mouse_pressed) {
-            mouse_pos = GetScreenToWorld2D(mouse_pos, game_ui_manager->camera);
             this->card_game.Get_Network()->call_game_rpc(
-                "spawntower", this->game_manager->local_player->player_id, mouse_pos.x,
-                mouse_pos.y);
+                "spawntower", this->game_manager->local_player->player_id, world_pos.x,
+                world_pos.y);
             placing_tower = false;
         }
     }
 
     root_elem->Render();
     step_text->Set_Text("Steps: " + to_string(game_manager->Get_Current_Step()));
+}
+
+bool Game_Scene::Can_Place_Tower(Vector2 pos, float min_dist) {
+    for (auto* object : game_manager->Get_All_Objects()) {
+        if (Tower* other = dynamic_cast<Tower*>(object)) {
+            if (Vector2Distance(pos, other->pos) <= min_dist)
+                return false;
+        }
+    }
+    for (auto path_pos : f_path->positions) {
+        if (Vector2Distance(pos, path_pos) <= min_dist)
+            return false;
+    }
+    return true;
 }
 
 void Game_Scene::Update(std::chrono::milliseconds) {

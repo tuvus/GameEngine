@@ -17,6 +17,8 @@ class Game_Scene : public Scene, Network_Events_Receiver {
     Path* r_path;
     bool placing_tower;
 
+    bool Can_Place_Tower(Vector2 pos, float min_dist);
+
   public:
     Game_Scene(Card_Game& card_game);
 
