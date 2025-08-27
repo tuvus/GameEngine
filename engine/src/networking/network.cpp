@@ -401,7 +401,6 @@ void Network::Process_Step_Rpcs(long step) {
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg) {
     if (error_type == k_ESteamNetworkingSocketsDebugOutputType_Bug) {
         cerr << pszMsg << endl;
-        cerr << pszMsg << endl;
     } else {
         cout << pszMsg << endl;
     }
