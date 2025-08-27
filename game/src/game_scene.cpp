@@ -1,9 +1,11 @@
 #include "game_scene.h"
 
 #include "card_player.h"
+#include "tower.h"
 #include "unit.h"
 
-Game_Scene::Game_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_game) {
+Game_Scene::Game_Scene(Card_Game& card_game)
+    : Scene(card_game), card_game(card_game), placing_tower(false) {
     EUI_HBox* root = new EUI_HBox();
     root_elem = root;
 
@@ -26,6 +28,8 @@ Game_Scene::Game_Scene(Card_Game& card_game) : Scene(card_game), card_game(card_
                                                      this->game_manager->local_player->player_id);
     });
     root->Add_Child(spawn_unit);
+    auto* place_tower = new EUI_Button("Place Tower", [this] { placing_tower = true; });
+    root->Add_Child(place_tower);
     card_game.Get_Network()->connection_events->emplace(
         static_cast<Network_Events_Receiver*>(this));
 }
@@ -72,6 +76,13 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
                      static_cast<Card_Player*>(player)->team));
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
+    card_game.Get_Network()->bind_rpc("spawntower", [this](Player_ID player_id, float x, float y) {
+        Player* player = game_manager->Get_Player(player_id);
+        game_manager->Add_Object(new Tower(*game_manager,
+                                           LoadTextureFromImage(LoadImage("resources/Tower.png")),
+                                           Vector2(x, y), static_cast<Card_Player*>(player)->team));
+        return RPC_Manager::VALID_CALL_ON_CLIENTS;
+    });
 }
 
 void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
@@ -88,6 +99,18 @@ void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
 
     // Draw arrows
     game_ui_manager->Update_UI(delta_time);
+
+    if (placing_tower) {
+        auto mouse_pos = card_game.eui_ctx->input.mouse_position;
+        DrawCircle(mouse_pos.x, mouse_pos.y, 30,
+                   static_cast<Card_Player*>(game_manager->local_player)->team ? RED : BLUE);
+        if (card_game.eui_ctx->input.left_mouse_pressed) {
+            this->card_game.Get_Network()->call_game_rpc(
+                "spawntower", this->game_manager->local_player->player_id, mouse_pos.x,
+                mouse_pos.y);
+            placing_tower = false;
+        }
+    }
 
     root_elem->Render();
     step_text->Set_Text("Steps: " + to_string(game_manager->Get_Current_Step()));

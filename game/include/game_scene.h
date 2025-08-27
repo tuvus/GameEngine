@@ -15,6 +15,7 @@ class Game_Scene : public Scene, Network_Events_Receiver {
     EUI_Text* step_text;
     Path* f_path;
     Path* r_path;
+    bool placing_tower;
 
   public:
     Game_Scene(Card_Game& card_game);

@@ -45,14 +45,15 @@ class Unit : public Game_Object {
                 if (other->team == team || !other->spawned)
                     continue;
 
-                if (Vector2Distance(pos, other->pos) < 60) {
-                    // Collide
-                    spawned = false;
-                    other->spawned = false;
-                    game_manager.Delete_Object(this);
-                    game_manager.Delete_Object(other);
-                    return;
-                }
+                if (Vector2Distance(pos, other->pos) > 60)
+                    continue;
+
+                // Collide
+                spawned = false;
+                other->spawned = false;
+                game_manager.Delete_Object(this);
+                game_manager.Delete_Object(other);
+                return;
             }
         }
 
