@@ -11,12 +11,17 @@ class Unit : public Game_Object {
     float lerp;
     float speed;
     int team;
+    bool spawned;
 
     Unit(Game_Manager& game_manager, Texture texture, Path* path, float speed, int team)
         : Game_Object(game_manager, texture, path->positions[0], path->Get_Rotation_On_Path(0)),
-          path(path), section(0), lerp(0), speed(speed), team(team) {}
+          path(path), section(0), lerp(0), speed(speed), team(team) {
+        spawned = true;
+    }
 
     void Update() override {
+        if (!spawned)
+            return;
         if (section + 1 == path->positions.size()) {
             pos = path->positions[section];
             Delete_Object();
@@ -34,6 +39,23 @@ class Unit : public Game_Object {
             Delete_Object();
             return;
         }
+
+        for (auto* object : game_manager.Get_All_Objects()) {
+            if (Unit* other = dynamic_cast<Unit*>(object)) {
+                if (other->team == team || !other->spawned)
+                    continue;
+
+                if (Vector2Distance(pos, other->pos) < 60) {
+                    // Collide
+                    spawned = false;
+                    other->spawned = false;
+                    game_manager.Delete_Object(this);
+                    game_manager.Delete_Object(other);
+                    return;
+                }
+            }
+        }
+
         pos = Vector2Lerp(path->positions[section], path->positions[section + 1], lerp);
         rot = path->Get_Rotation_On_Path(section);
     }
