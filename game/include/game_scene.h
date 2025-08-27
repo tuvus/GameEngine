@@ -12,10 +12,13 @@ class Game_Scene : public Scene, Network_Events_Receiver {
     Card_Game& card_game;
     std::unique_ptr<Game_Manager> game_manager;
     std::unique_ptr<Game_UI_Manager> game_ui_manager;
-    EUI_Text* step_text;
+    EUI_Text* money_text;
+    EUI_Button* spawn_unit_button;
+    EUI_Button* place_tower_button;
     Path* f_path;
     Path* r_path;
     bool placing_tower;
+    int time_until_income;
 
     bool Can_Place_Tower(Vector2 pos, float min_dist);
 

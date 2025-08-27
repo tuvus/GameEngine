@@ -115,7 +115,7 @@ class EUI_Context {
 
 class EUI_Element {
   public:
-    virtual ~EUI_Element() {  }
+    virtual ~EUI_Element() {}
 
     std::string id;
 
@@ -208,6 +208,8 @@ class EUI_Text : public EUI_Element {
 
 class EUI_Button : public EUI_Text {
   public:
+    bool is_enabled;
+
     EUI_Button(const std::string& text, std::function<void()> on_click);
 
     std::function<void()> on_click;
