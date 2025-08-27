@@ -9,10 +9,11 @@ typedef long Player_ID;
 typedef long Obj_ID;
 
 class Game_Manager {
-  private:
+  public:
     Application& application;
     Network& network;
 
+  private:
     /* The current count of the step */
     long step = 0;
     /* The maximum step that we are allowed to simulate to */
