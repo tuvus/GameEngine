@@ -69,18 +69,17 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
     }
 
     card_game.Get_Network()->bind_rpc("spawnunit", [this](Player_ID player_id) {
-        Player* player = game_manager->Get_Player(player_id);
-        game_manager->Add_Object(
-            new Unit(*game_manager, LoadTextureFromImage(LoadImage("resources/Arrow.png")),
-                     static_cast<Card_Player*>(player)->team == 0 ? f_path : r_path, 1,
-                     static_cast<Card_Player*>(player)->team, .4f));
+        Card_Player* player = static_cast<Card_Player*>(game_manager->Get_Player(player_id));
+        game_manager->Add_Object(new Unit(
+            *game_manager, LoadTextureFromImage(LoadImage("resources/Arrow.png")),
+            player->team == 0 ? f_path : r_path, 1, player->team, .4f, player->team ? RED : BLUE));
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
     card_game.Get_Network()->bind_rpc("spawntower", [this](Player_ID player_id, float x, float y) {
-        Player* player = game_manager->Get_Player(player_id);
+        Card_Player* player = static_cast<Card_Player*>(game_manager->Get_Player(player_id));
         game_manager->Add_Object(
             new Tower(*game_manager, LoadTextureFromImage(LoadImage("resources/Tower.png")),
-                      Vector2(x, y), static_cast<Card_Player*>(player)->team, .4f));
+                      Vector2(x, y), 150, player->team, .4f, player->team ? RED : BLUE));
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
 }
@@ -105,6 +104,7 @@ void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
         DrawCircle(mouse_pos.x, mouse_pos.y, 30,
                    static_cast<Card_Player*>(game_manager->local_player)->team ? RED : BLUE);
         if (card_game.eui_ctx->input.left_mouse_pressed) {
+            mouse_pos = GetScreenToWorld2D(mouse_pos, game_ui_manager->camera);
             this->card_game.Get_Network()->call_game_rpc(
                 "spawntower", this->game_manager->local_player->player_id, mouse_pos.x,
                 mouse_pos.y);

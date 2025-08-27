@@ -30,7 +30,7 @@ class Game_UI_Manager {
                 {obj->pos.x, obj->pos.y, obj->texture.width * obj->scale,
                  obj->texture.height * obj->scale},
                 Vector2(obj->texture.width * obj->scale / 2, obj->texture.height * obj->scale / 2),
-                obj->rot, WHITE);
+                obj->rot, obj->color);
         }
         EndMode2D();
     }
