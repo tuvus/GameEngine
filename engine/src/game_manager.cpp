@@ -86,10 +86,15 @@ void Game_Manager::Update() {
 
 void Game_Manager::Add_Object(Game_Object* object) {
     objects.emplace(object);
+    object->id = next_id++;
+    if (on_add_object != nullptr)
+        on_add_object(object);
 }
 
 void Game_Manager::Delete_Object(Game_Object* object) {
     objects_to_delete.push_back(object);
+    if (on_delete_object != nullptr)
+        on_delete_object(object);
 }
 
 long Game_Manager::Get_New_Id() {

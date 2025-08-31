@@ -35,6 +35,8 @@ class Game_Manager {
   public:
     Player* local_player;
     vector<Player*> players;
+    std::function<void(Game_Object*)> on_add_object;
+    std::function<void(Game_Object*)> on_delete_object;
 
     Game_Manager(Application&, Network&, vector<Player*>, Player*, long seed);
     ~Game_Manager();

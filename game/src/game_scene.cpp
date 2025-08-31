@@ -32,6 +32,9 @@ Game_Scene::Game_Scene(Card_Game& card_game)
     root->Add_Child(place_tower_button);
     card_game.Get_Network()->connection_events->emplace(
         static_cast<Network_Events_Receiver*>(this));
+
+    unit_data = {LoadTextureFromImage(LoadImage("resources/Arrow.png"))};
+    tower_data = {LoadTextureFromImage(LoadImage("resources/Tower.png"))};
 }
 
 Game_Scene::~Game_Scene() {
@@ -74,9 +77,9 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
             return RPC_Manager::INVALID;
 
         player->money -= 1;
-        game_manager->Add_Object(new Unit(
-            *game_manager, LoadTextureFromImage(LoadImage("resources/Arrow.png")),
-            player->team == 0 ? f_path : r_path, 1, player->team, .4f, player->team ? RED : BLUE));
+        game_manager->Add_Object(new Unit(*game_manager, unit_data,
+                                          player->team == 0 ? f_path : r_path, 1, player->team, .4f,
+                                          player->team ? RED : BLUE));
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
     card_game.Get_Network()->bind_rpc("spawntower", [this](Player_ID player_id, float x, float y) {
@@ -88,9 +91,8 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
             return RPC_Manager::INVALID;
 
         player->money -= 10;
-        game_manager->Add_Object(
-            new Tower(*game_manager, LoadTextureFromImage(LoadImage("resources/Tower.png")),
-                      Vector2(x, y), 150, player->team, .4f, player->team ? RED : BLUE));
+        game_manager->Add_Object(new Tower(*game_manager, tower_data, Vector2(x, y), 150,
+                                           player->team, .4f, player->team ? RED : BLUE));
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
 }

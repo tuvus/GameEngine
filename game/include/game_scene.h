@@ -5,7 +5,9 @@
 #include "game_ui_manager.h"
 #include "path.h"
 #include "scene.h"
+#include "tower.h"
 #include "ui/eui.h"
+#include "unit.h"
 
 class Game_Scene : public Scene, Network_Events_Receiver {
   private:
@@ -19,6 +21,8 @@ class Game_Scene : public Scene, Network_Events_Receiver {
     Path* r_path;
     bool placing_tower;
     int time_until_income;
+    Tower_Data tower_data;
+    Unit_Data unit_data;
 
     bool Can_Place_Tower(Vector2 pos, float min_dist);
 
