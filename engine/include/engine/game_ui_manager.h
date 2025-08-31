@@ -8,7 +8,6 @@ class Game_UI_Manager {
   private:
     Application& application;
     Game_Manager& game_manager;
-    std::unordered_map<Game_Object*, Object_UI*> active_ui_objects;
     std::unordered_set<Game_Object*> to_create;
     std::unordered_set<Game_Object*> to_delete;
 
@@ -17,6 +16,8 @@ class Game_UI_Manager {
     static Game_UI_Manager* game_ui_manager_instance;
 
   public:
+    std::unordered_map<Game_Object*, Object_UI*> active_ui_objects;
+
     Camera2D camera;
 
     Game_UI_Manager(Application& application, Game_Manager& game_manager);

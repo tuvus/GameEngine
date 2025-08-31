@@ -119,9 +119,12 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
     for (auto player : game_manager->players) {
         Card_Player* card_player = static_cast<Card_Player*>(player);
         card_player->deck = new Deck(*game_manager, card_player);
+        game_manager->Add_Object(card_player->deck);
         for (auto& card : starting_cards) {
             card_player->deck->deck.emplace_back(card->Clone());
+            game_manager->Add_Object(card_player->deck->deck.back());
         }
+        card_player->deck->DrawCard(3);
     }
 
     for (int i = 0; i < starting_cards.size(); i++) {
