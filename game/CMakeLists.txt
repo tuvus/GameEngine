@@ -13,6 +13,8 @@ set(Sources
         src/game_scene.cpp
         src/unit.cpp
         src/tower.cpp
+        src/deck.cpp
+        src/card.cpp
 )
 
 set(Headers
@@ -28,6 +30,10 @@ set(Headers
         include/deck.h
         include/unit_ui.h
         include/tower_ui.h
+        include/deck_ui.h
+        include/unit_card.h
+        include/card_ui.h
+        include/tower_card.h
 )
 
 add_executable(game ${Sources} ${Headers})

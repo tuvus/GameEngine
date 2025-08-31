@@ -2,7 +2,9 @@
 
 #include "card_player.h"
 #include "tower.h"
+#include "tower_card.h"
 #include "unit.h"
+#include "unit_card.h"
 
 Game_Scene::Game_Scene(Card_Game& card_game)
     : Scene(card_game), card_game(card_game), placing_tower(false), time_until_income(0) {
@@ -95,6 +97,37 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
                                            player->team, .4f, player->team ? RED : BLUE));
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
+
+    Texture2D card_texture = LoadTextureFromImage(LoadImage("resources/Card.png"));
+
+    card_datas.emplace_back(
+        new Card_Data{card_texture, "Send Units", "Sends 7 units to the opponent.", 5});
+    card_datas.emplace_back(
+        new Card_Data{card_texture, "Send Units", "Sends 11 units to the opponent.", 8});
+    card_datas.emplace_back(
+        new Card_Data{card_texture, "Send Units", "Sends 18 units to the opponent.", 12});
+    card_datas.emplace_back(
+        new Card_Data{card_texture, "Tower", "Places a tower that shoots opposing units.", 15});
+
+    vector<Card*> starting_cards{};
+    starting_cards.emplace_back(new Unit_Card(*game_manager, *this, *card_datas[0], unit_data, 7));
+    starting_cards.emplace_back(new Unit_Card(*game_manager, *this, *card_datas[0], unit_data, 7));
+    starting_cards.emplace_back(new Unit_Card(*game_manager, *this, *card_datas[1], unit_data, 11));
+    starting_cards.emplace_back(new Unit_Card(*game_manager, *this, *card_datas[2], unit_data, 18));
+    starting_cards.emplace_back(new Tower_Card(*game_manager, *this, *card_datas[3], tower_data));
+
+    for (auto player : game_manager->players) {
+        Card_Player* card_player = static_cast<Card_Player*>(player);
+        card_player->deck = new Deck(*game_manager, card_player);
+        for (auto& card : starting_cards) {
+            card_player->deck->deck.emplace_back(card->Clone());
+        }
+    }
+
+    for (int i = 0; i < starting_cards.size(); i++) {
+        delete starting_cards[i];
+    }
+    starting_cards.clear();
 }
 
 void Game_Scene::Update_UI(chrono::milliseconds delta_time) {

@@ -2,24 +2,28 @@
 #include "card_player.h"
 #include "game_object.h"
 
-#include <functional>
-#include <raymath.h>
 #include <string>
 
-class Card : public Game_Object {
-  public:
+class Game_Scene;
+struct Card_Data {
+    Texture2D texture;
     std::string name;
     std::string desc;
     int cost;
-    std::function<void(Card_Player*)> effect;
+};
 
-    Card(Game_Manager& game_manager, Texture texture, std::string name, std::string desc, int cost,
-         std::function<void(Card_Player*)> effect)
-        : Game_Object(game_manager, texture, Vector2Zero(), 0, 1, WHITE), name(name), desc(desc),
-          cost(cost), effect(effect) {}
+class Card : public Game_Object {
+  public:
+    Card_Data& card_data;
+    Game_Scene& game_scene;
 
-    void Play_Card(Card_Player* card_player) {
-        card_player->money -= cost;
-        effect(card_player);
-    }
+    Card(Game_Manager& game_manager, Game_Scene& game_scene, Card_Data& card_data);
+
+    virtual Card* Clone() = 0;
+
+    virtual bool Can_Play_Card(Card_Player* card_player);
+
+    virtual void Play_Card(Card_Player* card_player);
+
+    Object_UI* Create_UI_Object(Game_UI_Manager& game_ui_manager) override;
 };
