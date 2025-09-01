@@ -15,13 +15,15 @@ class Deck : public Game_Object {
     std::vector<Card*> discard;
     Deck(Game_Manager& game_manager, Card_Player* player);
 
-    void DrawCard(int cards = 1);
+    void Draw_Card(int cards = 1);
 
     void Shuffle_Discard_Into_Deck();
 
     void Shuffle_Deck();
 
     void Update() override;
+
+    void Discard_Card(Card*);
 
     Object_UI* Create_UI_Object(Game_UI_Manager& game_ui_manager) override;
 };

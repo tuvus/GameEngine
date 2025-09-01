@@ -10,7 +10,7 @@ Deck::Deck(Game_Manager& game_manager, Card_Player* player)
     : Game_Object(game_manager, Vector2Zero(), 0, 1, WHITE), player(player) {
 }
 
-void Deck::DrawCard(int cards) {
+void Deck::Draw_Card(int cards) {
     for (int i = 0; i < cards; i++) {
         if (deck.empty())
             Shuffle_Discard_Into_Deck();
@@ -35,6 +35,11 @@ void Deck::Shuffle_Deck() {
 }
 
 void Deck::Update() {
+}
+
+void Deck::Discard_Card(Card* card) {
+    hand.erase(ranges::find(hand, card));
+    discard.emplace_back(card);
 }
 
 Object_UI* Deck::Create_UI_Object(Game_UI_Manager& game_ui_manager) {
