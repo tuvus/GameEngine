@@ -8,7 +8,7 @@ class Object_UI {
     Object_UI(Game_Object* game_object) : game_object(game_object) {}
     virtual ~Object_UI() = default;
 
-    virtual void Update_UI() = 0;
+    virtual void Update_UI(EUI_Context* eui_ctx) = 0;
 };
 
 template <typename T>

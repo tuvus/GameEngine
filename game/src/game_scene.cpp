@@ -146,7 +146,7 @@ void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
     EndMode2D();
 
     // Draw arrows
-    game_ui_manager->Update_UI(delta_time);
+    game_ui_manager->Update_UI(delta_time, card_game.eui_ctx);
 
     Card_Player* local_player = static_cast<Card_Player*>(game_manager->local_player);
 

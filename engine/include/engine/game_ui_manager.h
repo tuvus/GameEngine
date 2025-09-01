@@ -22,7 +22,7 @@ class Game_UI_Manager {
 
     Game_UI_Manager(Application& application, Game_Manager& game_manager);
 
-    void Update_UI(std::chrono::milliseconds delta_time);
+    void Update_UI(std::chrono::milliseconds delta_time, EUI_Context* eui_ctx);
 
     void DrawImage(Texture2D& texture, Vector2 pos, float rot, float scale, Color color);
 
