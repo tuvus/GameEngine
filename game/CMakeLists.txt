@@ -10,13 +10,16 @@ set(Sources
         src/card_game.cpp
         src/main.cpp
         src/lobby_scene.cpp
+        src/game_scene.cpp
 )
 
 set(Headers
-        ${PROJECT_SOURCE_DIR}/include/card_game.h
-        ${PROJECT_SOURCE_DIR}/include/lobby_scene.h
-        ${PROJECT_SOURCE_DIR}/include/menu_scene.h
-        ${PROJECT_SOURCE_DIR}/include/game_scene.h
+        include/card_game.h
+        include/lobby_scene.h
+        include/menu_scene.h
+        include/game_scene.h
+        include/unit.h
+        include/path.h
 )
 
 add_executable(game ${Sources} ${Headers})
@@ -28,3 +31,6 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/../engine ${CMAKE_CURRENT_BINARY_DIR}/eucli
 target_link_libraries(${PROJECT_NAME} PUBLIC euclid)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+
+# Copy the resources directory to the build
+file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})

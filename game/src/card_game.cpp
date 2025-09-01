@@ -37,6 +37,7 @@ void Card_Game::Start_Client() {
 }
 
 void Card_Game::Update(chrono::milliseconds deltaTime) {
+    scene->Update(deltaTime);
 }
 
 void Card_Game::Update_UI(chrono::milliseconds deltaTime) {
