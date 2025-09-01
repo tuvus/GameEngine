@@ -4,16 +4,21 @@
 #include "game_manager.h"
 #include "unit_ui.h"
 
-Unit::Unit(Game_Manager& game_manager, Unit_Data& unit_data, Path* path, float speed, int team,
-           float scale, Color color)
+Unit::Unit(Game_Manager& game_manager, Unit_Data& unit_data, Path* path, float speed,
+           float start_offset, int team, float scale, Color color)
     : Game_Object(game_manager, path->positions[0], path->Get_Rotation_On_Path(0), scale, color),
       path(path), section(0), lerp(0), speed(speed), team(team), unit_data(unit_data) {
     spawned = true;
+    Move(start_offset);
 }
 
 void Unit::Update() {
     if (!spawned)
         return;
+    Move(speed);
+}
+
+void Unit::Move(float dist_to_move) {
     if (section + 1 == path->positions.size()) {
         pos = path->positions[section];
         Delete_Object();
@@ -21,7 +26,7 @@ void Unit::Update() {
     }
 
     float dist = Vector2Distance(path->positions[section], path->positions[section + 1]);
-    lerp += speed / dist;
+    lerp += dist_to_move / dist;
     if (lerp > 1) {
         lerp--;
         section++;

@@ -46,6 +46,7 @@ Game_Scene::~Game_Scene() {
 }
 
 void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long seed) {
+    ranges::sort(players, [](Player* a, Player* b) { return a->player_id <= b->player_id; });
     game_manager = std::make_unique<Game_Manager>(card_game, *card_game.Get_Network(), players,
                                                   local_player, seed);
     vector<Vector2> positions = vector<Vector2>();
@@ -80,8 +81,8 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
 
         player->money -= 1;
         game_manager->Add_Object(new Unit(*game_manager, unit_data,
-                                          player->team == 0 ? f_path : r_path, 1, player->team, .4f,
-                                          player->team ? RED : BLUE));
+                                          player->team == 0 ? f_path : r_path, 1, 0, player->team,
+                                          .4f, player->team ? RED : BLUE));
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
     card_game.Get_Network()->bind_rpc("spawntower", [this](Player_ID player_id, float x, float y) {
@@ -95,6 +96,18 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
         player->money -= 10;
         game_manager->Add_Object(new Tower(*game_manager, tower_data, Vector2(x, y), 150,
                                            player->team, .4f, player->team ? RED : BLUE));
+        return RPC_Manager::VALID_CALL_ON_CLIENTS;
+    });
+    card_game.Get_Network()->bind_rpc("playcard", [this](Player_ID player_id, Obj_ID object_id) {
+        Card_Player* player = static_cast<Card_Player*>(game_manager->Get_Player(player_id));
+        Card* card = static_cast<Card*>(game_manager->Get_Object(object_id));
+        // Check if the card is in the hand
+        if (ranges::find(player->deck->hand, card) == player->deck->hand.end())
+            return RPC_Manager::INVALID;
+        if (!card->Can_Play_Card(player))
+            return RPC_Manager::INVALID;
+
+        card->Play_Card(player);
         return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
 
@@ -128,7 +141,7 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
     }
 
     for (int i = 0; i < starting_cards.size(); i++) {
-        delete starting_cards[i];
+        game_manager->Delete_Object(starting_cards[i]);
     }
     starting_cards.clear();
 }

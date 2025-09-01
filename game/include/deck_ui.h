@@ -11,6 +11,7 @@ class Deck_UI : public Game_Object_UI<Deck> {
 
     void Update_UI(EUI_Context* ctx) override {
         float x_pos = 10;
+
         for (auto card : object->hand) {
             Card_UI* card_ui = static_cast<Card_UI*>(game_ui_manager.active_ui_objects[card]);
             card_ui->Update_UI(

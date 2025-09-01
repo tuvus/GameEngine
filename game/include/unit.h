@@ -18,10 +18,12 @@ class Unit : public Game_Object {
     bool spawned;
     Unit_Data& unit_data;
 
-    Unit(Game_Manager& game_manager, Unit_Data& unit_data, Path* path, float speed, int team,
-         float scale, Color color);
+    Unit(Game_Manager& game_manager, Unit_Data& unit_data, Path* path, float speed,
+         float start_offset, int team, float scale, Color color);
 
     void Update() override;
+
+    void Move(float dist);
 
     Object_UI* Create_UI_Object(Game_UI_Manager& game_ui_manager) override;
 };

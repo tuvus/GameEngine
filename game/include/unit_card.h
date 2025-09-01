@@ -15,12 +15,12 @@ class Unit_Card : public Card {
         return new Unit_Card(game_manager, game_scene, card_data, unit_data, unit_count);
     }
 
-    void Play_Card(Card_Player* card_player) {
+    void Play_Card(Card_Player* card_player) override {
         Card::Play_Card(card_player);
         for (int i = 0; i < unit_count; i++) {
             game_manager.Add_Object(
                 new Unit(game_manager, unit_data,
-                         card_player->team == 0 ? game_scene.f_path : game_scene.r_path, 1,
+                         card_player->team == 0 ? game_scene.f_path : game_scene.r_path, 1, i * 10,
                          card_player->team, .4f, card_player->team ? RED : BLUE));
         }
     }

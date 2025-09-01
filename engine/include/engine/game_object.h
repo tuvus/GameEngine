@@ -5,10 +5,11 @@
 class Object_UI;
 class Game_UI_Manager;
 class Game_Manager;
+typedef long Obj_ID;
 
 class Game_Object {
   public:
-    long id;
+    Obj_ID id;
     Vector2 pos;
     float rot;
     Game_Manager& game_manager;
