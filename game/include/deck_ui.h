@@ -10,6 +10,9 @@ class Deck_UI : public Game_Object_UI<Deck> {
     Deck_UI(Deck* deck, Game_UI_Manager& game_ui_manager) : Game_Object_UI(deck, game_ui_manager) {}
 
     void Update_UI(EUI_Context* ctx) override {
+        if (static_cast<Card_Player*>(game_ui_manager.game_manager.local_player)->deck != object)
+            return;
+
         float x_pos = 10;
 
         for (auto card : object->hand) {
