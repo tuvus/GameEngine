@@ -16,9 +16,6 @@ class Game_Scene : public Scene, Network_Events_Receiver {
     std::unique_ptr<Game_Manager> game_manager;
     std::unique_ptr<Game_UI_Manager> game_ui_manager;
     EUI_Text* money_text;
-    EUI_Button* spawn_unit_button;
-    EUI_Button* place_tower_button;
-    bool placing_tower;
     int time_until_income;
     Tower_Data tower_data;
     Unit_Data unit_data;
@@ -29,6 +26,7 @@ class Game_Scene : public Scene, Network_Events_Receiver {
   public:
     Path* f_path;
     Path* r_path;
+    Card* active_card;
 
     Game_Scene(Card_Game& card_game);
 
@@ -49,4 +47,6 @@ class Game_Scene : public Scene, Network_Events_Receiver {
     void On_Client_Connected(Client_ID) override {}
 
     void On_Client_Disconnected(Client_ID) override {}
+
+    void Activate_Card(Card* card);
 };

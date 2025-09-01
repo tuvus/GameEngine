@@ -15,8 +15,8 @@ class Unit_Card : public Card {
         return new Unit_Card(game_manager, game_scene, card_data, unit_data, unit_count);
     }
 
-    void Play_Card(Card_Player* card_player) override {
-        Card::Play_Card(card_player);
+    void Play_Card(Card_Player* card_player, Vector2 pos) override {
+        Card::Play_Card(card_player, pos);
         for (int i = 0; i < unit_count; i++) {
             game_manager.Add_Object(
                 new Unit(game_manager, unit_data,

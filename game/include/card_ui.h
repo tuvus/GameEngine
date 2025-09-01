@@ -1,10 +1,14 @@
 #pragma once
 #include "card.h"
 #include "game_object_ui.h"
+#include "game_scene.h"
 #include "game_ui_manager.h"
+
+#include <raymath.h>
 
 class Card_UI : public Game_Object_UI<Card> {
   public:
+    bool is_hovered = false;
     Card_UI(Card* card, Game_UI_Manager& game_ui_manager) : Game_Object_UI(card, game_ui_manager) {}
 
     void Update_UI(EUI_Context*) override {}
@@ -14,16 +18,19 @@ class Card_UI : public Game_Object_UI<Card> {
         const float height = object->card_data.texture.height * scale;
 
         // Check for pointer events
-        bool is_hovered = CheckCollisionPointRec(ctx->input.mouse_position,
-                                                 {pos.x, pos.y - height, width, height}) &&
-                          object->Can_Play_Card(
-                              static_cast<Card_Player*>(game_ui_manager.game_manager.local_player));
+        is_hovered = CheckCollisionPointRec(ctx->input.mouse_position,
+                                            {pos.x, pos.y - height, width, height}) &&
+                     object->Can_Play_Card(
+                         static_cast<Card_Player*>(game_ui_manager.game_manager.local_player),
+                         Vector2Zero());
         if (is_hovered && ctx->input.left_mouse_pressed) {
-            game_ui_manager.application.Get_Network()->call_game_rpc(
-                "playcard", game_ui_manager.game_manager.local_player->player_id, object->id);
+            object->game_scene.Activate_Card(object);
         }
 
-        const Color color = is_hovered ? GRAY : BLACK;
+        const Color color = (is_hovered && object->game_scene.active_card == nullptr) ||
+                                    object->game_scene.active_card == object
+                                ? GRAY
+                                : BLACK;
 
         // Draw the card
         game_ui_manager.DrawScreenImage(object->card_data.texture,

@@ -1,13 +1,15 @@
 #include "game_scene.h"
 
 #include "card_player.h"
+#include "card_ui.h"
+#include "game_object_ui.h"
 #include "tower.h"
 #include "tower_card.h"
 #include "unit.h"
 #include "unit_card.h"
 
 Game_Scene::Game_Scene(Card_Game& card_game)
-    : Scene(card_game), card_game(card_game), placing_tower(false), time_until_income(0) {
+    : Scene(card_game), card_game(card_game), active_card(nullptr), time_until_income(0) {
     EUI_HBox* root = new EUI_HBox();
     root_elem = root;
 
@@ -25,15 +27,6 @@ Game_Scene::Game_Scene(Card_Game& card_game)
 
     button->style.padding = {10, 20, 10, 20};
     root->Add_Child(button);
-    spawn_unit_button = new EUI_Button("Spawn Unit (1)", [this] {
-        this->card_game.Get_Network()->call_game_rpc("spawnunit",
-                                                     this->game_manager->local_player->player_id);
-    });
-    root->Add_Child(spawn_unit_button);
-    place_tower_button = new EUI_Button("Place Tower (10)", [this] { placing_tower = true; });
-    root->Add_Child(place_tower_button);
-    card_game.Get_Network()->connection_events->emplace(
-        static_cast<Network_Events_Receiver*>(this));
 
     unit_data = {LoadTextureFromImage(LoadImage("resources/Arrow.png"))};
     tower_data = {LoadTextureFromImage(LoadImage("resources/Tower.png"))};
@@ -73,43 +66,19 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
     if (static_cast<Card_Player*>(game_manager->local_player)->team == 1) {
         game_ui_manager->camera.rotation = 180;
     }
+    card_game.Get_Network()->bind_rpc(
+        "playcard", [this](Player_ID player_id, Obj_ID object_id, float x, float y) {
+            Card_Player* player = static_cast<Card_Player*>(game_manager->Get_Player(player_id));
+            Card* card = static_cast<Card*>(game_manager->Get_Object(object_id));
+            // Check if the card is in the hand
+            if (ranges::find(player->deck->hand, card) == player->deck->hand.end())
+                return RPC_Manager::INVALID;
+            if (!card->Can_Play_Card(player, Vector2(x, y)))
+                return RPC_Manager::INVALID;
 
-    card_game.Get_Network()->bind_rpc("spawnunit", [this](Player_ID player_id) {
-        Card_Player* player = static_cast<Card_Player*>(game_manager->Get_Player(player_id));
-        if (player->money < 1)
-            return RPC_Manager::INVALID;
-
-        player->money -= 1;
-        game_manager->Add_Object(new Unit(*game_manager, unit_data,
-                                          player->team == 0 ? f_path : r_path, 1, 0, player->team,
-                                          .4f, player->team ? RED : BLUE));
-        return RPC_Manager::VALID_CALL_ON_CLIENTS;
-    });
-    card_game.Get_Network()->bind_rpc("spawntower", [this](Player_ID player_id, float x, float y) {
-        if (!Can_Place_Tower(Vector2(x, y), 50))
-            return RPC_Manager::INVALID;
-
-        Card_Player* player = static_cast<Card_Player*>(game_manager->Get_Player(player_id));
-        if (player->money < 10)
-            return RPC_Manager::INVALID;
-
-        player->money -= 10;
-        game_manager->Add_Object(new Tower(*game_manager, tower_data, Vector2(x, y), 150,
-                                           player->team, .4f, player->team ? RED : BLUE));
-        return RPC_Manager::VALID_CALL_ON_CLIENTS;
-    });
-    card_game.Get_Network()->bind_rpc("playcard", [this](Player_ID player_id, Obj_ID object_id) {
-        Card_Player* player = static_cast<Card_Player*>(game_manager->Get_Player(player_id));
-        Card* card = static_cast<Card*>(game_manager->Get_Object(object_id));
-        // Check if the card is in the hand
-        if (ranges::find(player->deck->hand, card) == player->deck->hand.end())
-            return RPC_Manager::INVALID;
-        if (!card->Can_Play_Card(player))
-            return RPC_Manager::INVALID;
-
-        card->Play_Card(player);
-        return RPC_Manager::VALID_CALL_ON_CLIENTS;
-    });
+            card->Play_Card(player, Vector2(x, y));
+            return RPC_Manager::VALID_CALL_ON_CLIENTS;
+        });
 
     Texture2D card_texture = LoadTextureFromImage(LoadImage("resources/Card.png"));
 
@@ -163,22 +132,28 @@ void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
 
     Card_Player* local_player = static_cast<Card_Player*>(game_manager->local_player);
 
-    if (placing_tower) {
-        auto mouse_pos = card_game.eui_ctx->input.mouse_position;
-        auto world_pos = GetScreenToWorld2D(mouse_pos, game_ui_manager->camera);
+    auto mouse_pos = card_game.eui_ctx->input.mouse_position;
+    auto world_pos = GetScreenToWorld2D(mouse_pos, game_ui_manager->camera);
+    if (Tower_Card* tower_card = dynamic_cast<Tower_Card*>(active_card)) {
         if (Can_Place_Tower(world_pos, 50))
             DrawCircle(mouse_pos.x, mouse_pos.y, 75, ColorAlpha(LIGHTGRAY, .3f));
         DrawCircle(mouse_pos.x, mouse_pos.y, 20, local_player->team ? RED : BLUE);
 
-        if (card_game.eui_ctx->input.left_mouse_pressed) {
-            this->card_game.Get_Network()->call_game_rpc("spawntower", local_player->player_id,
-                                                         world_pos.x, world_pos.y);
-            placing_tower = false;
+        if (!card_game.eui_ctx->input.left_mouse_down) {
+            // If the cursor is still over the card, cancel
+            if (!static_cast<Card_UI*>(game_ui_manager->active_ui_objects[active_card])->is_hovered)
+                this->card_game.Get_Network()->call_game_rpc(
+                    "playcard", local_player->player_id, tower_card->id, world_pos.x, world_pos.y);
+            active_card = nullptr;
         }
+    } else if (active_card != nullptr && !card_game.eui_ctx->input.left_mouse_down) {
+        // If the cursor is still over the card, cancel
+        if (!static_cast<Card_UI*>(game_ui_manager->active_ui_objects[active_card])->is_hovered)
+            this->card_game.Get_Network()->call_game_rpc("playcard", local_player->player_id,
+                                                         active_card->id, world_pos.x, world_pos.y);
+        active_card = nullptr;
     }
 
-    spawn_unit_button->is_enabled = local_player->money >= 1;
-    place_tower_button->is_enabled = local_player->money >= 10;
     money_text->Set_Text("Money: " + to_string(local_player->money));
 
     root_elem->Render();
@@ -220,4 +195,8 @@ void Game_Scene::On_Disconnected() {
 void Game_Scene::On_Server_Stop() {
     card_game.set_ui_screen(MENU);
     card_game.Close_Network();
+}
+
+void Game_Scene::Activate_Card(Card* card) {
+    active_card = card;
 }

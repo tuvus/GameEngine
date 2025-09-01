@@ -8,11 +8,11 @@ Card::Card(Game_Manager& game_manager, Game_Scene& game_scene, Card_Data& card_d
       card_data(card_data) {
 }
 
-bool Card::Can_Play_Card(Card_Player* card_player) {
+bool Card::Can_Play_Card(Card_Player* card_player, Vector2 pos) {
     return card_player->money >= card_data.cost;
 }
 
-void Card::Play_Card(Card_Player* card_player) {
+void Card::Play_Card(Card_Player* card_player, Vector2 pos) {
     card_player->money -= card_data.cost;
     card_player->deck->Discard_Card(this);
 }

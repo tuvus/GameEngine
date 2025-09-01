@@ -21,9 +21,9 @@ class Card : public Game_Object {
 
     virtual Card* Clone() = 0;
 
-    virtual bool Can_Play_Card(Card_Player* card_player);
+    virtual bool Can_Play_Card(Card_Player* card_player, Vector2 pos);
 
-    virtual void Play_Card(Card_Player* card_player);
+    virtual void Play_Card(Card_Player* card_player, Vector2 pos);
 
     Object_UI* Create_UI_Object(Game_UI_Manager& game_ui_manager) override;
 };

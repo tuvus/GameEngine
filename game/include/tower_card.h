@@ -10,9 +10,15 @@ class Tower_Card : public Card {
                Tower_Data& tower_data)
         : Card(game_manager, game_scene, card_data), tower_data(tower_data) {}
 
-    Card* Clone() { return new Tower_Card(game_manager, game_scene, card_data, tower_data); }
+    Card* Clone() override {
+        return new Tower_Card(game_manager, game_scene, card_data, tower_data);
+    }
 
-    void Play_Card(Card_Player* player) { Card::Play_Card(player); }
+    void Play_Card(Card_Player* player, Vector2 pos) override {
+        Card::Play_Card(player, pos);
+        game_manager.Add_Object(new Tower(game_manager, tower_data, Vector2(pos.x, pos.y), 150,
+                                          player->team, .4f, player->team ? RED : BLUE));
+    }
 
     void Update() override {}
 };
