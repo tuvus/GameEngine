@@ -187,6 +187,31 @@ void Game_Scene::Update(std::chrono::milliseconds) {
             if (card_player->deck->hand.empty()) {
                 card_player->deck->Draw_Card(3);
             }
+
+            if (card_player->ai && !card_player->deck->hand.empty()) {
+                uniform_int_distribution<int> hand_dist(0, card_player->deck->hand.size() - 1);
+                int card_to_play = hand_dist(game_manager->random);
+                Card* card = card_player->deck->hand[card_to_play];
+                if (Tower_Card* tower_card = dynamic_cast<Tower_Card*>(card)) {
+                    for (auto pos : Get_Team_Path(card_player->team)->positions) {
+                        static uniform_int_distribution<int> tiny_offset(-10, 10);
+                        Vector2 r_pos = Vector2(pos.x + 50 + abs(tiny_offset(game_manager->random)),
+                                                pos.y + tiny_offset(game_manager->random));
+                        if (tower_card->Can_Play_Card(card_player, r_pos)) {
+                            tower_card->Play_Card(card_player, r_pos);
+                            break;
+                        }
+                        Vector2 l_pos = Vector2(pos.x - 50 - abs(tiny_offset(game_manager->random)),
+                                                pos.y + tiny_offset(game_manager->random));
+                        if (tower_card->Can_Play_Card(card_player, l_pos)) {
+                            tower_card->Play_Card(card_player, l_pos);
+                            break;
+                        }
+                    }
+                } else if (card->Can_Play_Card(card_player, Vector2Zero())) {
+                    card->Play_Card(card_player, Vector2Zero());
+                }
+            }
         }
         time_until_income = 40;
     }
@@ -204,4 +229,12 @@ void Game_Scene::On_Server_Stop() {
 
 void Game_Scene::Activate_Card(Card* card) {
     active_card = card;
+}
+
+Path* Game_Scene::Get_Team_Path(int team) const {
+    return team == 0 ? f_path : r_path;
+}
+
+Color Game_Scene::Get_Team_Color(int team) {
+    return team ? RED : BLUE;
 }
