@@ -1,6 +1,7 @@
 #pragma once
 
 #include "card_game.h"
+#include "card_player.h"
 #include "game_manager.h"
 #include "networking/network.h"
 #include "scene.h"
@@ -15,8 +16,9 @@ class Lobby_Scene : public Scene, Network_Events_Receiver {
     int player_count;
     // Used on the server to generate player ids
     int player_id_count;
-    unordered_map<Client_ID, Player_ID>* client_id_to_player_id;
-    Player_ID player_id;
+    vector<Player*> players;
+    Player* local_player;
+    void Server_Start_Game();
     void Start_Game(long seed);
 
   public:

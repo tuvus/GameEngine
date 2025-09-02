@@ -1,4 +1,6 @@
 #include "lobby_scene.h"
+
+#include "card_player.h"
 #include "game_scene.h"
 
 Lobby_Scene::Lobby_Scene(Card_Game& card_game)
@@ -14,12 +16,7 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
     if (card_game.Get_Network()->Is_Server())
         status_text->Set_Text("Setting up server...");
     root->Add_Child(status_text);
-    start_button = new EUI_Button("Start Game", [this, &card_game]() {
-        card_game.Get_Network()->call_rpc(true, "startgame",
-                                          chrono::duration_cast<chrono::milliseconds>(
-                                              chrono::system_clock::now().time_since_epoch())
-                                              .count());
-    });
+    start_button = new EUI_Button("Start Game", [this, &card_game]() { Server_Start_Game(); });
     start_button->style.padding = {10, 20, 10, 20};
     root->Add_Child(start_button);
     start_button->is_visible = card_game.Get_Network()->Is_Server();
@@ -36,18 +33,30 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
     });
     card_game.Get_Network()->bind_rpc(
         "addplayer", [this](Client_ID client_id, Player_ID player_id) {
-            client_id_to_player_id->emplace(client_id, player_id);
+            players.emplace_back(new Card_Player(client_id, player_id, 0));
             return RPC_Manager::Rpc_Validator_Result::VALID_CALL_ON_CLIENTS;
         });
     card_game.Get_Network()->bind_rpc("setplayerid", [this](Player_ID player_id) {
-        this->player_id = player_id;
+        for (auto& player : players) {
+            if (player->player_id != player_id)
+                continue;
+            player->local_player = true;
+            local_player = player;
+        }
         return RPC_Manager::Rpc_Validator_Result::VALID;
     });
     card_game.Get_Network()->bind_rpc("removeplayer", [this](Client_ID client_id) {
-        if (client_id_to_player_id->contains(client_id))
+        if (!any_of(players.begin(), players.end(),
+                    [client_id](Player* player) { return player->client_id == client_id; }))
             return RPC_Manager::INVALID;
-        client_id_to_player_id->erase(client_id);
+        erase_if(players, [client_id](Player* p) { return p->client_id == client_id; });
         return RPC_Manager::Rpc_Validator_Result::VALID_CALL_ON_CLIENTS;
+    });
+    card_game.Get_Network()->bind_rpc("setplayerteam", [this](Player_ID player_id, int team) {
+        static_cast<Card_Player*>(*std::ranges::find_if(players, [player_id](Player* player) {
+            return player->player_id == player_id;
+        }))->team = team;
+        return RPC_Manager::VALID_CALL_ON_CLIENTS;
     });
     card_game.Get_Network()->bind_rpc("startgame", [this, &card_game](long seed) {
         if (card_game.Get_Network()->Get_Network_State() != Network::Server_Running &&
@@ -58,7 +67,7 @@ Lobby_Scene::Lobby_Scene(Card_Game& card_game)
     });
     card_game.Get_Network()->connection_events->emplace(
         static_cast<Network_Events_Receiver*>(this));
-    client_id_to_player_id = new unordered_map<Client_ID, Player_ID>();
+    players = vector<Player*>();
 }
 
 Lobby_Scene::~Lobby_Scene() {
@@ -67,10 +76,22 @@ Lobby_Scene::~Lobby_Scene() {
             static_cast<Network_Events_Receiver*>(this));
 }
 
+void Lobby_Scene::Server_Start_Game() {
+    int team = 0;
+    for (auto* player : players) {
+        card_game.Get_Network()->call_rpc(true, "setplayerteam", player->player_id, team);
+        team = (team + 1) % 2;
+    }
+    card_game.Get_Network()->call_rpc(
+        true, "startgame",
+        chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch())
+            .count());
+}
+
 void Lobby_Scene::Start_Game(long seed) {
     card_game.set_ui_screen(GAME);
     Game_Scene* game_scene = static_cast<Game_Scene*>(card_game.scene);
-    game_scene->Setup_Scene(client_id_to_player_id, player_id, seed);
+    game_scene->Setup_Scene(players, local_player, seed);
 }
 
 void Lobby_Scene::Update_UI(std::chrono::milliseconds) {
@@ -92,8 +113,8 @@ void Lobby_Scene::On_Disconnected() {
 void Lobby_Scene::On_Server_Start() {
     player_count = 1;
     card_game.Get_Network()->call_rpc(true, "setplayercount", player_count);
-    player_id = 0;
     card_game.Get_Network()->call_rpc(true, "addplayer", 0, player_id_count++);
+    local_player = players[0];
 }
 
 void Lobby_Scene::On_Server_Stop() {
@@ -104,18 +125,17 @@ void Lobby_Scene::On_Client_Connected(Client_ID client_id) {
     player_count++;
     Player_ID new_player_id = player_id_count++;
     card_game.Get_Network()->call_rpc(true, "setplayercount", player_count);
-    card_game.Get_Network()->call_rpc_on_client(client_id, true, "setplayerid", new_player_id);
     card_game.Get_Network()->call_rpc(true, "addplayer", client_id, new_player_id);
-    for (const auto& client : *client_id_to_player_id) {
-        if (client.first == client_id)
+    card_game.Get_Network()->call_rpc_on_client(client_id, true, "setplayerid", new_player_id);
+    for (const auto& player : players) {
+        if (player->client_id == client_id)
             continue;
-        card_game.Get_Network()->call_rpc_on_client(client_id, true, "addplayer", client_id,
-                                                    new_player_id);
+        card_game.Get_Network()->call_rpc_on_client(client_id, true, "addplayer", player->client_id,
+                                                    player->player_id);
     }
 }
 
 void Lobby_Scene::On_Client_Disconnected(Client_ID client_id) {
-    client_id_to_player_id->erase(client_id);
     player_count--;
     card_game.Get_Network()->call_rpc(true, "setplayercount", player_count);
     card_game.Get_Network()->call_rpc(true, "removeplayer", client_id);

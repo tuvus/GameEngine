@@ -15,27 +15,31 @@ struct Rpc_Message {
     // Information about msgpack here: https://github.com/msgpack/msgpack-c/wiki/v2_0_cpp_packer
     long rpc_id;
     bool order_sensitive;
+    // -1 means coming from the client, -2 means not associated with a step
+    long associated_step;
     std::vector<char> rpc_call;
 
     Rpc_Message() = default;
 
-    Rpc_Message(bool order_sensitive, char* rpc_data, size_t length)
-        : rpc_id(-1), order_sensitive(order_sensitive) {
+    Rpc_Message(bool order_sensitive, long associated_step, char* rpc_data, size_t length)
+        : rpc_id(-1), order_sensitive(order_sensitive), associated_step(associated_step) {
         rpc_call = std::vector<char>(rpc_data, rpc_data + length);
     }
 
-    explicit Rpc_Message(bool order_sensitive, std::vector<char> rpc_call)
-        : rpc_id(-1), order_sensitive(order_sensitive), rpc_call(std::move(rpc_call)) {}
+    explicit Rpc_Message(bool order_sensitive, long associated_step, std::vector<char> rpc_call)
+        : rpc_id(-1), order_sensitive(order_sensitive), associated_step(associated_step),
+          rpc_call(std::move(rpc_call)) {}
 
     Rpc_Message(const Rpc_Message& copy, long msg_id)
-        : rpc_id(msg_id), order_sensitive(copy.order_sensitive) {
+        : rpc_id(msg_id), order_sensitive(copy.order_sensitive),
+          associated_step(copy.associated_step) {
         rpc_call = std::vector<char>();
         // We need to do a deep copy and copy the data as well so that the old one can be deleted
         std::copy(copy.rpc_call.begin(), copy.rpc_call.end(), back_inserter(rpc_call));
     }
 
     // Tells msgpack how to serialize Rpc_Message
-    MSGPACK_DEFINE(rpc_id, order_sensitive, rpc_call);
+    MSGPACK_DEFINE(rpc_id, order_sensitive, associated_step, rpc_call);
 };
 
 typedef unsigned int uint32;
@@ -69,16 +73,26 @@ class Network {
     };
 
   private:
-    class Rpc_Comparator {
+    class Rpc_Order_Comparator {
       public:
         bool operator()(Rpc_Message* a, Rpc_Message* b) { return a->rpc_id <= b->rpc_id; }
+    };
+
+    class Rpc_Step_Comparator {
+      public:
+        bool operator()(Rpc_Message* a, Rpc_Message* b) {
+            if (a->associated_step == b->associated_step)
+                return a->rpc_id <= b->rpc_id;
+            return a->associated_step <= b->associated_step;
+        }
     };
 
     class Connection_State {
       public:
         long next_rpc_id = 0;
         long next_rpc_id_to_receive = 0;
-        std::priority_queue<Rpc_Message*, std::vector<Rpc_Message*>, Rpc_Comparator> rpc_heap;
+        std::priority_queue<Rpc_Message*, std::vector<Rpc_Message*>, Rpc_Order_Comparator>
+            rpc_order_heap;
     };
 
     std::function<void()> close_network_function;
@@ -96,6 +110,8 @@ class Network {
     std::vector<std::tuple<Client_ID, Rpc_Message*>> pre_connected_messages;
     std::vector<Client_ID> newly_connected_clients;
     pthread_mutex_t newly_connected_client_mutex;
+    std::priority_queue<Rpc_Message*, std::vector<Rpc_Message*>, Rpc_Step_Comparator> rpc_step_heap;
+    long last_step = 0;
 
     void Poll_Incoming_Messages();
     static void On_Connect_Changed_Adapter(SteamNetConnectionStatusChangedCallback_t* new_status);
@@ -112,7 +128,7 @@ class Network {
      * @param data The name and parameters of the function cal
      * @param size The size of the data
      */
-    void invoke_rpc(bool order_sensitive, char* data, size_t size);
+    void invoke_rpc(bool order_sensitive, long associated_step, char* data, size_t size);
 
   public:
     void On_Connection_Status_Changed(SteamNetConnectionStatusChangedCallback_t* new_status);
@@ -151,10 +167,36 @@ class Network {
         clmdep_msgpack::v1::pack(*buffer, call_obj);
 
         if (server) {
-            invoke_rpc(order_sensitive, buffer->data(), buffer->size());
+            invoke_rpc(order_sensitive, -2, buffer->data(), buffer->size());
         } else {
             // Send the rpc call to the server
-            auto rpc_call_data = Rpc_Message(order_sensitive, buffer->data(), buffer->size());
+            auto rpc_call_data = Rpc_Message(order_sensitive, -2, buffer->data(), buffer->size());
+            Send_Message_To_Server(rpc_call_data);
+        }
+        delete buffer;
+    }
+
+    /**
+     * Calls the function on the server taking into account the current game steps.
+     * If the function returns a valid result it calls the function on every client at the same
+     * step. This method can be called on the server or on any client but will only be called before
+     * the next step on the server after it is received.
+     * @param function_name The name of the function being called
+     * @param args The arguments for the function call
+     */
+    template <typename... Args>
+    void call_game_rpc(std::string const& function_name, Args... args) {
+        auto call_obj =
+            make_tuple(static_cast<uint8_t>(0), 1, function_name, std::make_tuple(args...));
+
+        auto buffer = new clmdep_msgpack::v1::sbuffer;
+        clmdep_msgpack::v1::pack(*buffer, call_obj);
+
+        if (server) {
+            invoke_rpc(true, last_step + 1, buffer->data(), buffer->size());
+        } else {
+            // Send the rpc call to the server
+            auto rpc_call_data = Rpc_Message(true, -1, buffer->data(), buffer->size());
             Send_Message_To_Server(rpc_call_data);
         }
         delete buffer;
@@ -175,16 +217,13 @@ class Network {
             return;
         }
 
-        // TODO: Figure out how to let Rpc_Manager handle packing
-        // clmdep_msgpack::v1::sbuffer* buffer = rpc_manager->pack_rpc(function_name,
-        // std::forward<Args>(args)...);
         auto call_obj =
             make_tuple(static_cast<uint8_t>(0), 1, function_name, std::make_tuple(args...));
 
         auto buffer = new clmdep_msgpack::v1::sbuffer;
         clmdep_msgpack::v1::pack(*buffer, call_obj);
 
-        auto rpc_call_data = Rpc_Message(order_sensitive, buffer->data(), buffer->size());
+        auto rpc_call_data = Rpc_Message(order_sensitive, -2, buffer->data(), buffer->size());
         Send_Message_To_Client(client_id, rpc_call_data);
 
         delete buffer;
@@ -217,6 +256,8 @@ class Network {
             rpc_manager->dispatcher->bind(function_name, function);
         }
     }
+
+    void Process_Step_Rpcs(long step);
 };
 
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg);

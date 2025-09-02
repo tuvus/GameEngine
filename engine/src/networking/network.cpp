@@ -15,6 +15,7 @@ Network::Network(bool server, std::function<void()> close_network_function)
     state = Setting_Up;
     connection_events = make_unique<std::unordered_set<Network_Events_Receiver*>>();
     rpc_manager = make_unique<RPC_Manager>();
+    rpc_step_heap = priority_queue<Rpc_Message*, std::vector<Rpc_Message*>, Rpc_Step_Comparator>();
 }
 
 Network::~Network() {
@@ -302,6 +303,7 @@ void Network::Send_Message_To_Client(const Client_ID connection, const Rpc_Messa
 }
 
 void Network::Send_Message_To_Clients(const Rpc_Message& rpc_message) {
+    assert(rpc_message.associated_step != -1);
     for (const auto& client_id : connected_clients) {
         Send_Message_To_Client(client_id.first, rpc_message);
     }
@@ -326,31 +328,39 @@ void Network::Receive_Message(Client_ID from, char* data, size_t size) {
 
 void Network::Receive_Message(Client_ID from, Rpc_Message* rpc) {
     if (!rpc->order_sensitive) {
-        invoke_rpc(rpc->order_sensitive, rpc->rpc_call.data(), rpc->rpc_call.size());
+        invoke_rpc(rpc->order_sensitive, rpc->associated_step, rpc->rpc_call.data(),
+                   rpc->rpc_call.size());
+        return;
     }
     if (rpc->rpc_id > connected_clients[from]->next_rpc_id) {
         // This rpc has arrived earlier than a previous rpc and should be called later once the
-        // previous ones arrive Make sure to copy the rpc to memory so that it isn't accidently
+        // previous ones arrive Make sure to copy the rpc to memory so that it isn't accidentally
         // deleted
-        connected_clients[from]->rpc_heap.push(rpc);
-    } else {
-        connected_clients[from]->next_rpc_id++;
-        invoke_rpc(rpc->order_sensitive, rpc->rpc_call.data(), rpc->rpc_call.size());
+        connected_clients[from]->rpc_order_heap.push(rpc);
+        return;
+    }
 
-        // Check if we have any other rpcs stored to call
-        while (!connected_clients[from]->rpc_heap.empty() &&
-               connected_clients[from]->next_rpc_id ==
-                   connected_clients[from]->rpc_heap.top()->rpc_id) {
-            connected_clients[from]->next_rpc_id++;
-            Rpc_Message* next_rpc_message = connected_clients[from]->rpc_heap.top();
-            invoke_rpc(next_rpc_message->order_sensitive, next_rpc_message->rpc_call.data(),
-                       next_rpc_message->rpc_call.size());
-            connected_clients[from]->rpc_heap.pop();
-        }
+    connected_clients[from]->next_rpc_id++;
+    rpc->associated_step == -2 ? invoke_rpc(rpc->order_sensitive, rpc->associated_step,
+                                            rpc->rpc_call.data(), rpc->rpc_call.size())
+                               : rpc_step_heap.emplace(rpc);
+
+    // Check if we have any other rpcs stored to call
+    while (!connected_clients[from]->rpc_order_heap.empty() &&
+           connected_clients[from]->next_rpc_id ==
+               connected_clients[from]->rpc_order_heap.top()->rpc_id) {
+        connected_clients[from]->next_rpc_id++;
+        Rpc_Message* next_rpc_message = connected_clients[from]->rpc_order_heap.top();
+        next_rpc_message->associated_step == -2
+            ? invoke_rpc(next_rpc_message->order_sensitive, rpc->associated_step,
+                         next_rpc_message->rpc_call.data(), next_rpc_message->rpc_call.size())
+            : rpc_step_heap.emplace(rpc);
+
+        connected_clients[from]->rpc_order_heap.pop();
     }
 }
 
-void Network::invoke_rpc(bool order_sensitive, char* data, size_t size) {
+void Network::invoke_rpc(bool order_sensitive, long associated_step, char* data, size_t size) {
     if (server) {
         auto result = rpc_manager->call_data_rpc(data, size);
         if (result == RPC_Manager::INVALID) {
@@ -358,7 +368,7 @@ void Network::invoke_rpc(bool order_sensitive, char* data, size_t size) {
             return;
         }
         if (result == RPC_Manager::VALID_CALL_ON_CLIENTS) {
-            auto rpc_call_data = Rpc_Message(order_sensitive, data, size);
+            auto rpc_call_data = Rpc_Message(order_sensitive, associated_step, data, size);
             Send_Message_To_Clients(rpc_call_data);
         }
     } else {
@@ -372,9 +382,24 @@ void Network::invoke_rpc(bool order_sensitive, char* data, size_t size) {
     }
 }
 
+void Network::Process_Step_Rpcs(long step) {
+    if (!rpc_step_heap.empty() && !server)
+        assert(rpc_step_heap.top()->associated_step >= step);
+
+    last_step = step;
+
+    while (!rpc_step_heap.empty() && (rpc_step_heap.top()->associated_step == step ||
+                                      rpc_step_heap.top()->associated_step == -1)) {
+        Rpc_Message* rpc = rpc_step_heap.top();
+        assert(rpc->associated_step == step || (server && rpc->associated_step == -1));
+        invoke_rpc(rpc->order_sensitive, step, rpc->rpc_call.data(), rpc->rpc_call.size());
+
+        rpc_step_heap.pop();
+    }
+}
+
 void Debug_Output(ESteamNetworkingSocketsDebugOutputType error_type, const char* pszMsg) {
     if (error_type == k_ESteamNetworkingSocketsDebugOutputType_Bug) {
-        cerr << pszMsg << endl;
         cerr << pszMsg << endl;
     } else {
         cout << pszMsg << endl;
