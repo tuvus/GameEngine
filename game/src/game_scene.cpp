@@ -143,14 +143,17 @@ void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
 
         if (!card_game.eui_ctx->input.left_mouse_down) {
             // If the cursor is still over the card, cancel
-            if (!static_cast<Card_UI*>(game_ui_manager->active_ui_objects[active_card])->is_hovered)
+            if (!static_cast<Card_UI*>(game_ui_manager->active_ui_objects[active_card])
+                     ->is_hovered &&
+                active_card->Can_Play_Card(local_player, Vector2(world_pos.x, world_pos.y)))
                 this->card_game.Get_Network()->call_game_rpc(
                     "playcard", local_player->player_id, tower_card->id, world_pos.x, world_pos.y);
             active_card = nullptr;
         }
     } else if (active_card != nullptr && !card_game.eui_ctx->input.left_mouse_down) {
         // If the cursor is still over the card, cancel
-        if (!static_cast<Card_UI*>(game_ui_manager->active_ui_objects[active_card])->is_hovered)
+        if (!static_cast<Card_UI*>(game_ui_manager->active_ui_objects[active_card])->is_hovered &&
+            active_card->Can_Play_Card(local_player, Vector2(world_pos.x, world_pos.y)))
             this->card_game.Get_Network()->call_game_rpc("playcard", local_player->player_id,
                                                          active_card->id, world_pos.x, world_pos.y);
         active_card = nullptr;
