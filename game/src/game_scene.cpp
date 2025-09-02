@@ -19,6 +19,7 @@ Game_Scene::Game_Scene(Card_Game& card_game)
     root->style.horizontal_alignment = Alignment::Center;
 
     money_text = new EUI_Text("Money: 0");
+    money_text->style.font_size = 24;
     root->Add_Child(money_text);
     auto* button = new EUI_Button("Menu", [&card_game] {
         card_game.Close_Network();
