@@ -14,6 +14,10 @@ class Tower_Card : public Card {
         return new Tower_Card(game_manager, game_scene, card_data, tower_data);
     }
 
+    bool Can_Play_Card(Card_Player* card_player, Vector2 pos) override {
+        return Card::Can_Play_Card(card_player, pos) && game_scene.Can_Place_Tower(pos, 50);
+    }
+
     void Play_Card(Card_Player* player, Vector2 pos) override {
         Card::Play_Card(player, pos);
         game_manager.Add_Object(new Tower(game_manager, tower_data, Vector2(pos.x, pos.y), 150,

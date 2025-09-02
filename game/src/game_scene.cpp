@@ -106,6 +106,7 @@ void Game_Scene::Setup_Scene(vector<Player*> players, Player* local_player, long
             card_player->deck->deck.emplace_back(card->Clone());
             game_manager->Add_Object(card_player->deck->deck.back());
         }
+        card_player->deck->Shuffle_Deck();
         card_player->deck->Draw_Card(3);
     }
 
@@ -159,7 +160,7 @@ void Game_Scene::Update_UI(chrono::milliseconds delta_time) {
     root_elem->Render();
 }
 
-bool Game_Scene::Can_Place_Tower(Vector2 pos, float min_dist) {
+bool Game_Scene::Can_Place_Tower(Vector2 pos, float min_dist) const {
     for (auto* object : game_manager->Get_All_Objects()) {
         if (Tower* other = dynamic_cast<Tower*>(object)) {
             if (Vector2Distance(pos, other->pos) <= min_dist)

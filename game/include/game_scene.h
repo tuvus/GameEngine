@@ -21,8 +21,6 @@ class Game_Scene : public Scene, Network_Events_Receiver {
     Unit_Data unit_data;
     vector<Card_Data*> card_datas;
 
-    bool Can_Place_Tower(Vector2 pos, float min_dist);
-
   public:
     Path* f_path;
     Path* r_path;
@@ -49,4 +47,6 @@ class Game_Scene : public Scene, Network_Events_Receiver {
     void On_Client_Disconnected(Client_ID) override {}
 
     void Activate_Card(Card* card);
+
+    bool Can_Place_Tower(Vector2 pos, float min_dist) const;
 };
